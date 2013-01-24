@@ -1,8 +1,11 @@
 require 'amqp'
 require 'hutch/message'
+require 'hutch/logging'
 
 module Hutch
   class Worker
+    include Logging
+
     def initialize(consumers)
       @consumers = consumers
     end
@@ -11,12 +14,18 @@ module Hutch
     # process the messages in their respective queues indefinitely. This method
     # never returns.
     def run
+      logger.info 'booting eventmachine'
       EventMachine.run do
-        @connection = AMQP.connect(host: '127.0.0.1')
+        # TODO: make these configurable
+        host, port, exchange = '127.0.0.1', 5672, 'hutch.dev'
+        logger.info "connecting to rabbitmq (#{host}:#{port})"
+        @connection = AMQP.connect(host: host, port: port)
         @channel    = AMQP::Channel.new(@connection)
-        @exchange   = @channel.topic('hutch.dev')
+        @exchange   = @channel.topic(exchange)
+        logger.info "rabbitmq channel open, using exchange #{exchange}"
 
         setup_queues
+        logger.info 'set up queues, hutch is open for business'
       end
     end
 
@@ -47,6 +56,11 @@ module Hutch
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, metadata, payload)
+      logger.info("message(#{metadata.message_id || '-'}): " +
+                  "routing key: #{metadata.routing_key}, " +
+                  "consumer: #{consumer}, " +
+                  "payload: #{payload}")
+
       message = Message.new(metadata, payload)
       consumer.new.process(message)
     end
