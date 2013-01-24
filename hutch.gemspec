@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.email = ['developers@gocardless.com']
   gem.homepage = 'https://github.com/gocardless/hutch'
   gem.require_paths = ['lib']
-  #gem.executables = ['hutch']
+  gem.executables = ['hutch']
   gem.files = `git ls-files`.split("\n")
   gem.test_files = `git ls-files -- spec/*`.split("\n")
 end

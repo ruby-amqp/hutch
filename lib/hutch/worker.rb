@@ -14,7 +14,8 @@ module Hutch
     # process the messages in their respective queues indefinitely. This method
     # never returns.
     def run
-      logger.info 'booting eventmachine'
+      logger.info "starting worker with consumers: #{@consumers}"
+      logger.info 'spinning up eventmachine'
       EventMachine.run do
         # TODO: make these configurable
         host, port, exchange = '127.0.0.1', 5672, 'hutch.dev'
@@ -27,6 +28,11 @@ module Hutch
         setup_queues
         logger.info 'set up queues, hutch is open for business'
       end
+    end
+
+    # Stop a running worker gracefully
+    def stop
+      @connection.close { EventMachine.stop }
     end
 
     # Set up the queues for each of the worker's consumers.

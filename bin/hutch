@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/hutch'
+require_relative '../lib/hutch/cli'
+
+cli = Hutch::CLI.new
+cli.run
+
