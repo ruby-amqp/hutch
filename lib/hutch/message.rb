@@ -14,5 +14,9 @@ class Message
   def_delegators :@metadata, :routing_key, :timestamp, :exchange
 
   attr_reader :body
+
+  def to_s
+    "#<Message #{body.map { |k,v| "#{k}: #{v.inspect}" }.join(', ')}>"
+  end
 end
 
