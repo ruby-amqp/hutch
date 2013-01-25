@@ -32,6 +32,7 @@ GEM
     guard-rspec (0.5.11)
       guard (>= 0.8.4)
     multi_json (1.5.0)
+    rake (10.0.3)
     rb-fsevent (0.9.3)
     rspec (2.12.0)
       rspec-core (~> 2.12.0)
@@ -52,5 +53,6 @@ DEPENDENCIES
   guard (~> 0.8.8)
   guard-rspec (~> 0.5.4)
   hutch!
+  rake
   rb-fsevent (~> 0.9)
   rspec (~> 2.12.0)

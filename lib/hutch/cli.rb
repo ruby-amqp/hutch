@@ -11,11 +11,14 @@ module Hutch
       Hutch.logger.info "hutch booted with pid #{Process.pid}"
 
       load_app
-      start_work_loop
-
-      # If we got here, the worker was shut down nicely
-      Hutch.logger.info 'hutch shut down gracefully'
-      exit 0
+      if start_work_loop == :success
+        # If we got here, the worker was shut down nicely
+        Hutch.logger.info 'hutch shut down gracefully'
+        exit 0
+      else
+        Hutch.logger.info 'hutch terminated due to an error'
+        exit 1
+      end
     end
 
     def load_app

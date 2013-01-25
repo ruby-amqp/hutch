@@ -16,20 +16,29 @@ module Hutch
     def run
       logger.info "starting worker with consumers: #{@consumers}"
       logger.info 'spinning up eventmachine'
-      EventMachine.run do
-        host = Hutch.config[:rabbitmq_host]
-        port = Hutch.config[:rabbitmq_port]
-        logger.info "connecting to rabbitmq (#{host}:#{port})"
+      EventMachine.run { broker_setup }
+      :success
+    rescue AMQP::TCPConnectionFailed => ex
+      logger.fatal ex.message.downcase
+      :error
+    end
 
-        @connection = AMQP.connect(host: host, port: port)
-        @channel    = AMQP::Channel.new(@connection)
+    def broker_setup
+      host = Hutch.config[:rabbitmq_host]
+      port = Hutch.config[:rabbitmq_port]
+      logger.info "connecting to rabbitmq (#{host}:#{port})"
+
+      @connection = AMQP.connect(host: host, port: port) do
+        logger.info 'opening rabbitmq channel'
+        @channel = AMQP::Channel.new(@connection)
 
         exchange = Hutch.config[:rabbitmq_exchange]
-        logger.info "rabbitmq channel open, using exchange #{exchange}"
-        @exchange   = @channel.topic(exchange)
+        logger.info "using exchange #{exchange}"
+        @exchange = @channel.topic(exchange)
 
+        logger.info 'setting up queues'
         setup_queues
-        logger.info 'set up queues, hutch is open for business'
+        logger.info 'hutch is open for business'
       end
     end
 
