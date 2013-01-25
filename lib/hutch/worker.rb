@@ -31,6 +31,7 @@ module Hutch
       @connection = AMQP.connect(host: host, port: port) do
         logger.info 'opening rabbitmq channel'
         @channel = AMQP::Channel.new(@connection)
+        @channel.prefetch(1)
 
         exchange = Hutch.config[:rabbitmq_exchange]
         logger.info "using topic exchange '#{exchange}'"
@@ -61,7 +62,7 @@ module Hutch
         queue.bind(@exchange, routing_key: routing_key)
       end
 
-      queue.subscribe do |metadata, payload|
+      queue.subscribe(ack: true) do |metadata, payload|
         handle_message(consumer, metadata, payload)
       end
     end
@@ -80,9 +81,13 @@ module Hutch
                   "payload: #{payload}")
 
       message = Message.new(metadata, payload)
-      consumer.new.process(message)
-    rescue StandardError => ex
-      handle_error(metadata.message_id, consumer, ex)
+      begin
+        consumer.new.process(message)
+      rescue StandardError => ex
+        handle_error(metadata.message_id, consumer, ex)
+      ensure
+        metadata.ack
+      end
     end
 
     def handle_error(message_id, consumer, ex)

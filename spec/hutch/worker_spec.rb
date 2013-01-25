@@ -34,11 +34,18 @@ describe Hutch::Worker do
   describe '#handle_message' do
     let(:payload) { '{}' }
     let(:consumer_instance) { double('Consumer instance') }
-    let(:metadata) { double('Metadata', message_id: nil, routing_key: '') }
+    let(:metadata) { double('Metadata', message_id: nil, routing_key: '',
+                                        ack: true) }
     before { consumer.stub(new: consumer_instance) }
 
     it 'passes the message to the consumer' do
       consumer_instance.should_receive(:process).with(an_instance_of(Message))
+      worker.handle_message(consumer, metadata, payload)
+    end
+
+    it 'acknowledges the message' do
+      consumer_instance.stub(:process)
+      metadata.should_receive(:ack)
       worker.handle_message(consumer, metadata, payload)
     end
 
