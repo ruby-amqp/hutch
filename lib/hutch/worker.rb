@@ -17,7 +17,6 @@ module Hutch
       logger.info "starting worker with consumers: #{@consumers}"
       logger.info 'spinning up eventmachine'
       EventMachine.run do
-        # TODO: make these configurable
         host = Hutch.config[:rabbitmq_host]
         port = Hutch.config[:rabbitmq_port]
         logger.info "connecting to rabbitmq (#{host}:#{port})"
