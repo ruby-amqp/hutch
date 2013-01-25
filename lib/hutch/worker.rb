@@ -18,12 +18,16 @@ module Hutch
       logger.info 'spinning up eventmachine'
       EventMachine.run do
         # TODO: make these configurable
-        host, port, exchange = '127.0.0.1', 5672, 'hutch.dev'
+        host = Hutch.config[:rabbitmq_host]
+        port = Hutch.config[:rabbitmq_port]
         logger.info "connecting to rabbitmq (#{host}:#{port})"
+
         @connection = AMQP.connect(host: host, port: port)
         @channel    = AMQP::Channel.new(@connection)
-        @exchange   = @channel.topic(exchange)
+
+        exchange = Hutch.config[:rabbitmq_exchange]
         logger.info "rabbitmq channel open, using exchange #{exchange}"
+        @exchange   = @channel.topic(exchange)
 
         setup_queues
         logger.info 'set up queues, hutch is open for business'

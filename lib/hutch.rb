@@ -5,6 +5,17 @@ module Hutch
   require 'hutch/worker'
   require 'hutch/logging'
 
+  DEFAULT_CONFIG = {
+    rabbitmq_host: 'localhost',
+    rabbitmq_port: 5672,
+    rabbitmq_exchange: '',  # TODO: should this be required?
+    log_level: Logger::INFO,
+  }
+
+  def self.config
+    @config ||= DEFAULTS.dup
+  end
+
   def self.register_consumer(consumer)
     self.consumers << consumer
   end

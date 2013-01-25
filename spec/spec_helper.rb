@@ -1,13 +1,8 @@
 require 'hutch'
+require 'logger'
 
 RSpec.configure do |config|
-  #config.before :each do
-  #  Eventricle::Config.log_file = '/dev/null'
-  #end
-
-  config.after :each do
-    # drop queues from rabbitmq
-  end
+  Hutch.logger.level = Logger::WARN
 end
 
 # Constants (classes, etc) defined within a block passed to this method
