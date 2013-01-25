@@ -11,7 +11,7 @@ module Hutch
 
     def self.setup_logger(target = $stdout)
       @logger = Logger.new(target)
-      @logger.level = Logger::INFO
+      @logger.level = Hutch.config[:log_level]
       @logger.formatter = HutchFormatter.new
       @logger
     end

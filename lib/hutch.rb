@@ -13,7 +13,7 @@ module Hutch
   }
 
   def self.config
-    @config ||= DEFAULTS.dup
+    @config ||= DEFAULT_CONFIG.dup
   end
 
   def self.register_consumer(consumer)
