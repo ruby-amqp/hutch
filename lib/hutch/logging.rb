@@ -1,5 +1,6 @@
 require 'logger'
 require 'time'
+require 'hutch'
 
 module Hutch
   module Logging

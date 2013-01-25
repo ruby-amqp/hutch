@@ -8,7 +8,7 @@ module Hutch
   DEFAULT_CONFIG = {
     rabbitmq_host: 'localhost',
     rabbitmq_port: 5672,
-    rabbitmq_exchange: '',  # TODO: should this be required?
+    rabbitmq_exchange: 'hutch',  # TODO: should this be required?
     log_level: Logger::INFO,
   }
 

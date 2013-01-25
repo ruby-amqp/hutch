@@ -2,7 +2,7 @@ require 'hutch'
 require 'logger'
 
 RSpec.configure do |config|
-  Hutch.logger.level = Logger::WARN
+  Hutch.logger.level = Logger::FATAL
 end
 
 # Constants (classes, etc) defined within a block passed to this method

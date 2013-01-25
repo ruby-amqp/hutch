@@ -35,10 +35,19 @@ describe Hutch::Worker do
     let(:payload) { '{}' }
     let(:consumer_instance) { double('Consumer instance') }
     let(:metadata) { double('Metadata', message_id: nil, routing_key: '') }
+    before { consumer.stub(new: consumer_instance) }
+
     it 'passes the message to the consumer' do
       consumer_instance.should_receive(:process).with(an_instance_of(Message))
-      consumer.stub(new: consumer_instance)
       worker.handle_message(consumer, metadata, payload)
+    end
+
+    context 'when the consumer raises an exception' do
+      before { consumer_instance.stub(:process).and_raise('a consumer error') }
+      it 'logs the error' do
+        worker.logger.should_receive(:warn).at_least(:once)
+        worker.handle_message(consumer, metadata, payload)
+      end
     end
   end
 end

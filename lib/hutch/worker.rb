@@ -33,7 +33,7 @@ module Hutch
         @channel = AMQP::Channel.new(@connection)
 
         exchange = Hutch.config[:rabbitmq_exchange]
-        logger.info "using exchange #{exchange}"
+        logger.info "using topic exchange '#{exchange}'"
         @exchange = @channel.topic(exchange)
 
         logger.info 'setting up queues'
@@ -81,6 +81,15 @@ module Hutch
 
       message = Message.new(metadata, payload)
       consumer.new.process(message)
+    rescue StandardError => ex
+      handle_error(metadata.message_id, consumer, ex)
+    end
+
+    def handle_error(message_id, consumer, ex)
+      prefix = "message(#{message_id || '-'}): "
+      logger.warn prefix + "error in consumer '#{consumer}'"
+      logger.warn prefix + "#{ex.class} - #{ex.message}"
+      logger.warn (['backtrace:'] + ex.backtrace).join("\n")
     end
   end
 end
