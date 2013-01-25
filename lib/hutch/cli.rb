@@ -10,8 +10,7 @@ module Hutch
 
       Hutch.logger.info "hutch booted with pid #{Process.pid}"
 
-      load_app
-      if start_work_loop == :success
+      if load_app && start_work_loop == :success
         # If we got here, the worker was shut down nicely
         Hutch.logger.info 'hutch shut down gracefully'
         exit 0
@@ -22,13 +21,43 @@ module Hutch
     end
 
     def load_app
-      ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
-      rails_env_path = File.expand_path('config/environment.rb')
-      if File.exists?(rails_env_path)
-        logger.info 'found rails project, loading rails environment'
-        require rails_env_path
-        ::Rails.application.eager_load!
+      # Try to load a Rails app in the current directory
+      load_rails_app('.')
+      Hutch.config[:require_paths].each do |path|
+        # See if each path is a Rails app. If so, try to load it.
+        next if load_rails_app(path)
+
+        # Given path is not a Rails app, try requiring it as a file
+        logger.info "requiring '#{path}'"
+        begin
+          # Need to add '.' to load path for relative requires
+          $LOAD_PATH << '.'
+          require path
+        rescue LoadError => ex
+          logger.fatal "could not load file '#{path}'"
+          return false
+        ensure
+          # Clean up load path
+          $LOAD_PATH.pop
+        end
       end
+      true
+    end
+
+    def load_rails_app(path)
+      # path should point to the app's top level directory
+      if File.directory?(path)
+        # Smells like a Rails app if it's got a config/environment.rb file
+        rails_path = File.expand_path(File.join(path, 'config/environment.rb'))
+        if File.exists?(rails_path)
+          logger.info "found rails project (#{path}), booting app"
+          ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
+          require rails_path
+          ::Rails.application.eager_load!
+          return true
+        end
+      end
+      false
     end
 
     # Kick off the work loop. This method returns when the worker is shut down
@@ -55,6 +84,10 @@ module Hutch
         opts.on('--rabbitmq-exchange PORT',
                 'Set the RabbitMQ exchange') do |exchange|
           Hutch.config[:rabbitmq_exchange] = exchange
+        end
+
+        opts.on('--require PATH', 'Require a Rails app or path') do |path|
+          Hutch.config[:require_paths] << path
         end
 
         opts.on('-q', '--quiet', 'Quiet logging') do

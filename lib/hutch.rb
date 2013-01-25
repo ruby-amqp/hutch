@@ -10,6 +10,7 @@ module Hutch
     rabbitmq_port: 5672,
     rabbitmq_exchange: 'hutch',  # TODO: should this be required?
     log_level: Logger::INFO,
+    require_paths: []
   }
 
   def self.config
