@@ -77,3 +77,37 @@ $ hutch --require path/to/rails-app  # loads a rails app
 $ hutch --require path/to/file.rb    # loads a ruby file
 ```
 
+## Producers
+
+Hutch focuses on handling incoming messages, not producing messages. There are,
+however, a few things to keep in mind when writing producers that send messages
+to Hutch.
+
+- Make sure that the producer exchange name matches the exchange name that
+  Hutch is using.
+- Hutch works with topic exchanges, check the producer is also using topic
+  exchanges.
+- Use message routing keys that match those used in your Hutch consumers.
+- Be sure your exchanges are marked as durable. In the Ruby AMQP gem, this is
+  done by passing `durable: true` to the exchange creation method.
+- Mark your messages as persistent. This is done by passing `persistent: true`
+  to the publish method in Ruby AMQP.
+- Wrapping publishing code in transactions or using publisher confirms is
+  highly recommended. This can be slightly tricky, see [this issue](pc-issue)
+  and [this gist](pc-gist) for more info.
+
+Here's an example of a well-behaved publisher, minus publisher confirms:
+
+```ruby
+AMQP.connect(host: config[:host]) do |connection|
+  channel  = AMQP::Channel.new(connection)
+  exchange = channel.topic(config[:exchange], durable: true)
+
+  message = JSON.dump({ subject: 'Test', id: 'abc' })
+  exchange.publish(message, routing_key: 'test', persistent: true)
+end
+```
+
+[pc-issue]: https://github.com/ruby-amqp/amqp/issues/92
+[pc-gist]: https://gist.github.com/3042381
+
