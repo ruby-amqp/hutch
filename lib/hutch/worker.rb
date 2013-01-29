@@ -35,7 +35,7 @@ module Hutch
 
         exchange = Hutch.config[:rabbitmq_exchange]
         logger.info "using topic exchange '#{exchange}'"
-        @exchange = @channel.topic(exchange)
+        @exchange = @channel.topic(exchange, durable: true)
 
         logger.info 'setting up queues'
         setup_queues
@@ -69,7 +69,7 @@ module Hutch
 
     # Get / create the RabbitMQ queue for a given consumer.
     def consumer_queue(consumer)
-      @channel.queue(consumer.queue_name)
+      @channel.queue(consumer.queue_name, durable: true)
     end
 
     # Called internally when a new messages comes in from RabbitMQ. Responsible
