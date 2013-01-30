@@ -23,7 +23,7 @@ module Hutch
     def load_app
       # Try to load a Rails app in the current directory
       load_rails_app('.')
-      Hutch.config[:require_paths].each do |path|
+      Hutch::Config.require_paths.each do |path|
         # See if each path is a Rails app. If so, try to load it.
         next if load_rails_app(path)
 
@@ -73,29 +73,30 @@ module Hutch
       parser = OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
 
-        opts.on('--rabbitmq-host HOST', 'Set the RabbitMQ host') do |host|
-          Hutch.config[:rabbitmq_host] = host
+        opts.on('--mq-host HOST', 'Set the RabbitMQ host') do |host|
+          Hutch::Config.mq_host = host
         end
 
-        opts.on('--rabbitmq-port PORT', 'Set the RabbitMQ port') do |port|
-          Hutch.config[:rabbitmq_port] = port
+        opts.on('--mq-port PORT', 'Set the RabbitMQ port') do |port|
+          Hutch::Config.mq_port = port
         end
 
-        opts.on('--rabbitmq-exchange PORT',
-                'Set the RabbitMQ exchange') do |exchange|
-          Hutch.config[:rabbitmq_exchange] = exchange
+        opts.on('--mq-exchange PORT', 'Set the RabbitMQ exchange') do |exchange|
+          Hutch::Config.mq_exchange = exchange
         end
+
+        # TODO: options for rabbit api config
 
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
-          Hutch.config[:require_paths] << path
+          Hutch::Config.require_paths << path
         end
 
         opts.on('-q', '--quiet', 'Quiet logging') do
-          Hutch.config[:log_level] = Logger::WARN
+          Hutch::Config.log_level = Logger::WARN
         end
 
         opts.on('-v', '--verbose', 'Verbose logging') do
-          Hutch.config[:log_level] = Logger::DEBUG
+          Hutch::Config.log_level = Logger::DEBUG
         end
 
         opts.on('--version', 'Print the version and exit') do

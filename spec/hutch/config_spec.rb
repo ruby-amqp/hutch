@@ -8,7 +8,7 @@ describe Hutch::Config do
       subject { Hutch::Config.get(:mq_host) }
 
       context 'with no overridden value' do
-        it { should == Hutch::Config::DEFAULTS[:mq_host] }
+        it { should == 'localhost' }
       end
 
       context 'with an overridden value' do
