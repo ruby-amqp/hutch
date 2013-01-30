@@ -1,5 +1,4 @@
 require 'logger'
-#require 'marshal'
 
 module Hutch
   class UnknownAttributeError < StandardError; end
@@ -56,8 +55,8 @@ module Hutch
     end
 
     private
-    def deep_copy(o)
-      Marshal.load(Marshal.dump(o))
+    def deep_copy(obj)
+      Marshal.load(Marshal.dump(obj))
     end
   end
 end

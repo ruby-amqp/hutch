@@ -1,7 +1,9 @@
 require File.expand_path('../lib/hutch/version', __FILE__)
 
 Gem::Specification.new do |gem|
+  gem.add_runtime_dependency 'bunny', '~> 0.9.0.pre6'
   gem.add_runtime_dependency 'amqp', '~> 0.9.8'
+  gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.5'
   gem.add_development_dependency 'rspec', '~> 2.12.0'
 
