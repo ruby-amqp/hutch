@@ -3,19 +3,25 @@ PATH
   specs:
     hutch (0.0.1)
       amqp (~> 0.9.8)
+      bunny (~> 0.9.0.pre6)
+      carrot-top (~> 0.0.7)
       multi_json (~> 1.5)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    amq-client (0.9.10)
-      amq-protocol (>= 0.9.4)
+    amq-client (0.9.11)
+      amq-protocol (>= 1.0.1)
       eventmachine
     amq-protocol (1.1.0)
     amqp (0.9.8)
       amq-client (~> 0.9.5)
       amq-protocol (>= 0.9.4)
       eventmachine
+    bunny (0.9.0.pre6)
+      amq-protocol (>= 1.0.1)
+    carrot-top (0.0.7)
+      json
     columnize (0.3.6)
     debugger (1.2.4)
       columnize (>= 0.3.1)
@@ -31,6 +37,7 @@ GEM
       thor (~> 0.14.6)
     guard-rspec (0.5.11)
       guard (>= 0.8.4)
+    json (1.7.6)
     multi_json (1.5.0)
     rake (10.0.3)
     rb-fsevent (0.9.3)
