@@ -11,7 +11,7 @@ class Message
   end
 
   def_delegator :@body, :[]
-  def_delegators :@metadata, :routing_key, :timestamp, :exchange
+  def_delegators :@metadata, :message_id, :routing_key, :timestamp, :exchange
 
   attr_reader :body
 
