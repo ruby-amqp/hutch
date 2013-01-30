@@ -73,7 +73,12 @@ module Hutch
     end
 
     def bindings
-
+      results = Hash.new { |hash, key| hash[key] = [] }
+      @api_client.bindings.each do |binding|
+        next if binding['destination'] == binding['routing_key']
+        results[binding['destination']] << binding['routing_key']
+      end
+      results
     end
   end
 end

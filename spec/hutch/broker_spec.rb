@@ -67,5 +67,24 @@ describe Hutch::Broker do
       specify { set_up_api_connection.should raise_error }
     end
   end
+
+  describe '#bindings', rabbitmq: true do
+    around { |example| broker.connect { example.run } }
+    subject { broker.bindings }
+
+    context 'with no bindings' do
+      its(:keys) { should_not include 'test' }
+    end
+
+    context 'with a binding' do
+      around do |example|
+        queue = broker.queue('test').bind(broker.exchange, routing_key: 'key')
+        example.run
+        queue.unbind(broker.exchange, routing_key: 'key').delete
+      end
+
+      it { should include({ 'test' => ['key'] }) }
+    end
+  end
 end
 
