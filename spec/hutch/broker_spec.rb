@@ -5,7 +5,35 @@ describe Hutch::Broker do
   let(:config) { deep_copy(Hutch::Config.user_config) }
   subject(:broker) { Hutch::Broker.new(config) }
 
-  describe 'set_up_amqp_connection', rabbitmq: true do
+  describe '#connect' do
+    before { broker.stub(:set_up_amqp_connection) }
+    before { broker.stub(:set_up_api_connection) }
+    before { broker.stub(:disconnect) }
+
+    it 'sets up the amqp connection' do
+      broker.should_receive(:set_up_amqp_connection)
+      broker.connect
+    end
+
+    it 'sets up the api connection' do
+      broker.should_receive(:set_up_api_connection)
+      broker.connect
+    end
+
+    it 'does not disconnect' do
+      broker.should_not_receive(:disconnect)
+      broker.connect
+    end
+
+    context 'when given a block' do
+      it 'disconnects' do
+        broker.should_receive(:disconnect).once
+        broker.connect { }
+      end
+    end
+  end
+
+  describe '#set_up_amqp_connection', rabbitmq: true do
     context 'with valid details' do
       before { broker.set_up_amqp_connection }
       after  { broker.disconnect }
@@ -23,7 +51,7 @@ describe Hutch::Broker do
     end
   end
 
-  describe 'set_up_api_connection', rabbitmq: true do
+  describe '#set_up_api_connection', rabbitmq: true do
     context 'with valid details' do
       before { broker.set_up_api_connection }
       after  { broker.disconnect }

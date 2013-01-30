@@ -15,11 +15,15 @@ module Hutch
     def connect
       set_up_amqp_connection
       set_up_api_connection
+
+      if block_given?
+        yield
+        disconnect
+      end
     end
 
     def disconnect
       @channel.close    if @channel
-
       @connection.close if @connection
       @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
     end
@@ -58,6 +62,18 @@ module Hutch
       @api_client = CarrotTop.new(host: host, port: port,
                                   user: user, password: password)
       @api_client.exchanges
+    end
+
+    # Create / get a durable queue.
+    def queue(name)
+      @channel.queue(name, durable: true)
+    end
+
+    def bind_queue(queue, exchange, routing_keys)
+    end
+
+    def bindings
+
     end
   end
 end
