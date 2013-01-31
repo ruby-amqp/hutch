@@ -86,5 +86,38 @@ describe Hutch::Broker do
       it { should include({ 'test' => ['key'] }) }
     end
   end
+
+  describe '#bind_queue' do
+    around { |example| broker.connect { example.run } }
+    let(:routing_keys) { %w( a b c ) }
+    let(:queue) { double('Queue', bind: nil, unbind: nil, name: 'consumer') }
+    before { broker.stub(bindings: { 'consumer' => ['d'] }) }
+
+    it 'calls bind for each routing key' do
+      routing_keys.each do |key|
+        queue.should_receive(:bind).with(broker.exchange, routing_key: key)
+      end
+      broker.bind_queue(queue, routing_keys)
+    end
+
+    it 'calls unbind for each redundant existing binding' do
+      queue.should_receive(:unbind).with(broker.exchange, routing_key: 'd')
+      broker.bind_queue(queue, routing_keys)
+    end
+
+    context '(rabbitmq integration test)', rabbitmq: true do
+      let(:queue) { broker.queue('consumer') }
+      let(:routing_key) { 'key' }
+
+      before { broker.unstub(:bindings) }
+      before { queue.bind(broker.exchange, routing_key: 'redundant-key') }
+      after { queue.unbind(broker.exchange, routing_key: routing_key).delete }
+
+      it 'results in the correct bindings' do
+        broker.bind_queue(queue, [routing_key])
+        broker.bindings.should include({ queue.name => [routing_key] })
+      end
+    end
+  end
 end
 

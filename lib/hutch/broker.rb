@@ -69,9 +69,7 @@ module Hutch
       @channel.queue(name, durable: true)
     end
 
-    def bind_queue(queue, exchange, routing_keys)
-    end
-
+    # Return a mapping of queue names to the routing keys they're bound to.
     def bindings
       results = Hash.new { |hash, key| hash[key] = [] }
       @api_client.bindings.each do |binding|
@@ -79,6 +77,24 @@ module Hutch
         results[binding['destination']] << binding['routing_key']
       end
       results
+    end
+
+    # Bind a queue to the broker's exchange on the routing keys provided. Any
+    # existing bindings on the queue that aren't present in the array of
+    # routing keys will be unbound.
+    def bind_queue(queue, routing_keys)
+      # Find the existing bindings, and unbind any redundant bindings
+      queue_bindings = bindings.select { |dest, keys| dest == queue.name }
+      queue_bindings.each do |dest, keys|
+        keys.reject { |key| routing_keys.include?(key) }.each do |key|
+          queue.unbind(@exchange, routing_key: key)
+        end
+      end
+
+      # Ensure all the desired bindings are present
+      routing_keys.each do |routing_key|
+        queue.bind(@exchange, routing_key: routing_key)
+      end
     end
   end
 end
