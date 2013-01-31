@@ -96,6 +96,16 @@ module Hutch
         queue.bind(@exchange, routing_key: routing_key)
       end
     end
+
+    # Each subscriber is run in a thread. This effectively calls Thread#join
+    # on each of the subscriber threads.
+    def wait_on_threads
+      @channel.work_pool.join
+    end
+
+    def ack(delivery_tag)
+      @channel.ack(delivery_tag, false)
+    end
   end
 end
 

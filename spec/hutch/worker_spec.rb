@@ -1,9 +1,12 @@
+require 'spec_helper'
 require 'hutch/worker'
 
 describe Hutch::Worker do
-  let(:consumer) { double('Consumer', routing_keys: %w( a b c )) }
+  let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
+                          queue_name: 'consumer') }
   let(:consumers) { [consumer, double('Consumer')] }
-  subject(:worker) { Hutch::Worker.new(consumers) }
+  let(:broker) { Hutch::Broker.new }
+  subject(:worker) { Hutch::Worker.new(broker, consumers) }
 
   describe '#setup_queues' do
     it 'sets up queues for each of the consumers' do
@@ -17,16 +20,20 @@ describe Hutch::Worker do
   describe '#setup_queue' do
     let(:queue) { double('Queue', bind: nil, subscribe: nil) }
     before { worker.stub(consumer_queue: queue) }
+    before { broker.stub(queue: queue, bind_queue: nil) }
+
+    it 'creates a queue' do
+      broker.should_receive(:queue).with(consumer.queue_name).and_return(queue)
+      worker.setup_queue(consumer)
+    end
 
     it 'binds the queue to each of the routing keys' do
-      %w( a b c ).each do |key|
-        queue.should_receive(:bind).with(anything, routing_key: key)
-      end
+      broker.should_receive(:bind_queue).with(queue, %w( a b c ))
       worker.setup_queue(consumer)
     end
 
     it 'sets up a subscription' do
-      queue.should_receive(:subscribe)
+      queue.should_receive(:subscribe).with(ack: true)
       worker.setup_queue(consumer)
     end
   end
@@ -34,26 +41,34 @@ describe Hutch::Worker do
   describe '#handle_message' do
     let(:payload) { '{}' }
     let(:consumer_instance) { double('Consumer instance') }
-    let(:metadata) { double('Metadata', message_id: nil, routing_key: '',
-                                        ack: true) }
+    let(:delivery_info) { double('Delivery Info', routing_key: '',
+                                 delivery_tag: 'dt') }
+    let(:properties) { double('Properties', message_id: nil) }
     before { consumer.stub(new: consumer_instance) }
+    before { broker.stub(:ack) }
 
     it 'passes the message to the consumer' do
       consumer_instance.should_receive(:process).with(an_instance_of(Message))
-      worker.handle_message(consumer, metadata, payload)
+      worker.handle_message(consumer, delivery_info, properties, payload)
     end
 
     it 'acknowledges the message' do
       consumer_instance.stub(:process)
-      metadata.should_receive(:ack)
-      worker.handle_message(consumer, metadata, payload)
+      broker.should_receive(:ack).with(delivery_info.delivery_tag)
+      worker.handle_message(consumer, delivery_info, properties, payload)
     end
 
     context 'when the consumer raises an exception' do
       before { consumer_instance.stub(:process).and_raise('a consumer error') }
+
       it 'logs the error' do
         worker.logger.should_receive(:warn).at_least(:once)
-        worker.handle_message(consumer, metadata, payload)
+        worker.handle_message(consumer, delivery_info, properties, payload)
+      end
+
+      it 'acknowledges the message' do
+        broker.should_receive(:ack).with(delivery_info.delivery_tag)
+        worker.handle_message(consumer, delivery_info, properties, payload)
       end
     end
   end
