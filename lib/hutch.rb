@@ -1,5 +1,3 @@
-require 'amqp'
-
 module Hutch
   require 'hutch/consumer'
   require 'hutch/worker'
