@@ -1,5 +1,6 @@
 require 'bunny'
 require 'carrot-top'
+require 'securerandom'
 require 'hutch/logging'
 
 module Hutch
@@ -105,6 +106,19 @@ module Hutch
 
     def ack(delivery_tag)
       @channel.ack(delivery_tag, false)
+    end
+
+    def publish(routing_key, message)
+      # TODO: add publisher confirms
+      logger.info "publishing message '#{message.inspect}' to #{routing_key}"
+      payload = JSON.dump(message)
+      @exchange.publish(payload, routing_key: routing_key, persistent: true,
+                        timestamp: Time.now.to_i, message_id: generate_id)
+    end
+
+    private
+    def generate_id
+      SecureRandom.uuid
     end
   end
 end

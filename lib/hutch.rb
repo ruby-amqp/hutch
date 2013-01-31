@@ -14,5 +14,25 @@ module Hutch
   def self.logger
     Hutch::Logging.logger
   end
+
+  def self.connect
+    unless connected?
+      @broker = Hutch::Broker.new
+      @broker.connect
+      @connected = true
+    end
+  end
+
+  def self.broker
+    @broker
+  end
+
+  def self.connected?
+    @connected
+  end
+
+  def self.publish(routing_key, message)
+    @broker.publish(routing_key, message)
+  end
 end
 

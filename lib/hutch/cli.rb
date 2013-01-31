@@ -63,9 +63,8 @@ module Hutch
     # Kick off the work loop. This method returns when the worker is shut down
     # gracefully (with a SIGQUIT, SIGTERM or SIGINT).
     def start_work_loop
-      broker = Hutch::Broker.new
-      broker.connect
-      @worker = Hutch::Worker.new(broker, Hutch.consumers)
+      Hutch.connect
+      @worker = Hutch::Worker.new(Hutch.broker, Hutch.consumers)
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
       @worker.run
