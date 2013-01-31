@@ -79,9 +79,20 @@ $ hutch --require path/to/file.rb    # loads a ruby file
 
 ## Producers
 
-Hutch focuses on handling incoming messages, not producing messages. There are,
-however, a few things to keep in mind when writing producers that send messages
-to Hutch.
+Hutch includes a `publish` method for sending messages to Hutch consumers. When
+possible, this should be used, rather than directly interfacing with RabbitMQ
+libraries.
+
+```ruby
+Hutch.publish('routing.key', subject: 'payment', action: 'received')
+```
+
+### Writing Well-Behaved Publishers
+
+You may need to send messages to Hutch from languages other than Ruby. This
+prevents the use of `Hutch.publish`, requiring custom publication code to be
+written. There are a few things to keep in mind when writing producers that
+send messages to Hutch.
 
 - Make sure that the producer exchange name matches the exchange name that
   Hutch is using.
