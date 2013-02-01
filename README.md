@@ -47,9 +47,12 @@ running `hutch` on the command line. `hutch` takes a number of options:
 ```console
 $ hutch -h
 usage: hutch [options]
-        --rabbitmq-host HOST         Set the RabbitMQ host
-        --rabbitmq-port PORT         Set the RabbitMQ port
-        --rabbitmq-exchange PORT     Set the RabbitMQ exchange
+        --mq-host HOST               Set the RabbitMQ host
+        --mq-port PORT               Set the RabbitMQ port
+        --mq-exchange PORT           Set the RabbitMQ exchange
+        --mq-api-port PORT           Set the RabbitMQ API port
+        --mq-api-username USERNAME   Set the RabbitMQ API username
+        --mq-api-password PASSWORD   Set the RabbitMQ API password
         --require PATH               Require a Rails app or path
     -q, --quiet                      Quiet logging
     -v, --verbose                    Verbose logging
