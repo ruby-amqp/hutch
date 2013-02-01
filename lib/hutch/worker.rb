@@ -9,6 +9,7 @@ module Hutch
 
     def initialize(broker, consumers)
       @broker = broker
+      raise WorkerSetupError.new('no consumers loaded') if consumers.empty?
       @consumers = consumers
     end
 
