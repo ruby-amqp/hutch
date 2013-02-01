@@ -1,6 +1,6 @@
 require 'logger'
 require 'time'
-require 'hutch'
+require 'hutch/config'
 
 module Hutch
   module Logging
@@ -12,7 +12,7 @@ module Hutch
 
     def self.setup_logger(target = $stdout)
       @logger = Logger.new(target)
-      @logger.level = Hutch.config[:log_level]
+      @logger.level = Hutch::Config.log_level
       @logger.formatter = HutchFormatter.new
       @logger
     end

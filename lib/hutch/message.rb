@@ -4,14 +4,16 @@ require 'forwardable'
 class Message
   extend Forwardable
 
-  def initialize(metadata, payload)
-    @metadata = metadata
-    @payload  = payload
-    @body     = MultiJson.load(payload, symbolize_keys: true)
+  def initialize(delivery_info, properties, payload)
+    @delivery_info = delivery_info
+    @properties    = properties
+    @payload       = payload
+    @body          = MultiJson.load(payload, symbolize_keys: true)
   end
 
   def_delegator :@body, :[]
-  def_delegators :@metadata, :routing_key, :timestamp, :exchange
+  def_delegators :@properties, :message_id, :timestamp
+  def_delegators :@delivery_info, :routing_key, :exchange
 
   attr_reader :body
 

@@ -1,21 +1,7 @@
-require 'amqp'
-
 module Hutch
   require 'hutch/consumer'
   require 'hutch/worker'
   require 'hutch/logging'
-
-  DEFAULT_CONFIG = {
-    rabbitmq_host: 'localhost',
-    rabbitmq_port: 5672,
-    rabbitmq_exchange: 'hutch',  # TODO: should this be required?
-    log_level: Logger::INFO,
-    require_paths: []
-  }
-
-  def self.config
-    @config ||= DEFAULT_CONFIG.dup
-  end
 
   def self.register_consumer(consumer)
     self.consumers << consumer
@@ -27,6 +13,26 @@ module Hutch
 
   def self.logger
     Hutch::Logging.logger
+  end
+
+  def self.connect
+    unless connected?
+      @broker = Hutch::Broker.new
+      @broker.connect
+      @connected = true
+    end
+  end
+
+  def self.broker
+    @broker
+  end
+
+  def self.connected?
+    @connected
+  end
+
+  def self.publish(routing_key, message)
+    @broker.publish(routing_key, message)
   end
 end
 
