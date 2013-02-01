@@ -10,7 +10,7 @@ module Hutch
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_api_port: 55672,
-        mq_api_user: 'guest',
+        mq_api_username: 'guest',
         mq_api_password: 'guest',
         log_level: Logger::INFO,
         require_paths: []

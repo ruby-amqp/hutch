@@ -19,6 +19,11 @@ module Hutch
       setup_queues
       # handle errors
       @broker.wait_on_threads
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      raise WorkerSetupError.new('could not create queue due to a type ' +
+                                 'conflict with an existing queue, remove ' +
+                                 'the existing queue and try again')
     end
 
     # Stop a running worker by killing all subscriber threads.

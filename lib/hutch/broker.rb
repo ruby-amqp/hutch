@@ -2,6 +2,7 @@ require 'bunny'
 require 'carrot-top'
 require 'securerandom'
 require 'hutch/logging'
+require 'hutch/exceptions'
 
 module Hutch
   class Broker
@@ -46,23 +47,40 @@ module Hutch
       exchange_name = @config[:mq_exchange]
       logger.info "using topic exchange '#{exchange}'"
       @exchange = @channel.topic(exchange_name, durable: true)
+    rescue Bunny::TCPConnectionFailed => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      uri = "amqp://#{host}:#{port}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      raise WorkerSetupError.new('could not create exchange due to a type ' +
+                                 'conflict with an existing exchange, ' +
+                                 'remove the existing exchange and try again')
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      host = @config[:mq_host]
-      port = @config[:mq_api_port]
-      user = @config[:mq_api_user]
-      password = @config[:mq_api_password]
+      host, port = @config[:mq_host], @config[:mq_api_port]
+      username, password = @config[:mq_api_username], @config[:mq_api_password]
 
-      management_uri = "http://#{user}:#{password}@#{host}:#{port}/"
+      management_uri = "http://#{username}:#{password}@#{host}:#{port}/"
       logger.info "connecting to rabbitmq management api (#{management_uri})"
 
       @api_client = CarrotTop.new(host: host, port: port,
-                                  user: user, password: password)
+                                  user: username, password: password)
       @api_client.exchanges
+    rescue Errno::ECONNREFUSED => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to api at #{management_uri}")
+    rescue Net::HTTPServerException => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      if ex.response.code == '401'
+        raise AuthenticationError.new('invalid api credentials')
+      else
+        raise
+      end
     end
 
     # Create / get a durable queue.

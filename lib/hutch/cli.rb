@@ -1,4 +1,5 @@
 require 'hutch/logging'
+require 'hutch/exceptions'
 
 module Hutch
   class CLI
@@ -68,6 +69,10 @@ module Hutch
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
       @worker.run
+      :success
+    rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
+      logger.fatal ex.message
+      :error
     end
 
     def parse_options
@@ -84,6 +89,20 @@ module Hutch
 
         opts.on('--mq-exchange PORT', 'Set the RabbitMQ exchange') do |exchange|
           Hutch::Config.mq_exchange = exchange
+        end
+
+        opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
+          Hutch::Config.mq_api_port = port
+        end
+
+        opts.on('--mq-api-username USERNAME',
+                'Set the RabbitMQ API username') do |username|
+          Hutch::Config.mq_api_username = username
+        end
+
+        opts.on('--mq-api-password PASSWORD',
+                'Set the RabbitMQ API password') do |password|
+          Hutch::Config.mq_api_password = password
         end
 
         # TODO: options for rabbit api config
