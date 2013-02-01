@@ -18,8 +18,12 @@ module Hutch
     def run
       setup_queues
       # handle errors
-      # join subscription threads
       @broker.wait_on_threads
+    end
+
+    # Stop a running worker by killing all subscriber threads.
+    def stop
+      @broker.stop
     end
 
     # Set up the queues for each of the worker's consumers.

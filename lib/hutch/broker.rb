@@ -104,6 +104,10 @@ module Hutch
       @channel.work_pool.join
     end
 
+    def stop
+      @channel.work_pool.kill
+    end
+
     def ack(delivery_tag)
       @channel.ack(delivery_tag, false)
     end
