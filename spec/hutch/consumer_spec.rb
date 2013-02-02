@@ -37,6 +37,7 @@ describe Hutch::Consumer do
     end
   end
 
+
   describe '.consume' do
     it 'saves the routing key to the consumer' do
       simple_consumer.routing_keys.should include 'hutch.test1'
@@ -47,6 +48,12 @@ describe Hutch::Consumer do
         complex_consumer.routing_keys.should include 'hutch.test1'
         complex_consumer.routing_keys.should include 'hutch.test2'
       end
+    end
+
+    context 'when given the same routing key multiple times' do
+      subject { simple_consumer.routing_keys }
+      before { simple_consumer.consume 'hutch.test1' }
+      its(:length) { should == 1}
     end
   end
 

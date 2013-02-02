@@ -12,7 +12,7 @@ module Hutch
       # Add one or more routing keys to the set of routing keys the consumer
       # wants to subscribe to.
       def consume(*routing_keys)
-        self.routing_keys.concat(routing_keys)
+        @routing_keys = self.routing_keys.union(routing_keys)
       end
 
       # The RabbitMQ queue name for the consumer. This is derived from the
@@ -25,7 +25,7 @@ module Hutch
 
       # Accessor for the consumer's routing key.
       def routing_keys
-        @routing_keys ||= []
+        @routing_keys ||= Set.new
       end
     end
   end
