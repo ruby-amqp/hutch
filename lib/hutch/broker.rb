@@ -45,7 +45,7 @@ module Hutch
       @channel = @connection.create_channel
 
       exchange_name = @config[:mq_exchange]
-      logger.info "using topic exchange '#{exchange}'"
+      logger.info "using topic exchange '#{exchange_name}'"
       @exchange = @channel.topic(exchange_name, durable: true)
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
@@ -106,12 +106,14 @@ module Hutch
       queue_bindings = bindings.select { |dest, keys| dest == queue.name }
       queue_bindings.each do |dest, keys|
         keys.reject { |key| routing_keys.include?(key) }.each do |key|
+          logger.debug "removing redundant binding #{queue.name} <--> #{key}"
           queue.unbind(@exchange, routing_key: key)
         end
       end
 
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
+        logger.debug "creating binding #{queue.name} <--> #{routing_key}"
         queue.bind(@exchange, routing_key: routing_key)
       end
     end
