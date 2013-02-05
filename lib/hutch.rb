@@ -15,9 +15,9 @@ module Hutch
     Hutch::Logging.logger
   end
 
-  def self.connect
+  def self.connect(config = Hutch::Config)
     unless connected?
-      @broker = Hutch::Broker.new
+      @broker = Hutch::Broker.new(config)
       @broker.connect
       @connected = true
     end
