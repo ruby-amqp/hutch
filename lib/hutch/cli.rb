@@ -96,18 +96,18 @@ module Hutch
           Hutch::Config.mq_vhost = vhost
         end
 
+        opts.on('--mq-username USERNAME',
+                'Set the RabbitMQ username') do |username|
+          Hutch::Config.mq_username = username
+        end
+
+        opts.on('--mq-password PASSWORD',
+                'Set the RabbitMQ password') do |password|
+          Hutch::Config.mq_password = password
+        end
+
         opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
           Hutch::Config.mq_api_port = port
-        end
-
-        opts.on('--mq-api-username USERNAME',
-                'Set the RabbitMQ API username') do |username|
-          Hutch::Config.mq_api_username = username
-        end
-
-        opts.on('--mq-api-password PASSWORD',
-                'Set the RabbitMQ API password') do |password|
-          Hutch::Config.mq_api_password = password
         end
 
         # TODO: options for rabbit api config

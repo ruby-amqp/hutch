@@ -34,12 +34,14 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      host = @config[:mq_host]
-      port = @config[:mq_port]
+      host, port, vhost = @config[:mq_host], @config[:mq_port]
+      username, password = @config[:mq_username], @config[:mq_password]
       vhost = @config[:mq_vhost]
-      logger.info "connecting to rabbitmq (#{host}:#{port})"
+      uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      logger.info "connecting to rabbitmq (amqp://#{uri})"
 
-      @connection = Bunny.new(host: host, port: port, vhost: vhost)
+      @connection = Bunny.new(host: host, port: port, vhost: vhost,
+                              username: username, password: password)
       @connection.start
 
       logger.info 'opening rabbitmq channel'
@@ -64,7 +66,7 @@ module Hutch
     # listing queues and bindings.
     def set_up_api_connection
       host, port = @config[:mq_host], @config[:mq_api_port]
-      username, password = @config[:mq_api_username], @config[:mq_api_password]
+      username, password = @config[:mq_username], @config[:mq_password]
 
       management_uri = "http://#{username}:#{password}@#{host}:#{port}/"
       logger.info "connecting to rabbitmq management api (#{management_uri})"
