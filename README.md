@@ -49,7 +49,8 @@ $ hutch -h
 usage: hutch [options]
         --mq-host HOST               Set the RabbitMQ host
         --mq-port PORT               Set the RabbitMQ port
-        --mq-exchange PORT           Set the RabbitMQ exchange
+        --mq-exchange EXCHANGE       Set the RabbitMQ exchange
+        --mq-vhost VHOST             Set the RabbitMQ vhost
         --mq-api-port PORT           Set the RabbitMQ API port
         --mq-api-username USERNAME   Set the RabbitMQ API username
         --mq-api-password PASSWORD   Set the RabbitMQ API password
