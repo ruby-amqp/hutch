@@ -96,6 +96,7 @@ module Hutch
       results = Hash.new { |hash, key| hash[key] = [] }
       @api_client.bindings.each do |binding|
         next if binding['destination'] == binding['routing_key']
+        next unless binding['source'] == @config[:mq_exchange]
         next unless binding['vhost'] == @config[:mq_vhost]
         results[binding['destination']] << binding['routing_key']
       end
