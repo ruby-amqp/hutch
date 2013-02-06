@@ -36,9 +36,10 @@ module Hutch
     def set_up_amqp_connection
       host = @config[:mq_host]
       port = @config[:mq_port]
+      vhost = @config[:mq_vhost]
       logger.info "connecting to rabbitmq (#{host}:#{port})"
 
-      @connection = Bunny.new(host: host, port: port)
+      @connection = Bunny.new(host: host, port: port, vhost: vhost)
       @connection.start
 
       logger.info 'opening rabbitmq channel'
@@ -93,6 +94,7 @@ module Hutch
       results = Hash.new { |hash, key| hash[key] = [] }
       @api_client.bindings.each do |binding|
         next if binding['destination'] == binding['routing_key']
+        next unless binding['vhost'] == @config[:mq_vhost]
         results[binding['destination']] << binding['routing_key']
       end
       results

@@ -87,8 +87,13 @@ module Hutch
           Hutch::Config.mq_port = port
         end
 
-        opts.on('--mq-exchange PORT', 'Set the RabbitMQ exchange') do |exchange|
+        opts.on('--mq-exchange EXCHANGE',
+                'Set the RabbitMQ exchange') do |exchange|
           Hutch::Config.mq_exchange = exchange
+        end
+
+        opts.on('--mq-vhost VHOST', 'Set the RabbitMQ vhost') do |vhost|
+          Hutch::Config.mq_vhost = vhost
         end
 
         opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
