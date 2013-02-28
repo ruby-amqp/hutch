@@ -1,3 +1,5 @@
+require 'optparse'
+
 require 'hutch/logging'
 require 'hutch/exceptions'
 
