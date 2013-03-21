@@ -108,8 +108,8 @@ send messages to Hutch.
 - Mark your messages as persistent. This is done by passing `persistent: true`
   to the publish method in Ruby AMQP.
 - Wrapping publishing code in transactions or using publisher confirms is
-  highly recommended. This can be slightly tricky, see [this issue](pc-issue)
-  and [this gist](pc-gist) for more info.
+  highly recommended. This can be slightly tricky, see [this issue][pc-issue]
+  and [this gist][pc-gist] for more info.
 
 Here's an example of a well-behaved publisher, minus publisher confirms:
 
