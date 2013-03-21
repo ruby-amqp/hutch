@@ -9,7 +9,6 @@ module Hutch
     include Logging
 
     attr_accessor :connection, :channel, :exchange, :api_client
-    attr_reader :config
 
     def initialize(config = nil)
       @config = config || Hutch::Config
