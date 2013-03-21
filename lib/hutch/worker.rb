@@ -70,10 +70,9 @@ module Hutch
     end
 
     def handle_error(message_id, consumer, ex)
-      prefix = "message(#{message_id || '-'}): "
-      logger.warn prefix + "error in consumer '#{consumer}'"
-      logger.warn prefix + "#{ex.class} - #{ex.message}"
-      logger.warn (['backtrace:'] + ex.backtrace).join("\n")
+      Hutch::Config[:error_backends].each do |backend|
+        backend.new.handle(message_id, consumer, ex)
+      end
     end
   end
 end

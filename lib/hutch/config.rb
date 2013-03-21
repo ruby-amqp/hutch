@@ -14,8 +14,13 @@ module Hutch
         mq_password: 'guest',
         mq_api_port: 55672,
         log_level: Logger::INFO,
-        require_paths: []
+        require_paths: [],
+        error_backends: [Hutch::ErrorBackends::Logger]
       }
+
+      if defined?(Raven)
+        @config[:error_backends] << Hutch::ErrorBackends::Sentry
+      end
     end
 
     def self.get(attr)

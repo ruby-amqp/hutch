@@ -1,7 +1,9 @@
 require 'spec_helper'
 require 'hutch/worker'
+require 'raven'
 
 describe Hutch::Worker do
+  before { Raven.as_null_object }
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
                           queue_name: 'consumer') }
   let(:consumers) { [consumer, double('Consumer')] }
@@ -62,7 +64,9 @@ describe Hutch::Worker do
       before { consumer_instance.stub(:process).and_raise('a consumer error') }
 
       it 'logs the error' do
-        worker.logger.should_receive(:warn).at_least(:once)
+        Hutch::Config[:error_backends].each do |backend|
+          backend.any_instance.should_receive(:handle)
+        end
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
 

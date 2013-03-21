@@ -7,6 +7,8 @@ group :development do
   gem "debugger"
   gem "guard", "~> 0.8.8"
   gem "guard-rspec", "~> 0.5.4"
+  gem "sentry-raven", git: "https://github.com/hmarr/raven-ruby.git",
+                      branch: 'server-name-fix'
 end
 
 group :development, :darwin do
