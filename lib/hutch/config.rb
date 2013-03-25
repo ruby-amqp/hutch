@@ -15,11 +15,11 @@ module Hutch
         mq_api_port: 55672,
         log_level: Logger::INFO,
         require_paths: [],
-        error_backends: [Hutch::ErrorBackends::Logger]
+        error_backends: [Hutch::ErrorHandlers::Logger]
       }
 
       if defined?(Raven)
-        @config[:error_backends] << Hutch::ErrorBackends::Sentry
+        @config[:error_backends] << Hutch::ErrorHandlers::Sentry
       end
     end
 

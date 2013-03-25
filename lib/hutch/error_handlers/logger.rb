@@ -1,9 +1,17 @@
 require 'hutch/logging'
 
 module Hutch
-  module ErrorBackends
+  module ErrorHandlers
     class Logger
       include Logging
+
+      def initialize(target = Hutch::Logging.logger)
+        @target = target
+      end
+
+      def logger
+        @target
+      end
 
       def handle(message_id, consumer, ex)
         prefix = "message(#{message_id || '-'}): "
