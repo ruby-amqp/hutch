@@ -70,8 +70,8 @@ module Hutch
     end
 
     def handle_error(message_id, consumer, ex)
-      Hutch::Config[:error_backends].each do |backend|
-        backend.new.handle(message_id, consumer, ex)
+      Hutch::Config[:error_handlers].each do |backend|
+        backend.handle(message_id, consumer, ex)
       end
     end
   end

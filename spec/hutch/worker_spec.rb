@@ -64,8 +64,8 @@ describe Hutch::Worker do
       before { consumer_instance.stub(:process).and_raise('a consumer error') }
 
       it 'logs the error' do
-        Hutch::Config[:error_backends].each do |backend|
-          backend.any_instance.should_receive(:handle)
+        Hutch::Config[:error_handlers].each do |backend|
+          backend.should_receive(:handle)
         end
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
