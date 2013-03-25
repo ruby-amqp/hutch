@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'hutch/worker'
-require 'raven'
 
 describe Hutch::Worker do
   before { Raven.as_null_object }
