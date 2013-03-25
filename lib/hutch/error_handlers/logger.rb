@@ -7,9 +7,9 @@ module Hutch
 
       def handle(message_id, consumer, ex)
         prefix = "message(#{message_id || '-'}): "
-        logger.warn prefix + "error in consumer '#{consumer}'"
-        logger.warn prefix + "#{ex.class} - #{ex.message}"
-        logger.warn (['backtrace:'] + ex.backtrace).join("\n")
+        logger.error prefix + "error in consumer '#{consumer}'"
+        logger.error prefix + "#{ex.class} - #{ex.message}"
+        logger.error (['backtrace:'] + ex.backtrace).join("\n")
       end
     end
   end

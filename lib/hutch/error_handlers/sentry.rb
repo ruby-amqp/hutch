@@ -13,8 +13,8 @@ module Hutch
         # returns nil, in which case we don't want to log anything
         if event
           prefix = "message(#{message_id || '-'}): "
-          logger.warn prefix + "Logging event to Sentry"
-          logger.warn prefix + "#{ex.class} - #{ex.message}"
+          logger.error prefix + "Logging event to Sentry"
+          logger.error prefix + "#{ex.class} - #{ex.message}"
           Raven.send(event)
         end
       end
