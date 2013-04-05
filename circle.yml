@@ -2,4 +2,4 @@ machine:
   services:
     - rabbitmq-server
   post:
-    - rabbitmq-plugins enable rabbitmq_management
+    - sudo rabbitmq-plugins enable rabbitmq_management
