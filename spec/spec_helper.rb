@@ -1,3 +1,4 @@
+require 'raven'
 require 'hutch'
 require 'logger'
 
