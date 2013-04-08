@@ -3,7 +3,7 @@ module Hutch
   require 'hutch/worker'
   require 'hutch/logging'
   require 'hutch/error_handlers/logger'
-  require 'hutch/error_handlers/sentry'
+  require 'hutch/error_handlers/sentry' if defined?(Raven)
 
   def self.register_consumer(consumer)
     self.consumers << consumer
