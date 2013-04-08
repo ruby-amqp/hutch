@@ -49,7 +49,8 @@ describe Hutch::Worker do
     before { broker.stub(:ack) }
 
     it 'passes the message to the consumer' do
-      consumer_instance.should_receive(:process).with(an_instance_of(Message))
+      consumer_instance.should_receive(:process).
+                        with(an_instance_of(Hutch::Message))
       worker.handle_message(consumer, delivery_info, properties, payload)
     end
 

@@ -1,10 +1,11 @@
 require 'hutch/message'
 
-describe Message do
+describe Hutch::Message do
   let(:delivery_info) { double('Delivery Info') }
   let(:props) { double('Properties') }
   let(:body) {{ foo: 'bar' }}
-  subject(:message) { Message.new(delivery_info, props, MultiJson.dump(body)) }
+  let(:json_body) { MultiJson.dump(body) }
+  subject(:message) { Hutch::Message.new(delivery_info, props, json_body) }
 
   its(:body) { should == body }
 
