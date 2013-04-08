@@ -36,6 +36,13 @@ class FailedPaymentConsumer
 end
 ```
 
+If you are using Hutch with Rails and want to make Hutch log to the Rails
+logger rather than `stdout`, add this to `config/initializers/hutch.rb`
+
+```ruby
+Hutch::Logging.logger = Rails.logger
+```
+
 [topic-docs]: http://www.rabbitmq.com/tutorials/tutorial-five-python.html
 
 

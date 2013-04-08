@@ -21,6 +21,10 @@ module Hutch
       @logger || setup_logger
     end
 
+    def self.logger=(logger)
+      @logger = logger
+    end
+
     def logger
       Hutch::Logging.logger
     end

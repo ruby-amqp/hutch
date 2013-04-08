@@ -9,6 +9,11 @@ group :development do
   gem "guard-rspec", "~> 0.5.4"
 end
 
+group :development, :test do
+  gem "sentry-raven", git: "https://github.com/hmarr/raven-ruby.git",
+                      branch: 'server-name-fix'
+end
+
 group :development, :darwin do
   gem "rb-fsevent", "~> 0.9"
   gem "growl", "~> 1.0.3"
