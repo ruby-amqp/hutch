@@ -108,6 +108,10 @@ module Hutch
           Hutch::Config.mq_password = password
         end
 
+        opts.on('--mq-api-host HOST', 'Set the RabbitMQ API host') do |host|
+          Hutch::Config.mq_api_host = host
+        end
+
         opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
           Hutch::Config.mq_api_port = port
         end
