@@ -60,7 +60,7 @@ describe Hutch::Broker do
     end
 
     context 'when given invalid details' do
-      before { config[:mq_host] = 'notarealhost' }
+      before { config[:mq_api_host] = 'notarealhost' }
       after  { broker.disconnect }
       let(:set_up_api_connection) { ->{ broker.set_up_api_connection } }
 
