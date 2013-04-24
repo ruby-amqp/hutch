@@ -65,7 +65,7 @@ module Hutch
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      host, port = @config[:mq_host], @config[:mq_api_port]
+      host, port = @config[:mq_api_host], @config[:mq_api_port]
       username, password = @config[:mq_username], @config[:mq_password]
 
       management_uri = "http://#{username}:#{password}@#{host}:#{port}/"

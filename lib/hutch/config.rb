@@ -12,6 +12,7 @@ module Hutch
         mq_vhost: '/',
         mq_username: 'guest',
         mq_password: 'guest',
+        mq_api_host: 'localhost',
         mq_api_port: 55672,
         log_level: Logger::INFO,
         require_paths: [],
