@@ -33,8 +33,8 @@ module Hutch
     @connected
   end
 
-  def self.publish(routing_key, message)
-    @broker.publish(routing_key, message)
+  def self.publish(routing_key, message, confirm)
+    @broker.publish(routing_key, message, confirm)
   end
 end
 
