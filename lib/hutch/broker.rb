@@ -41,7 +41,9 @@ module Hutch
       logger.info "connecting to rabbitmq (amqp://#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
-                              username: username, password: password)
+                              username: username, password: password,
+                              heartbeat: 1,
+                              automatically_recover: true, network_recovery_interval: 1)
       @connection.start
 
       logger.info 'opening rabbitmq channel'
