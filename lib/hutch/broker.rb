@@ -139,26 +139,15 @@ module Hutch
       @channel.ack(delivery_tag, false)
     end
 
-    def publish(routing_key, message, confirm)
-      logger.info "publishing message '#{message.inspect}' to #{routing_key}"
-
-      if confirm
-        @channel.confirm_select do |delivery_tag, multiple, nack|
-          logger.info "confirm cb #{delivery_tag} #{multiple} #{nack}"
-        end
-      end
-
+    def publish(routing_key, message)
       payload = JSON.dump(message)
-      
-      @exchange.publish(payload, routing_key: routing_key, persistent: true,
-                        timestamp: Time.now.to_i, message_id: generate_id)
-      
-      if confirm
-        success = @channel.wait_for_confirms
-        unless success
-          logger.info "confirmation never received for message '#{message.inspect}"
-          return false
-        end
+
+      if @connection.open?
+        logger.info "publishing message '#{message.inspect}' to #{routing_key}"
+        @exchange.publish(payload, routing_key: routing_key, persistent: true,
+                          timestamp: Time.now.to_i, message_id: generate_id)
+      else
+        logger.error "Unable to publish : routing key: #{routing_key}, message: #{message}"
       end
     end
 
