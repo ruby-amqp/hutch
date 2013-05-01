@@ -6,14 +6,14 @@ module Hutch
   module Config
     def self.initialize
       @config = {
-        mq_host: 'localhost',
+        mq_host: '33.33.33.10',
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_vhost: '/',
         mq_username: 'guest',
         mq_password: 'guest',
-        mq_api_host: 'localhost',
-        mq_api_port: 55672,
+        mq_api_host: '33.33.33.10',
+        mq_api_port: 15672,
         log_level: Logger::INFO,
         require_paths: [],
         error_handlers: [Hutch::ErrorHandlers::Logger.new]
