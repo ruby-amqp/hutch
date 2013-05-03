@@ -41,7 +41,9 @@ module Hutch
       logger.info "connecting to rabbitmq (amqp://#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
-                              username: username, password: password)
+                              username: username, password: password,
+                              heartbeat: 1,
+                              automatically_recover: true, network_recovery_interval: 1)
       @connection.start
 
       logger.info 'opening rabbitmq channel'
@@ -138,11 +140,15 @@ module Hutch
     end
 
     def publish(routing_key, message)
-      # TODO: add publisher confirms
-      logger.info "publishing message '#{message.inspect}' to #{routing_key}"
       payload = JSON.dump(message)
-      @exchange.publish(payload, routing_key: routing_key, persistent: true,
-                        timestamp: Time.now.to_i, message_id: generate_id)
+
+      if @connection.open?
+        logger.info "publishing message '#{message.inspect}' to #{routing_key}"
+        @exchange.publish(payload, routing_key: routing_key, persistent: true,
+                          timestamp: Time.now.to_i, message_id: generate_id)
+      else
+        logger.error "Unable to publish : routing key: #{routing_key}, message: #{message}"
+      end
     end
 
     private
