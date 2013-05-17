@@ -45,6 +45,15 @@ module Hutch
         end
       end
       true
+
+      # Because of the order things are required when we run the Hutch binary
+      # in hutch/bin, the Sentry Raven gem gets required **after** the error
+      # handlers are set up. Due to this, we never got any Sentry notifications
+      # when an error occurred in any of the consumers.
+      if defined?(Raven)
+        Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
+      end
+
     end
 
     def load_rails_app(path)
