@@ -45,7 +45,6 @@ module Hutch
       @broker.bind_queue(queue, consumer.routing_keys)
 
       queue.subscribe(ack: true) do |delivery_info, properties, payload|
-        puts "got msg from #{delivery_info.routing_key}, telling #{consumer}"
         handle_message(consumer, delivery_info, properties, payload)
       end
     end
