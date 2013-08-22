@@ -10,8 +10,7 @@ group :development do
 end
 
 group :development, :test do
-  gem "sentry-raven", git: "https://github.com/hmarr/raven-ruby.git",
-                      branch: 'server-name-fix'
+  gem "sentry-raven"
 end
 
 group :development, :darwin do
