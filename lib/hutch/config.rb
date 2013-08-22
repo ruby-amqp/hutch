@@ -18,10 +18,6 @@ module Hutch
         require_paths: [],
         error_handlers: [Hutch::ErrorHandlers::Logger.new]
       }
-
-      if defined?(Raven)
-        @config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
-      end
     end
 
     def self.get(attr)
