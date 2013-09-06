@@ -42,8 +42,8 @@ module Hutch
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               username: username, password: password,
-                              heartbeat: 1,
-                              automatically_recover: true, network_recovery_interval: 1)
+                              heartbeat: 1, automatically_recover: true,
+                              network_recovery_interval: 1)
       @connection.start
 
       logger.info 'opening rabbitmq channel'
@@ -153,6 +153,7 @@ module Hutch
     end
 
     private
+
     def generate_id
       SecureRandom.uuid
     end

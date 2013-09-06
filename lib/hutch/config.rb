@@ -31,8 +31,8 @@ module Hutch
     end
 
     class << self
-      alias :[]  :get
-      alias :[]= :set
+      alias_method :[],  :get
+      alias_method :[]=, :set
     end
 
     def self.check_attr(attr)
@@ -58,6 +58,7 @@ module Hutch
     end
 
     private
+
     def deep_copy(obj)
       Marshal.load(Marshal.dump(obj))
     end

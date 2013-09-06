@@ -36,7 +36,7 @@ module Hutch
           # Need to add '.' to load path for relative requires
           $LOAD_PATH << '.'
           require path
-        rescue LoadError => ex
+        rescue LoadError
           logger.fatal "could not load file '#{path}'"
           return false
         ensure
@@ -44,7 +44,6 @@ module Hutch
           $LOAD_PATH.pop
         end
       end
-      true
 
       # Because of the order things are required when we run the Hutch binary
       # in hutch/bin, the Sentry Raven gem gets required **after** the error
@@ -54,6 +53,7 @@ module Hutch
         Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
       end
 
+      true
     end
 
     def load_rails_app(path)
@@ -87,7 +87,7 @@ module Hutch
     end
 
     def parse_options
-      parser = OptionParser.new do |opts|
+      OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
 
         opts.on('--mq-host HOST', 'Set the RabbitMQ host') do |host|
@@ -124,8 +124,6 @@ module Hutch
         opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
           Hutch::Config.mq_api_port = port
         end
-
-        # TODO: options for rabbit api config
 
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
           Hutch::Config.require_paths << path
