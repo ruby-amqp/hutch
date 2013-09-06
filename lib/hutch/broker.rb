@@ -125,10 +125,18 @@ module Hutch
       end
     end
 
-    # Each subscriber is run in a thread. This effectively calls Thread#join
-    # on each of the subscriber threads.
-    def wait_on_threads
-      @channel.work_pool.join
+    # Each subscriber is run in a thread. This calls Thread#join on each of the
+    # subscriber threads.
+    def wait_on_threads(timeout)
+      # HACK: work_pool.join doesn't allow a timeout to be passed in, so we
+      #       use instance_variable_get to gain access to the threadpool, and
+      #       manuall call thread.join with a timeout
+      threads = work_pool_threads
+
+      # Thread#join returns nil when the timeout is hit. If any return nil,
+      # the threads didn't all join so we return false.
+      per_thread_timeout = timeout.to_f / threads.length
+      threads.none? { |thread| thread.join(per_thread_timeout).nil? }
     end
 
     def stop
@@ -153,6 +161,11 @@ module Hutch
     end
 
     private
+
+    def work_pool_threads
+      # TODO: fix bunny so we don't need to do this
+      @channel.work_pool.instance_variable_get(:@threads)
+    end
 
     def generate_id
       SecureRandom.uuid

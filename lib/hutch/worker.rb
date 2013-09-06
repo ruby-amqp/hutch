@@ -18,13 +18,40 @@ module Hutch
     # never returns.
     def run
       setup_queues
-      # handle errors
-      @broker.wait_on_threads
+
+      # Set up signal handlers for graceful shutdown
+      register_signal_handlers
+
+      # Take a break from Thread#join every 0.1 seconds to check if we've
+      # been sent any signals
+      handle_signals until @broker.wait_on_threads(0.1)
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
       raise WorkerSetupError.new('could not create queue due to a type ' +
                                  'conflict with an existing queue, remove ' +
                                  'the existing queue and try again')
+    end
+
+    # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
+    # gracefully. Forceful shutdowns are very bad!
+    def register_signal_handlers
+      Thread.main[:signal_queue] = []
+      %w(QUIT TERM INT).map(&:to_sym).each do |sig|
+        # This needs to be reentrant, so we queue up signals to be handled
+        # in the run loop, rather than acting on signals here
+        trap(sig) do
+          Thread.main[:signal_queue] << sig
+        end
+      end
+    end
+
+    # Handle any pending signals
+    def handle_signals
+      signal = Thread.main[:signal_queue].shift
+      if signal
+        logger.info "caught sig#{signal.downcase}, stopping hutch..."
+        stop
+      end
     end
 
     # Stop a running worker by killing all subscriber threads.
