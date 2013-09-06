@@ -136,7 +136,7 @@ module Hutch
       # Thread#join returns nil when the timeout is hit. If any return nil,
       # the threads didn't all join so we return false.
       per_thread_timeout = timeout.to_f / threads.length
-      threads.all? { |thread| !thread.join(per_thread_timeout).nil? }
+      threads.none? { |thread| thread.join(per_thread_timeout).nil? }
     end
 
     def stop

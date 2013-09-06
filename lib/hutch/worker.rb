@@ -50,7 +50,7 @@ module Hutch
       signal = Thread.main[:signal_queue].shift
       if signal
         logger.info "caught sig#{signal.downcase}, stopping hutch..."
-        @broker.stop
+        stop
       end
     end
 
