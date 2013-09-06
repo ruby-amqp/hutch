@@ -61,9 +61,9 @@ module Hutch
       broker = @broker
       begin
         consumer.new.process(message)
+        broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
         handle_error(message.message_id, consumer, ex)
-      ensure
         broker.ack(delivery_info.delivery_tag)
       end
     end
