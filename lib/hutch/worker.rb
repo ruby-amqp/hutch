@@ -47,8 +47,9 @@ module Hutch
 
     # Handle any pending signals
     def handle_signals
-      if sig = Thread.main[:signal_queue].shift
-        logger.info "caught sig#{sig.downcase}, stopping hutch..."
+      signal = Thread.main[:signal_queue].shift
+      if signal
+        logger.info "caught sig#{signal.downcase}, stopping hutch..."
         @broker.stop
       end
     end
