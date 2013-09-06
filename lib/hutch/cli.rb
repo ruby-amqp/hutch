@@ -77,8 +77,6 @@ module Hutch
     def start_work_loop
       Hutch.connect
       @worker = Hutch::Worker.new(Hutch.broker, Hutch.consumers)
-      # Set up signal handlers for graceful shutdown
-      register_signal_handlers
       @worker.run
       :success
     rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
@@ -147,17 +145,6 @@ module Hutch
           exit 0
         end
       end.parse!
-    end
-
-    # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
-    # gracefully. Forceful shutdowns are very bad!
-    def register_signal_handlers
-      %w(QUIT TERM INT).map(&:to_sym).each do |sig|
-        trap(sig) do
-          Hutch.logger.info "caught sig#{sig.downcase}, stopping hutch..."
-          @worker.stop
-        end
-      end
     end
   end
 end

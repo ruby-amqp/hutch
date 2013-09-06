@@ -120,6 +120,21 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#wait_on_threads' do
+    let(:thread) { double('Thread') }
+    before { broker.stub(work_pool_threads: threads) }
+
+    context 'when all threads finish within the timeout' do
+      let(:threads) { [double(join: thread), double(join: thread)] }
+      specify { expect(broker.wait_on_threads(1)).to be_true }
+    end
+
+    context 'when timeout expires for one thread' do
+      let(:threads) { [double(join: thread), double(join: nil)] }
+      specify { expect(broker.wait_on_threads(1)).to be_false }
+    end
+  end
+
   describe '#publish' do
     context 'with a valid connection' do
       before { broker.set_up_amqp_connection }
