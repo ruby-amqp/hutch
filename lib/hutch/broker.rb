@@ -142,12 +142,13 @@ module Hutch
     def publish(routing_key, message)
       payload = JSON.dump(message)
 
-      if @connection.open?
+      if @connection && @connection.open?
         logger.info "publishing message '#{message.inspect}' to #{routing_key}"
         @exchange.publish(payload, routing_key: routing_key, persistent: true,
                           timestamp: Time.now.to_i, message_id: generate_id)
       else
-        logger.error "Unable to publish : routing key: #{routing_key}, message: #{message}"
+        logger.error "Unable to publish : routing key: #{routing_key}, " +
+                     "message: #{message}"
       end
     end
 

@@ -119,5 +119,24 @@ describe Hutch::Broker do
       end
     end
   end
+
+  describe '#publish' do
+    context 'with a valid connection' do
+      before { broker.set_up_amqp_connection }
+      after  { broker.disconnect }
+
+      it 'publishes to the exchange' do
+        broker.exchange.should_receive(:publish).once
+        broker.publish('test.key', 'message')
+      end
+    end
+
+    context 'without a valid connection' do
+      it 'logs an error' do
+        broker.logger.should_receive(:error)
+        broker.publish('test.key', 'message')
+      end
+    end
+  end
 end
 
