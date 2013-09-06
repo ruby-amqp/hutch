@@ -2,7 +2,9 @@ require 'hutch'
 
 Hutch.connect
 loop do
+  print "Press return to send test message..."
+  gets
   Hutch.publish('hutch.test', subject: 'test message')
-  sleep 0.5
+  puts "Send message with routing key 'hutch.test'"
 end
 
