@@ -7,12 +7,15 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec', '~> 2.12.0'
 
   gem.name = 'hutch'
-  gem.summary = %q{A system for processing messages from RabbitMQ.}
+  gem.summary = 'Easy inter-service communication using RabbitMQ.'
+  gem.description = 'Hutch is a Ruby library for enabling asynchronous ' +
+                    'inter-service communication using RabbitMQ.'
   gem.version = Hutch::VERSION.dup
   gem.authors = ['Harry Marr']
   gem.email = ['developers@gocardless.com']
   gem.homepage = 'https://github.com/gocardless/hutch'
   gem.require_paths = ['lib']
+  gem.license = 'MIT'
   gem.executables = ['hutch']
   gem.files = `git ls-files`.split("\n")
   gem.test_files = `git ls-files -- spec/*`.split("\n")
