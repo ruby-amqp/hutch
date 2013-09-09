@@ -1,7 +1,7 @@
 ![](http://cl.ly/image/3h0q3F3G142K/hutch.png)
 
-A system for processing messages from RabbitMQ. Messages should be sent over
-topic exchanges, and encoded with JSON.
+Hutch is a Ruby library for enabling asynchronous inter-service communication
+in a service-oriented architecture, using RabbitMQ.
 
 
 ## Defining Consumers
