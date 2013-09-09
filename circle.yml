@@ -1,6 +1,3 @@
 machine:
   services:
     - rabbitmq-server
-notify:
-  webhooks:
-    - url: http://gc-hubot.herokuapp.com/hubot/ci_hook
