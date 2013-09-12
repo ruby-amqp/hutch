@@ -36,11 +36,12 @@ module Hutch
     def set_up_amqp_connection
       host, port, vhost = @config[:mq_host], @config[:mq_port]
       username, password = @config[:mq_username], @config[:mq_password]
-      vhost = @config[:mq_vhost]
+      vhost, ssl = @config[:mq_vhost], @config[:mq_ssl]
+      protocol = ssl ? "amqp://" : "amqps://"
       uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
-      logger.info "connecting to rabbitmq (amqp://#{uri})"
+      logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
-      @connection = Bunny.new(host: host, port: port, vhost: vhost,
+      @connection = Bunny.new(host: host, port: port, vhost: vhost, ssl: ssl,
                               username: username, password: password,
                               heartbeat: 1, automatically_recover: true,
                               network_recovery_interval: 1)
@@ -54,7 +55,7 @@ module Hutch
       @exchange = @channel.topic(exchange_name, durable: true)
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "amqp://#{host}:#{port}"
+      uri = "#{protocol}#{host}:#{port}"
       raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
