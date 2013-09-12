@@ -4,6 +4,44 @@ Hutch is a Ruby library for enabling asynchronous inter-service communication
 in a service-oriented architecture, using RabbitMQ.
 
 
+## Project Maturity
+
+Hutch is a relatively young project that was extracted from production systems.
+
+
+
+## Installation & Bundler Dependency
+
+### Most Recent Release
+
+[![Gem Version](https://badge.fury.io/rb/hutch.png)](http://badge.fury.io/rb/hutch)
+
+### With Rubygems
+
+To install with RubyGems:
+
+```
+gem install hutch
+```
+
+### Bundler Dependency
+
+To use in a project managed with Bundler:
+
+``` ruby
+gem "hutch", ">= 0.1.1"
+```
+
+## Overview
+
+Hutch is a conventions-based framework for writing services that communicate
+over RabbitMQ. Hutch is opinionated: it uses topic exchanges for message
+distribution and makes some assumptions about how consumers and publishers
+should work.
+
+Hutch uses [Bunny](http://rubybunny.info) under the hood.
+
+
 ## Defining Consumers
 
 Consumers receive messages from a RabbitMQ queue. That queue may be bound to
@@ -130,6 +168,12 @@ AMQP.connect(host: config[:host]) do |connection|
   exchange.publish(message, routing_key: 'test', persistent: true)
 end
 ```
+
+## Supported RabbitMQ Versions
+
+Hutch requires RabbitMQ 2.x or later. 3.x releases
+are recommended.
+
 
 [pc-issue]: https://github.com/ruby-amqp/amqp/issues/92
 [pc-gist]: https://gist.github.com/3042381
