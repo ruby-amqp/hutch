@@ -123,6 +123,10 @@ module Hutch
           Hutch::Config.mq_api_port = port
         end
 
+        opts.on('--mq-api-ssl', 'Set the RabbitMQ API connection to use SSL') do |api_ssl|
+          Hutch::Config.mq_api_ssl = ssl
+        end
+
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
           Hutch::Config.require_paths << path
         end

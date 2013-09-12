@@ -14,6 +14,7 @@ module Hutch
         mq_password: 'guest',
         mq_api_host: 'localhost',
         mq_api_port: 15672,
+        mq_api_ssl: false,
         log_level: Logger::INFO,
         require_paths: [],
         error_handlers: [Hutch::ErrorHandlers::Logger.new]

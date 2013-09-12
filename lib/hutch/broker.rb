@@ -69,12 +69,15 @@ module Hutch
     def set_up_api_connection
       host, port = @config[:mq_api_host], @config[:mq_api_port]
       username, password = @config[:mq_username], @config[:mq_password]
+      ssl = @config[:mq_api_ssl]
 
-      management_uri = "http://#{username}:#{password}@#{host}:#{port}/"
+      protocol = ssl ? "https://" : "http://"
+      management_uri = "#{protocol}#{username}:#{password}@#{host}:#{port}/"
       logger.info "connecting to rabbitmq management api (#{management_uri})"
 
       @api_client = CarrotTop.new(host: host, port: port,
-                                  user: username, password: password)
+                                  user: username, password: password,
+                                  ssl: ssl)
       @api_client.exchanges
     rescue Errno::ECONNREFUSED => ex
       logger.error "api connection error: #{ex.message.downcase}"
