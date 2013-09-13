@@ -84,13 +84,13 @@ module Hutch
                   "consumer: #{consumer}, " +
                   "payload: #{payload}")
 
-      message = Message.new(delivery_info, properties, payload)
       broker = @broker
       begin
+        message = Message.new(delivery_info, properties, payload)
         consumer.new.process(message)
         broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
-        handle_error(message.message_id, consumer, ex)
+        handle_error(properties.message_id, consumer, ex)
         broker.ack(delivery_info.delivery_tag)
       end
     end
