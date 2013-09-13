@@ -75,6 +75,22 @@ describe Hutch::Worker do
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
     end
+
+    context "when the payload is not valid json" do
+      let(:payload) { "Not Valid JSON" }
+
+      it 'logs the error' do
+        Hutch::Config[:error_handlers].each do |backend|
+          backend.should_receive(:handle)
+        end
+        worker.handle_message(consumer, delivery_info, properties, payload)
+      end
+
+      it 'acknowledges the message' do
+        broker.should_receive(:ack).with(delivery_info.delivery_tag)
+        worker.handle_message(consumer, delivery_info, properties, payload)
+      end
+    end
   end
 end
 
