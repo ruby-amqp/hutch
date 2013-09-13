@@ -1,2 +1,3 @@
 .bundle
 hutch-*.gem
+Gemfile.lock
