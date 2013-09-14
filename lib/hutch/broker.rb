@@ -36,11 +36,12 @@ module Hutch
     def set_up_amqp_connection
       host, port, vhost = @config[:mq_host], @config[:mq_port]
       username, password = @config[:mq_username], @config[:mq_password]
-      vhost = @config[:mq_vhost]
+      vhost, tls = @config[:mq_vhost], @config[:mq_tls]
+      protocol = tls ? "amqps://" : "amqp://"
       uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
-      logger.info "connecting to rabbitmq (amqp://#{uri})"
+      logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
-      @connection = Bunny.new(host: host, port: port, vhost: vhost,
+      @connection = Bunny.new(host: host, port: port, vhost: vhost, tls: tls,
                               username: username, password: password,
                               heartbeat: 1, automatically_recover: true,
                               network_recovery_interval: 1)
@@ -54,7 +55,7 @@ module Hutch
       @exchange = @channel.topic(exchange_name, durable: true)
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "amqp://#{host}:#{port}"
+      uri = "#{protocol}#{host}:#{port}"
       raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
@@ -69,12 +70,15 @@ module Hutch
     def set_up_api_connection
       host, port = @config[:mq_api_host], @config[:mq_api_port]
       username, password = @config[:mq_username], @config[:mq_password]
+      ssl = @config[:mq_api_ssl]
 
-      management_uri = "http://#{username}:#{password}@#{host}:#{port}/"
+      protocol = ssl ? "https://" : "http://"
+      management_uri = "#{protocol}#{username}:#{password}@#{host}:#{port}/"
       logger.info "connecting to rabbitmq management api (#{management_uri})"
 
       @api_client = CarrotTop.new(host: host, port: port,
-                                  user: username, password: password)
+                                  user: username, password: password,
+                                  ssl: ssl)
       @api_client.exchanges
     rescue Errno::ECONNREFUSED => ex
       logger.error "api connection error: #{ex.message.downcase}"

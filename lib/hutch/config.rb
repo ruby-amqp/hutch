@@ -10,10 +10,12 @@ module Hutch
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_vhost: '/',
+        mq_ssl: false,
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: 'localhost',
         mq_api_port: 15672,
+        mq_api_ssl: false,
         log_level: Logger::INFO,
         require_paths: [],
         error_handlers: [Hutch::ErrorHandlers::Logger.new]
