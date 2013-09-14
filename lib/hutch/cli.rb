@@ -96,8 +96,8 @@ module Hutch
           Hutch::Config.mq_port = port
         end
 
-        opts.on('--mq-ssl', 'Set the RabbitMQ connection to use SSL') do |ssl|
-          Hutch::Config.mq_ssl = ssl
+        opts.on('--mq-tls', 'Set the RabbitMQ connection to use TLS') do |tls|
+          Hutch::Config.mq_tls = tls
         end
 
         opts.on('--mq-exchange EXCHANGE',
