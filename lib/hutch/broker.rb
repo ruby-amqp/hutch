@@ -37,7 +37,7 @@ module Hutch
       host, port, vhost = @config[:mq_host], @config[:mq_port]
       username, password = @config[:mq_username], @config[:mq_password]
       vhost, ssl = @config[:mq_vhost], @config[:mq_ssl]
-      protocol = ssl ? "amqp://" : "amqps://"
+      protocol = ssl ? "amqps://" : "amqp://"
       uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
