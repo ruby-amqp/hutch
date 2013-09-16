@@ -96,6 +96,10 @@ module Hutch
           Hutch::Config.mq_port = port
         end
 
+        opts.on('--mq-tls', 'Set the RabbitMQ connection to use TLS') do |tls|
+          Hutch::Config.mq_tls = tls
+        end
+
         opts.on('--mq-exchange EXCHANGE',
                 'Set the RabbitMQ exchange') do |exchange|
           Hutch::Config.mq_exchange = exchange
@@ -121,6 +125,10 @@ module Hutch
 
         opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
           Hutch::Config.mq_api_port = port
+        end
+
+        opts.on('--mq-api-ssl', 'Set the RabbitMQ API connection to use SSL') do |api_ssl|
+          Hutch::Config.mq_api_ssl = api_ssl
         end
 
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
