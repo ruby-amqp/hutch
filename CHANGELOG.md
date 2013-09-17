@@ -1,3 +1,7 @@
+## 0.2.1 - September 17, 2013
+
+- Fix inconsistency with `mq-tls` option
+
 ## 0.2.0 - September 16, 2013
 
 - Support for connecting to RabbitMQ with TLS/SSL. There are two new
