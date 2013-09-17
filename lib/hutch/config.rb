@@ -10,7 +10,7 @@ module Hutch
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_vhost: '/',
-        mq_ssl: false,
+        mq_tls: false,
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: 'localhost',
