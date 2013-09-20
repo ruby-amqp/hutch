@@ -25,7 +25,7 @@ module Hutch
 
     def load_app
       # Try to load a Rails app in the current directory
-      load_rails_app('.')
+      load_rails_app('.') if Hutch::Config.autoload_rails
       Hutch::Config.require_paths.each do |path|
         # See if each path is a Rails app. If so, try to load it.
         next if load_rails_app(path)
@@ -135,6 +135,10 @@ module Hutch
           Hutch::Config.require_paths << path
         end
 
+        opts.on('--[no-]autoload-rails', 'Require the current rails app directory') do |autoload_rails|
+          Hutch::Config.autoload_rails = autoload_rails
+        end
+
         opts.on('-q', '--quiet', 'Quiet logging') do
           Hutch::Config.log_level = Logger::WARN
         end
@@ -156,4 +160,3 @@ module Hutch
     end
   end
 end
-
