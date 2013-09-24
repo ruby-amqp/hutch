@@ -1,3 +1,8 @@
+## 0.3.0 - September 24, 2013
+
+- Add `--[no-]autoload-rails` flag to optionally disable the autoloading of
+  Rails apps in the current directory
+
 ## 0.2.1 - September 17, 2013
 
 - Fix inconsistency with `mq-tls` option
