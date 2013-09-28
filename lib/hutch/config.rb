@@ -4,6 +4,8 @@ module Hutch
   class UnknownAttributeError < StandardError; end
 
   module Config
+    require 'yaml'
+
     def self.initialize
       @config = {
         mq_host: 'localhost',
@@ -47,6 +49,18 @@ module Hutch
     def self.user_config
       initialize unless @config
       @config
+    end
+
+    def self.load_configs_from_file(file)
+      begin
+        configs = YAML.load_file(file)
+      rescue Errno::ENOENT
+        abort 'Config file not found'
+      end
+
+      configs.each do |attr, value|
+        Hutch::Config.send "#{attr}=", value
+      end
     end
 
     def self.method_missing(method, *args, &block)
