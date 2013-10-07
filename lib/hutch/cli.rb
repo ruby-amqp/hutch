@@ -131,6 +131,10 @@ module Hutch
           Hutch::Config.mq_api_ssl = api_ssl
         end
 
+        opts.on('--config FILE', 'Load Hutch configuration from a file') do |file|
+          Hutch::Config.load_configs_from_file file
+        end
+
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
           Hutch::Config.require_paths << path
         end
