@@ -2,6 +2,7 @@ require 'optparse'
 
 require 'hutch/logging'
 require 'hutch/exceptions'
+require 'hutch/config'
 
 module Hutch
   class CLI
@@ -84,7 +85,7 @@ module Hutch
       :error
     end
 
-    def parse_options
+    def parse_options(args = ARGV)
       OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
 
@@ -132,7 +133,11 @@ module Hutch
         end
 
         opts.on('--config FILE', 'Load Hutch configuration from a file') do |file|
-          Hutch::Config.load_configs_from_file file
+          begin
+            File.open(file) { |fp| Hutch::Config.load_from_file(fp) }
+          rescue Errno::ENOENT
+            abort "Config file '#{file}' not found"
+          end
         end
 
         opts.on('--require PATH', 'Require a Rails app or path') do |path|
@@ -160,7 +165,7 @@ module Hutch
           puts opts
           exit 0
         end
-      end.parse!
+      end.parse!(args)
     end
   end
 end

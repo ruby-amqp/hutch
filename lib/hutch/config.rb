@@ -1,3 +1,4 @@
+require 'hutch/error_handlers/logger'
 require 'logger'
 
 module Hutch
@@ -51,15 +52,9 @@ module Hutch
       @config
     end
 
-    def self.load_configs_from_file(file)
-      begin
-        configs = YAML.load_file(file)
-      rescue Errno::ENOENT
-        abort 'Config file not found'
-      end
-
-      configs.each do |attr, value|
-        Hutch::Config.send "#{attr}=", value
+    def self.load_from_file(file)
+      YAML.load(file).each do |attr, value|
+        Hutch::Config.send("#{attr}=", value)
       end
     end
 
