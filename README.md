@@ -102,6 +102,8 @@ usage: hutch [options]
         --mq-api-host HOST           Set the RabbitMQ API host
         --mq-api-port PORT           Set the RabbitMQ API port
         --mq-api-ssl                 Use SSL for the RabbitMQ API
+        --config FILE                Load Hutch configuration from a file
+
         --require PATH               Require a Rails app or path
     -q, --quiet                      Quiet logging
     -v, --verbose                    Verbose logging
@@ -110,7 +112,20 @@ usage: hutch [options]
 ```
 
 The first three are for configuring which RabbitMQ instance to connect to.
-`--require` is covered in the next section. The remainder are self-explanatory.
+`--require` is covered in the next section. Configurations can also be
+specified in a YAML file for convenience by passing the file location
+to the --config option.  The file should look like:
+
+```yaml
+mq_username: peter
+mq_password: rabbit
+mq_host: broker.yourhost.com
+```
+
+Passing a setting as a command-line option will overwrite what's specified
+in the config file, allowing for easy customization.
+
+
 
 ### Loading Consumers
 

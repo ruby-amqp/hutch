@@ -1,4 +1,5 @@
 require 'hutch/config'
+require 'tempfile'
 
 describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
@@ -64,6 +65,50 @@ describe Hutch::Config do
     context 'for an invalid attribute' do
       let(:invalid_setter) { ->{ Hutch::Config.invalid_attr = new_value } }
       specify { invalid_setter.should raise_error NoMethodError }
+    end
+  end
+
+  describe '.load_configs_from_file' do
+    context 'when the file specified is not found' do
+      let(:file) { '/path/to/nonexistant/file' }
+
+      before { STDERR.stub(:write) }
+
+      it 'bails' do
+        expect {
+          Hutch::Config.load_configs_from_file file
+        }.to raise_error SystemExit
+      end
+    end
+
+    context 'when the file specified is found' do
+      let(:host) { 'broker.yourhost.com' }
+      let(:username) { 'calvin' }
+      let(:file) do
+        Tempfile.new('configs.yaml').tap do |t|
+          t.write YAML.dump(config_data)
+          t.rewind
+        end.to_path
+      end
+
+      context 'when an attribute is invalid' do
+        let(:config_data) { { random_attribute: 'socks' } }
+        it 'raises an error' do
+          expect {
+            Hutch::Config.load_configs_from_file file
+          }.to raise_error NoMethodError
+        end
+      end
+
+      context 'when attributes are valid' do
+        let(:config_data) { { mq_host: host, mq_username: username } }
+
+        it 'loads in the config data' do
+          Hutch::Config.load_configs_from_file file
+          Hutch::Config.mq_host.should eq host
+          Hutch::Config.mq_username.should eq username
+        end
+      end
     end
   end
 end
