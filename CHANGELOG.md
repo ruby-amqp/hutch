@@ -1,3 +1,8 @@
+## 0.4.0 - October 9, 2013
+
+- Support for loading configuration from a file, specified with the `--config`
+  command line option.
+
 ## 0.3.0 - September 24, 2013
 
 - Add `--[no-]autoload-rails` flag to optionally disable the autoloading of
