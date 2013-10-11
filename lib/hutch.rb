@@ -1,6 +1,7 @@
 module Hutch
   autoload :Consumer, 'hutch/consumer'
   autoload :Worker, 'hutch/worker'
+  autoload :Broker, 'hutch/broker'
   autoload :Logging, 'hutch/logging'
   autoload :Config, 'hutch/config'
   autoload :ErrorHandlers, 'hutch/error_handlers'
