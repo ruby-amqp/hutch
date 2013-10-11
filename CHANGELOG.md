@@ -1,3 +1,7 @@
+## 0.4.2 - October 11, 2013
+
+- Autoload the Broker module, which was missed in the previous release.
+
 ## 0.4.1 - October 11, 2013
 
 - Autoload internal modules. Fixes regression where the `Config` module was
