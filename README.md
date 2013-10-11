@@ -29,7 +29,7 @@ gem install hutch
 To use in a project managed with Bundler:
 
 ``` ruby
-gem "hutch", "~> 0.4.0"
+gem "hutch", "~> 0.4.1"
 ```
 
 ## Overview

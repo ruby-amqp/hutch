@@ -1,3 +1,8 @@
+## 0.4.1 - October 11, 2013
+
+- Autoload internal modules. Fixes regression where the `Config` module was
+  not available by simply `require`ing `hutch`.
+
 ## 0.4.0 - October 9, 2013
 
 - Support for loading configuration from a file, specified with the `--config`
