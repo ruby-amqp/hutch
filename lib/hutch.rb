@@ -1,9 +1,9 @@
 module Hutch
-  require 'hutch/consumer'
-  require 'hutch/worker'
-  require 'hutch/logging'
-  require 'hutch/error_handlers/logger'
-  ErrorHandlers.autoload :Sentry, 'hutch/error_handlers/sentry'
+  autoload :Consumer, 'hutch/consumer'
+  autoload :Worker, 'hutch/worker'
+  autoload :Logging, 'hutch/logging'
+  autoload :Config, 'hutch/config'
+  autoload :ErrorHandlers, 'hutch/error_handlers'
 
   def self.register_consumer(consumer)
     self.consumers << consumer
