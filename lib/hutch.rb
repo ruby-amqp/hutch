@@ -1,9 +1,12 @@
 module Hutch
-  autoload :Consumer, 'hutch/consumer'
-  autoload :Worker, 'hutch/worker'
-  autoload :Broker, 'hutch/broker'
-  autoload :Logging, 'hutch/logging'
-  autoload :Config, 'hutch/config'
+  autoload :Consumer,      'hutch/consumer'
+  autoload :Worker,        'hutch/worker'
+  autoload :Broker,        'hutch/broker'
+  autoload :Logging,       'hutch/logging'
+  autoload :Config,        'hutch/config'
+  autoload :Message,       'hutch/message'
+  autoload :CLI,           'hutch/cli'
+  autoload :Version,       'hutch/version'
   autoload :ErrorHandlers, 'hutch/error_handlers'
 
   def self.register_consumer(consumer)

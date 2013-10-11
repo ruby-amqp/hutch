@@ -1,3 +1,7 @@
+## 0.4.3 - October 11, 2013
+
+- More autoloading tweaks, all internal modules are now autoloaded.
+
 ## 0.4.2 - October 11, 2013
 
 - Autoload the Broker module, which was missed in the previous release.
