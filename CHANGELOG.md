@@ -1,3 +1,7 @@
+## 0.4.4 - October 12, 2013
+
+- Friendlier Message#inspect, doesn't spew out detailed bunny info.
+
 ## 0.4.3 - October 11, 2013
 
 - More autoloading tweaks, all internal modules are now autoloaded.
