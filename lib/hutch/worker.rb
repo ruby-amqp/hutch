@@ -8,9 +8,8 @@ module Hutch
     include Logging
 
     def initialize(broker, consumers)
-      @broker = broker
-      raise WorkerSetupError.new('no consumers loaded') if consumers.empty?
-      @consumers = consumers
+      @broker        = broker
+      self.consumers = consumers
     end
 
     # Run the main event loop. The consumers will be set up with queues, and
@@ -99,6 +98,14 @@ module Hutch
       Hutch::Config[:error_handlers].each do |backend|
         backend.handle(message_id, consumer, ex)
       end
+    end
+
+    def consumers=(val)
+      if val.empty?
+        logger.warn 'no consumer loaded, ensure there\'s' +
+                    'no configuration issue'
+      end
+      @consumers = val
     end
   end
 end
