@@ -168,7 +168,7 @@ module Hutch
 
     def work_pool_threads
       # TODO: fix bunny so we don't need to do this
-      @channel.work_pool.instance_variable_get(:@threads)
+      @channel.work_pool.instance_variable_get(:@threads) || []
     end
 
     def generate_id
