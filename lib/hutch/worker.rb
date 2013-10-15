@@ -9,7 +9,7 @@ module Hutch
 
     def initialize(broker, consumers)
       @broker = broker
-      raise WorkerSetupError.new('no consumers loaded') if consumers.empty?
+      logger.warn %q(no consumer loaded, are you sure there's no configuration issue?)  if consumers.empty?
       @consumers = consumers
     end
 
