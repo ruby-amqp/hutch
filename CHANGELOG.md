@@ -1,3 +1,10 @@
+## 0.4.5 - October 15, 2013
+
+- No exception raised when hutch is run with no consumers. Instead, a warning
+  is logged.
+- Internal refactoring: use Bunny's shiny `ConsumerWorkPool#threads`
+  attr_reader.
+
 ## 0.4.4 - October 12, 2013
 
 - Friendlier Message#inspect, doesn't spew out detailed bunny info.
