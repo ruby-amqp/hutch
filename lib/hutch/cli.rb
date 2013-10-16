@@ -101,6 +101,16 @@ module Hutch
           Hutch::Config.mq_tls = tls
         end
 
+        opts.on('--mq-tls-cert FILE', 'Certificate  for TLS client verification') do |file|
+          abort "Certificate file '#{file}' not found" unless File.exists?(file)
+          Hutch::Config.mq_tls_cert = file
+        end
+
+        opts.on('--mq-tls-key FILE', 'Private key for TLS client verification') do |file|
+          abort "Private key file '#{file}' not found" unless File.exists?(file)
+          Hutch::Config.mq_tls_key = file
+        end
+
         opts.on('--mq-exchange EXCHANGE',
                 'Set the RabbitMQ exchange') do |exchange|
           Hutch::Config.mq_exchange = exchange
