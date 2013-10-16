@@ -1,3 +1,6 @@
 .bundle
 hutch-*.gem
 Gemfile.lock
+.ruby-version
+.ruby-gemset
+.idea
