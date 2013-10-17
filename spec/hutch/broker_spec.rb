@@ -147,9 +147,14 @@ describe Hutch::Broker do
     end
 
     context 'without a valid connection' do
+      it 'raises an exception' do
+        expect { broker.publish('test.key', 'message') }.
+          to raise_exception(Hutch::PublishError)
+      end
+
       it 'logs an error' do
         broker.logger.should_receive(:error)
-        broker.publish('test.key', 'message')
+        broker.publish('test.key', 'message') rescue nil
       end
     end
   end
