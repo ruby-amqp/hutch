@@ -28,5 +28,53 @@ describe Hutch::CLI do
         end
       end
     end
+
+    context "--mq-tls-key" do
+      context "when the keyfile file does not exist" do
+        let(:file) { "/path/to/nonexistant/file" }
+        before { STDERR.stub(:write) }
+
+        it "bails" do
+          expect {
+            cli.parse_options(["--mq-tls-key=#{file}"])
+          }.to raise_error SystemExit
+        end
+      end
+
+      context "when the keyfile file exists" do
+        let(:file) do
+          Tempfile.new("hutch-test-key.pem").to_path
+        end
+
+        it "sets mq_tls_key to the file" do
+          Hutch::Config.should_receive(:mq_tls_key=)
+          cli.parse_options(["--mq-tls-key=#{file}"])
+        end
+      end
+    end
+
+    context "--mq-tls-cert" do
+      context "when the certfile file does not exist" do
+        let(:file) { "/path/to/nonexistant/file" }
+        before { STDERR.stub(:write) }
+
+        it "bails" do
+          expect {
+            cli.parse_options(["--mq-tls-cert=#{file}"])
+          }.to raise_error SystemExit
+        end
+      end
+
+      context "when the certfile file exists" do
+        let(:file) do
+          Tempfile.new("hutch-test-cert.pem").to_path
+        end
+
+        it "sets mq_tls_cert to the file" do
+          Hutch::Config.should_receive(:mq_tls_cert=)
+          cli.parse_options(["--mq-tls-cert=#{file}"])
+        end
+      end
+    end
   end
 end
