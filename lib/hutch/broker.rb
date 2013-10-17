@@ -152,15 +152,17 @@ module Hutch
       payload = JSON.dump(message)
 
       unless @connection
-        logger.error("unable to publish (no connection to broker): " +
-                     "routing key: #{routing_key}, message: #{message}")
-        raise PublishError, "No connection to broker"
+        msg = "Unable to publish - no connection to broker. " +
+              "Message: #{message.inspect}, Routing key: #{routing_key}."
+        logger.error(msg)
+        raise PublishError, msg
       end
 
       unless @connection.open?
-        logger.error("unable to publish (connection is closed): " +
-                     "routing key: #{routing_key}, message: #{message}")
-        raise PublishError, "Connection is closed"
+        msg = "Unable to publish - connection is closed. " +
+              "Message: #{message.inspect}, Routing key: #{routing_key}."
+        logger.error(msg)
+        raise PublishError, msg
       end
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
