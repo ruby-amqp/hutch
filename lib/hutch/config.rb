@@ -14,6 +14,8 @@ module Hutch
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_vhost: '/',
         mq_tls: false,
+        mq_tls_cert: nil,
+        mq_tls_key: nil,
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: 'localhost',

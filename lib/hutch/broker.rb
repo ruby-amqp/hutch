@@ -37,11 +37,13 @@ module Hutch
       host, port, vhost = @config[:mq_host], @config[:mq_port]
       username, password = @config[:mq_username], @config[:mq_password]
       vhost, tls = @config[:mq_vhost], @config[:mq_tls]
+      tls_key, tls_cert = @config[:mq_tls_key], @config[:mq_tls_cert]
       protocol = tls ? "amqps://" : "amqp://"
       uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
-      @connection = Bunny.new(host: host, port: port, vhost: vhost, tls: tls,
+      @connection = Bunny.new(host: host, port: port, vhost: vhost,
+                              tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
                               heartbeat: 1, automatically_recover: true,
                               network_recovery_interval: 1)
