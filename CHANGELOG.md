@@ -1,3 +1,7 @@
+## 0.5.0 - October 17, 2013
+
+- Support for the `--mq-tls-key` and `--mq-tls-cert` configuration options.
+
 ## 0.4.5 - October 15, 2013
 
 - No exception raised when hutch is run with no consumers. Instead, a warning
