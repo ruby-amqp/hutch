@@ -1,3 +1,7 @@
+## 0.5.1 - October 17, 2013
+
+- Raise an exception when publishing fails
+
 ## 0.5.0 - October 17, 2013
 
 - Support for the `--mq-tls-key` and `--mq-tls-cert` configuration options.
