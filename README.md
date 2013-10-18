@@ -3,20 +3,8 @@
 Hutch is a Ruby library for enabling asynchronous inter-service communication
 in a service-oriented architecture, using RabbitMQ.
 
-
-## Project Maturity
-
-Hutch is a relatively young project that was extracted from production systems.
-
-
-
-## Installation & Bundler Dependency
-
-### Most Recent Release
-
 [![Gem Version](https://badge.fury.io/rb/hutch.png)](http://badge.fury.io/rb/hutch)
-
-### With Rubygems
+[![Build Status](https://travis-ci.org/gocardless/hutch.png?branch=master)](https://travis-ci.org/gocardless/hutch)
 
 To install with RubyGems:
 
@@ -24,13 +12,10 @@ To install with RubyGems:
 gem install hutch
 ```
 
-### Bundler Dependency
+## Project Maturity
 
-To use in a project managed with Bundler:
+Hutch is a relatively young project that was extracted from production systems.
 
-``` ruby
-gem "hutch", "~> 0.5.1"
-```
 
 ## Overview
 
