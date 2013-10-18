@@ -5,6 +5,7 @@ in a service-oriented architecture, using RabbitMQ.
 
 [![Gem Version](https://badge.fury.io/rb/hutch.png)](http://badge.fury.io/rb/hutch)
 [![Build Status](https://travis-ci.org/gocardless/hutch.png?branch=master)](https://travis-ci.org/gocardless/hutch)
+[![Dependency Status](https://gemnasium.com/gocardless/hutch.png)](https://gemnasium.com/gocardless/hutch)
 
 To install with RubyGems:
 
