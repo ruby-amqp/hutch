@@ -77,7 +77,7 @@ describe Hutch::Consumer do
     end
   end
 
-  describe ".queue_prefix" do
+  describe ".queue_namespace" do
     it "prefixes the queue_name" do
       module Foo
         class BarBaz
