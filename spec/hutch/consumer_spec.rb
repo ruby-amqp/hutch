@@ -76,5 +76,29 @@ describe Hutch::Consumer do
       FooBarBAZ.queue_name.should == 'foo_bar_baz'
     end
   end
+
+  describe ".queue_prefix" do
+    it "prefixes the queue_name" do
+      module Foo
+        class BarBaz
+          include Hutch::Consumer
+          queue_namespace "service"
+        end
+      end
+
+      Foo::BarBaz.queue_name.should == "service:foo:bar_baz"
+    end
+
+    it "strips non word characters and colons from the namespace" do
+      module Foo
+        class BarBaz
+          include Hutch::Consumer
+          queue_namespace "service=&*:"
+        end
+      end
+
+      Foo::BarBaz.queue_name.should == "service:foo:bar_baz"
+    end
+  end
 end
 
