@@ -148,7 +148,7 @@ module Hutch
       @channel.ack(delivery_tag, false)
     end
 
-    def publish(routing_key, message)
+    def publish(routing_key, message, properties = {})
       payload = JSON.dump(message)
 
       unless @connection
@@ -165,9 +165,12 @@ module Hutch
         raise PublishError, msg
       end
 
+      non_overridable_properties = {
+        routing_key: routing_key, timestamp: Time.now.to_i, message_id: generate_id
+      }
+
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(payload, routing_key: routing_key, persistent: true,
-                        timestamp: Time.now.to_i, message_id: generate_id)
+      @exchange.publish(payload, {persistent: true}.merge(properties).merge(non_overridable_properties))
     end
 
     private
