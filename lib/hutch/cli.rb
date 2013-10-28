@@ -166,6 +166,10 @@ module Hutch
           Hutch::Config.log_level = Logger::DEBUG
         end
 
+        opts.on('--namespace NAMESPACE', 'Queue namespace') do |namespace|
+          Hutch::Config.namespace = namespace
+        end
+
         opts.on('--version', 'Print the version and exit') do
           puts "hutch v#{VERSION}"
           exit 0

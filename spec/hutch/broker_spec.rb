@@ -68,6 +68,17 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#queue' do
+    let(:channel) { double('Channel') }
+    before { broker.stub(:channel) { channel } }
+
+    it 'applies a global namespace' do
+      config[:namespace] = 'service'
+      broker.channel.should_receive(:queue).with { |*args| args.first == 'service:test' }
+      broker.queue('test')
+    end
+  end
+
   describe '#bindings', rabbitmq: true do
     around { |example| broker.connect { example.run } }
     subject { broker.bindings }
@@ -88,7 +99,9 @@ describe Hutch::Broker do
   end
 
   describe '#bind_queue' do
+    
     around { |example| broker.connect { example.run } }
+
     let(:routing_keys) { %w( a b c ) }
     let(:queue) { double('Queue', bind: nil, unbind: nil, name: 'consumer') }
     before { broker.stub(bindings: { 'consumer' => ['d'] }) }

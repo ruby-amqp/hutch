@@ -94,9 +94,11 @@ module Hutch
       end
     end
 
-    # Create / get a durable queue.
+    # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
-      @channel.queue(name, durable: true)
+      namespace = @config[:namespace].to_s.downcase.gsub(/\W|:/, "")
+      name = name.prepend(namespace + ":") unless namespace.empty?
+      channel.queue(name, durable: true)
     end
 
     # Return a mapping of queue names to the routing keys they're bound to.
