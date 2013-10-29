@@ -144,6 +144,11 @@ describe Hutch::Broker do
         broker.exchange.should_receive(:publish).once
         broker.publish('test.key', 'message')
       end
+
+      it "allows passing message properties" do
+        broker.exchange.should_receive(:publish).once
+        broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
+      end
     end
 
     context 'without a valid connection' do
