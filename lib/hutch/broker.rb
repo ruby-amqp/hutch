@@ -166,8 +166,9 @@ module Hutch
       end
 
       non_overridable_properties = {
-        routing_key: routing_key, timestamp: Time.now.to_i, message_id: generate_id
+        routing_key: routing_key, timestamp: Time.now.to_i
       }
+      properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
       @exchange.publish(payload, {persistent: true}.
