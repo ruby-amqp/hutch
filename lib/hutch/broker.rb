@@ -170,7 +170,9 @@ module Hutch
       }
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(payload, {persistent: true}.merge(properties).merge(non_overridable_properties))
+      @exchange.publish(payload, {persistent: true}.
+        merge(properties).
+        merge(non_overridable_properties))
     end
 
     private
