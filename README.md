@@ -11,7 +11,7 @@ in a service-oriented architecture, using RabbitMQ.
 To install with RubyGems:
 
 ```
-gem install hutch
+$ gem install hutch
 ```
 
 ## Project Maturity
@@ -82,6 +82,8 @@ usage: hutch [options]
         --mq-host HOST               Set the RabbitMQ host
         --mq-port PORT               Set the RabbitMQ port
         --mq-tls                     Use TLS for the AMQP connection
+        --mq-tls-cert FILE           Certificate  for TLS client verification
+        --mq-tls-key FILE            Private key for TLS client verification
         --mq-exchange EXCHANGE       Set the RabbitMQ exchange
         --mq-vhost VHOST             Set the RabbitMQ vhost
         --mq-username USERNAME       Set the RabbitMQ username
@@ -90,8 +92,8 @@ usage: hutch [options]
         --mq-api-port PORT           Set the RabbitMQ API port
         --mq-api-ssl                 Use SSL for the RabbitMQ API
         --config FILE                Load Hutch configuration from a file
-
         --require PATH               Require a Rails app or path
+        --[no-]autoload-rails        Require the current rails app directory
     -q, --quiet                      Quiet logging
     -v, --verbose                    Verbose logging
         --version                    Print the version and exit
