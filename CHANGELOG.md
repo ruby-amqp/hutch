@@ -1,3 +1,7 @@
+## 0.6.0 - November 4, 2013
+
+- Metadata can now be passed in to `#publish`
+
 ## 0.5.1 - October 17, 2013
 
 - Raise an exception when publishing fails
