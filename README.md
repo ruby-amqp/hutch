@@ -183,3 +183,6 @@ are recommended.
 [pc-issue]: https://github.com/ruby-amqp/amqp/issues/92
 [pc-gist]: https://gist.github.com/3042381
 
+---
+
+GoCardless ♥ open source. If you do too, come [join us](https://gocardless.com/jobs/backend_developer).
