@@ -45,7 +45,7 @@ module Hutch
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
-                              heartbeat: 1, automatically_recover: true,
+                              heartbeat: 30, automatically_recover: true,
                               network_recovery_interval: 1)
       @connection.start
 
