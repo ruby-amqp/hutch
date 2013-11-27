@@ -38,17 +38,7 @@ module Hutch
       username, password = @config[:mq_username], @config[:mq_password]
       vhost, tls = @config[:mq_vhost], @config[:mq_tls]
       tls_key, tls_cert = @config[:mq_tls_key], @config[:mq_tls_cert]
-
-      if tls.nil? || tls == 0 || tls == "0" || tls == false || tls == "false" \
-        || tls == ""
-        protocol = "amqp://"
-        tls = false
-      else
-        protocol = "amqps://"
-        tls = true
-      end
-      logger.info "AMQP protocol: #{protocol}"
-
+      protocol = tls ? "amqps://" : "amqp://"
       uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
@@ -84,16 +74,7 @@ module Hutch
       username, password = @config[:mq_username], @config[:mq_password]
       ssl = @config[:mq_api_ssl]
 
-      if ssl.nil? || ssl == 0 || ssl == "0" || ssl == false || ssl == "false" \
-        || ssl == ""
-        protocol = "http://"
-        ssl = false
-      else
-        protocol = "https://"
-        ssl = true
-      end
-      logger.info "HTTP protocol: #{protocol}"
-
+      protocol = ssl ? "https://" : "http://"
       management_uri = "#{protocol}#{username}:#{password}@#{host}:#{port}/"
       logger.info "connecting to rabbitmq management api (#{management_uri})"
 

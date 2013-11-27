@@ -81,7 +81,7 @@ $ hutch -h
 usage: hutch [options]
         --mq-host HOST               Set the RabbitMQ host
         --mq-port PORT               Set the RabbitMQ port
-        --mq-tls                     Use TLS for the AMQP connection
+        --[no-]mq-tls                Use TLS for the AMQP connection
         --mq-tls-cert FILE           Certificate  for TLS client verification
         --mq-tls-key FILE            Private key for TLS client verification
         --mq-exchange EXCHANGE       Set the RabbitMQ exchange
@@ -90,7 +90,7 @@ usage: hutch [options]
         --mq-password PASSWORD       Set the RabbitMQ password
         --mq-api-host HOST           Set the RabbitMQ API host
         --mq-api-port PORT           Set the RabbitMQ API port
-        --mq-api-ssl                 Use SSL for the RabbitMQ API
+        --[no-]mq-api-ssl            Use SSL for the RabbitMQ API
         --config FILE                Load Hutch configuration from a file
         --require PATH               Require a Rails app or path
         --[no-]autoload-rails        Require the current rails app directory
