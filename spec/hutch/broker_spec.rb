@@ -149,6 +149,30 @@ describe Hutch::Broker do
         broker.exchange.should_receive(:publish).once
         broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
       end
+
+      context 'when there are global properties' do
+        context 'as a hash' do
+          before do
+            Hutch.stub global_properties: { app_id: 'app' }
+          end
+
+          it 'merges the properties' do
+            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish('test.key', 'message')
+          end
+        end
+
+        context 'as a callable object' do
+          before do
+            Hutch.stub global_properties: proc { { app_id: 'app' } }
+          end
+
+          it 'calls the proc and merges the properties' do
+            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish('test.key', 'message')
+          end
+        end
+      end
     end
 
     context 'without a valid connection' do
