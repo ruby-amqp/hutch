@@ -166,7 +166,9 @@ module Hutch
       end
 
       non_overridable_properties = {
-        routing_key: routing_key, timestamp: Time.now.to_i
+        routing_key: routing_key,
+        timestamp: Time.now.to_i,
+        content_type: 'application/json'
       }
       properties[:message_id] ||= generate_id
 
