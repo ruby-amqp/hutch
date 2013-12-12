@@ -145,7 +145,20 @@ describe Hutch::Broker do
         broker.publish('test.key', 'message')
       end
 
-      it "allows passing message properties" do
+      it 'sets default properties' do
+        broker.exchange.should_receive(:publish).with(
+          JSON.dump("message"),
+          hash_including(
+            persistent: true,
+            routing_key: 'test.key',
+            content_type: 'application/json'
+          )
+        )
+
+        broker.publish('test.key', 'message')
+      end
+
+      it 'allows passing message properties' do
         broker.exchange.should_receive(:publish).once
         broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
       end
