@@ -10,7 +10,9 @@ module Hutch
         @connection  = connection
         @routing_key = routing_key
         @message     = message
+
         properties[:message_id] ||= generate_id
+        properties[:persistent] ||= true
         @properties  = properties
       end
 
@@ -19,7 +21,7 @@ module Hutch
       end
 
       def options
-        { persistent: true }.merge(properties).merge(non_overridable_properties)
+        properties.merge(non_overridable_properties)
       end
 
       def error_message
