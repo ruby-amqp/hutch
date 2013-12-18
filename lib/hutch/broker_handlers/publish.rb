@@ -6,10 +6,11 @@ module Hutch
 
       attr_reader :connection, :routing_key, :message, :properties
 
-      def initialize(connection, routing_key, message, properties)
-        @connection  = connection
-        @routing_key = routing_key
-        @message     = message
+      def initialize(params)
+        @connection  = params.fetch :connection
+        @routing_key = params.fetch :routing_key
+        @message     = params.fetch :message
+        properties   = params.fetch :properties
         properties[:message_id] ||= generate_id
         @properties  = properties
       end

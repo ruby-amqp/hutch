@@ -118,7 +118,12 @@ module Hutch
     end
 
     def publish(routing_key, message, properties = {})
-      handler = ::Hutch::BrokerHandlers::Publish.new(connection, routing_key, message, properties)
+      handler = ::Hutch::BrokerHandlers::Publish.new({
+        connection:  connection,
+        routing_key: routing_key,
+        message:     message,
+        properties:  properties
+      })
 
       if handler.valid_connection?
         logger.info handler.info_message
