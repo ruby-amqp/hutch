@@ -71,6 +71,10 @@ module Hutch
         end
       end
 
+      def each(*args)
+        @config.each(*args)
+      end
+
       def each_pair(*args)
         @config.each_pair(*args)
       end
