@@ -17,14 +17,14 @@ module Hutch
       @config = OpenStruct.new(config || Hutch::Config)
     end
 
-    def connect
+    def connect(options = {})
       set_up_amqp_connection
-      set_up_api_connection
+      set_up_api_connection  if options.fetch(:with_api, true)
 
-      if block_given?
-        yield
-        disconnect
-      end
+      return unless block_given?
+
+      yield
+      disconnect
     end
 
     def disconnect

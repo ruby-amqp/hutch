@@ -9,36 +9,38 @@ module Hutch
   autoload :Version,       'hutch/version'
   autoload :ErrorHandlers, 'hutch/error_handlers'
 
-  def self.register_consumer(consumer)
-    self.consumers << consumer
-  end
-
-  def self.consumers
-    @consumers ||= []
-  end
-
-  def self.logger
-    Hutch::Logging.logger
-  end
-
-  def self.connect(config = Hutch::Config)
-    unless connected?
-      @broker = Hutch::Broker.new(config)
-      @broker.connect
-      @connected = true
+  class << self
+    def register_consumer(consumer)
+      self.consumers << consumer
     end
-  end
 
-  def self.broker
-    @broker
-  end
+    def consumers
+      @consumers ||= []
+    end
 
-  def self.connected?
-    @connected
-  end
+    def logger
+      Hutch::Logging.logger
+    end
 
-  def self.publish(routing_key, message)
-    @broker.publish(routing_key, message)
+    def connect(options = {}, config = Hutch::Config)
+      unless connected?
+        @broker = Hutch::Broker.new(config)
+        @broker.connect options
+        @connected = true
+      end
+    end
+
+    def broker
+      @broker
+    end
+
+    def connected?
+      @connected
+    end
+
+    def publish(routing_key, message)
+      @broker.publish(routing_key, message)
+    end
   end
 end
 
