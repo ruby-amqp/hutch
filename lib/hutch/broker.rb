@@ -1,22 +1,20 @@
 require 'bunny'
 require 'carrot-top'
-require 'securerandom'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/brokers/amqp_handler'
 require 'hutch/brokers/api_handler'
+require 'hutch/brokers/publish_handler'
 
 module Hutch
   class Broker
     include Logging
 
     attr_accessor :connection, :channel, :exchange, :api_client
-    attr_reader   :config, :amqp_handler, :api_handler
+    attr_reader   :config
 
     def initialize(config = nil)
-      @config       = OpenStruct.new(config || Hutch::Config)
-      @amqp_handler = ::Hutch::Brokers::AmqpHandler.new(@config)
-      @api_handler  = ::Hutch::Brokers::ApiHandler.new(@config)
+      @config = OpenStruct.new(config || Hutch::Config)
     end
 
     def connect
@@ -120,41 +118,21 @@ module Hutch
     end
 
     def publish(routing_key, message, properties = {})
-      unless connection
-        msg = "Unable to publish - no connection to broker. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
+      handler = ::Hutch::Brokers::PublishHandler.new(connection, routing_key, message, properties)
+
+      if handler.valid_connection?
+        logger.info handler.info_message
+        exchange.publish(JSON.dump(message), handler.options)
+      else
+        logger.error handler.error_message
+        raise PublishError, handler.error_message
       end
-
-      unless connection.open?
-        msg = "Unable to publish - connection is closed. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
-      end
-
-      non_overridable_properties = {
-        routing_key:  routing_key,
-        timestamp:    Time.now.to_i,
-        content_type: 'application/json'
-      }
-      properties[:message_id] ||= generate_id
-
-      logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      exchange.publish(JSON.dump(message), {persistent: true}.
-        merge(properties).
-        merge(non_overridable_properties))
     end
 
     private
 
     def work_pool_threads
       channel.work_pool.threads || []
-    end
-
-    def generate_id
-      SecureRandom.uuid
     end
 
     def with_bunny_rescue(&block)
@@ -164,9 +142,7 @@ module Hutch
       raise ConnectionError.new(amqp_handler.connection_error)
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
-      raise WorkerSetupError.new('could not create exchange due to a type ' +
-                                 'conflict with an existing exchange, ' +
-                                 'remove the existing exchange and try again')
+      raise WorkerSetupError.new(amqp_handler.worker_setup_error)
     end
 
     def with_api_rescue(&block)
@@ -187,6 +163,13 @@ module Hutch
       bindings.select { |dest, keys| dest == queue.name }
     end
 
+    def amqp_handler
+      @amqp_handler ||= ::Hutch::Brokers::AmqpHandler.new(config)
+    end
+
+    def api_handler
+      @api_handler ||= ::Hutch::Brokers::ApiHandler.new(config)
+    end
   end
 end
 

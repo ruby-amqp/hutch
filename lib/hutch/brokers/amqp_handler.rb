@@ -16,6 +16,12 @@ module Hutch
         "couldn't connect to rabbitmq at #{ short_uri }"
       end
 
+      def worker_setup_error
+        'could not create exchange due to a type ' +
+        'conflict with an existing exchange, ' +
+        'remove the existing exchange and try again'
+      end
+
       def bunny_params
         {
           host:      mq_host,
