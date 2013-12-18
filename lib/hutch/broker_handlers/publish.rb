@@ -1,8 +1,8 @@
 require 'securerandom'
 
 module Hutch
-  module Brokers
-    class PublishHandler
+  module BrokerHandlers
+    class Publish
 
       attr_reader :connection, :routing_key, :message, :properties
 

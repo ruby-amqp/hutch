@@ -1,8 +1,8 @@
 require 'delegate'
 
 module Hutch
-  module Brokers
-    class ApiHandler < SimpleDelegator
+  module BrokerHandlers
+    class Api < SimpleDelegator
 
       def carrot_top_params
         {

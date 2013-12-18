@@ -2,9 +2,9 @@ require 'bunny'
 require 'carrot-top'
 require 'hutch/logging'
 require 'hutch/exceptions'
-require 'hutch/brokers/amqp_handler'
-require 'hutch/brokers/api_handler'
-require 'hutch/brokers/publish_handler'
+require 'hutch/broker_handlers/amqp'
+require 'hutch/broker_handlers/api'
+require 'hutch/broker_handlers/publish'
 
 module Hutch
   class Broker
@@ -118,7 +118,7 @@ module Hutch
     end
 
     def publish(routing_key, message, properties = {})
-      handler = ::Hutch::Brokers::PublishHandler.new(connection, routing_key, message, properties)
+      handler = ::Hutch::BrokerHandlers::Publish.new(connection, routing_key, message, properties)
 
       if handler.valid_connection?
         logger.info handler.info_message
@@ -164,11 +164,11 @@ module Hutch
     end
 
     def amqp_handler
-      @amqp_handler ||= ::Hutch::Brokers::AmqpHandler.new(config)
+      @amqp_handler ||= ::Hutch::BrokerHandlers::Amqp.new(config)
     end
 
     def api_handler
-      @api_handler ||= ::Hutch::Brokers::ApiHandler.new(config)
+      @api_handler ||= ::Hutch::BrokerHandlers::Api.new(config)
     end
   end
 end

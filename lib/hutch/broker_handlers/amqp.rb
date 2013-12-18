@@ -1,8 +1,8 @@
 require 'delegate'
 
 module Hutch
-  module Brokers
-    class AmqpHandler < SimpleDelegator
+  module BrokerHandlers
+    class Amqp < SimpleDelegator
 
       def connection_log_info
         "connecting to rabbitmq (#{protocol}#{uri})"
