@@ -13,6 +13,39 @@ describe Hutch do
     end
   end
 
+  describe '.connect' do
+    context 'not connected' do
+      let(:options) { double 'options' }
+      let(:config)  { double 'config' }
+      let(:broker)  { double 'broker' }
+      let(:action)  { Hutch.connect(options, config) }
+
+      it 'passes options and config' do
+        Hutch::Broker.should_receive(:new).with(config).and_return broker
+        broker.should_receive(:connect).with options
+
+        action
+      end
+
+      it 'sets @connect' do
+        action
+
+        expect(Hutch.connected?).to be_true
+      end
+
+    end
+
+    context 'connected' do
+      before { Hutch.stub(:connected?).and_return true }
+
+      it 'does not reconnect' do
+        Hutch::Broker.should_not_receive :new
+        Hutch.connect
+      end
+    end
+
+  end
+
   describe '#publish' do
     let(:broker) { double(Hutch::Broker) }
     let(:args) { ['test.key', 'message', { headers: { foo: 'bar' } }] }
