@@ -175,6 +175,7 @@ module Hutch
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
       @exchange.publish(payload, {persistent: true}.
         merge(properties).
+        merge(global_properties).
         merge(non_overridable_properties))
     end
 
@@ -186,6 +187,10 @@ module Hutch
 
     def generate_id
       SecureRandom.uuid
+    end
+
+    def global_properties
+      Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
   end
 end

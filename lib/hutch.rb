@@ -21,6 +21,14 @@ module Hutch
     Hutch::Logging.logger
   end
 
+  def self.global_properties=(properties)
+    @global_properties = properties
+  end
+
+  def self.global_properties
+    @global_properties ||= {}
+  end
+
   def self.connect(config = Hutch::Config)
     unless connected?
       @broker = Hutch::Broker.new(config)
