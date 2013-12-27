@@ -36,10 +36,9 @@ module Hutch
     def set_up_amqp_connection
       host     = @config[:mq_host]
       port     = @config[:mq_port]
-      vhost    = nil
+      vhost    = @config[:mq_vhost]
       username = @config[:mq_username]
       password = @config[:mq_password]
-      vhost    = @config[:mq_vhost]
       tls      = @config[:mq_tls]
       tls_key  = @config[:mq_tls_cert]
       tls_cert = @config[:mq_tls_key]
