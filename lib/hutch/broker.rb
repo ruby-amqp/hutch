@@ -34,12 +34,17 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      host, port, vhost = @config[:mq_host], @config[:mq_port]
-      username, password = @config[:mq_username], @config[:mq_password]
-      vhost, tls = @config[:mq_vhost], @config[:mq_tls]
-      tls_key, tls_cert = @config[:mq_tls_key], @config[:mq_tls_cert]
+      host     = @config[:mq_host]
+      port     = @config[:mq_port]
+      vhost    = nil
+      username = @config[:mq_username]
+      password = @config[:mq_password]
+      vhost    = @config[:mq_vhost]
+      tls      = @config[:mq_tls]
+      tls_key  = @config[:mq_tls_cert]
+      tls_cert = @config[:mq_tls_key]
       protocol = tls ? "amqps://" : "amqp://"
-      uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      uri      = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
