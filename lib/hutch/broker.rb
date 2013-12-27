@@ -34,6 +34,24 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
+      conn     = connect
+      @channel = open_channel(conn)
+
+      exchange_name = @config[:mq_exchange]
+      logger.info "using topic exchange '#{exchange_name}'"
+      @exchange = @channel.topic(exchange_name, durable: true)
+    rescue Bunny::TCPConnectionFailed => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      uri = "#{protocol}#{host}:#{port}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      raise WorkerSetupError.new('could not create exchange due to a type ' +
+                                 'conflict with an existing exchange, ' +
+                                 'remove the existing exchange and try again')
+    end
+
+    def connect
       host     = @config[:mq_host]
       port     = @config[:mq_port]
       vhost    = @config[:mq_vhost]
@@ -52,22 +70,12 @@ module Hutch
                               heartbeat: 30, automatically_recover: true,
                               network_recovery_interval: 1)
       @connection.start
+      @connection
+    end
 
+    def open_channel(connection)
       logger.info 'opening rabbitmq channel'
-      @channel = @connection.create_channel
-
-      exchange_name = @config[:mq_exchange]
-      logger.info "using topic exchange '#{exchange_name}'"
-      @exchange = @channel.topic(exchange_name, durable: true)
-    rescue Bunny::TCPConnectionFailed => ex
-      logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "#{protocol}#{host}:#{port}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
-    rescue Bunny::PreconditionFailed => ex
-      logger.error ex.message
-      raise WorkerSetupError.new('could not create exchange due to a type ' +
-                                 'conflict with an existing exchange, ' +
-                                 'remove the existing exchange and try again')
+      connection.create_channel
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
