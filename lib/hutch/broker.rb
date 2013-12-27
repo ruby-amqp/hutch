@@ -34,7 +34,7 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      conn     = connect
+      conn     = open_connection
       @channel = open_channel(conn)
 
       exchange_name = @config[:mq_exchange]
@@ -51,7 +51,7 @@ module Hutch
                                  'remove the existing exchange and try again')
     end
 
-    def connect
+    def open_connection
       host     = @config[:mq_host]
       port     = @config[:mq_port]
       vhost    = @config[:mq_vhost]
