@@ -82,27 +82,15 @@ module Hutch
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      host, port = @config[:mq_api_host], @config[:mq_api_port]
-      username, password = @config[:mq_username], @config[:mq_password]
-      ssl = @config[:mq_api_ssl]
+      logger.info "connecting to rabbitmq management api (#{api_config.management_uri})"
 
-      protocol = ssl ? "https://" : "http://"
-      management_uri = "#{protocol}#{username}:#{password}@#{host}:#{port}/"
-      logger.info "connecting to rabbitmq management api (#{management_uri})"
-
-      @api_client = CarrotTop.new(host: host, port: port,
-                                  user: username, password: password,
-                                  ssl: ssl)
-      @api_client.exchanges
-    rescue Errno::ECONNREFUSED => ex
-      logger.error "api connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to api at #{management_uri}")
-    rescue Net::HTTPServerException => ex
-      logger.error "api connection error: #{ex.message.downcase}"
-      if ex.response.code == '401'
-        raise AuthenticationError.new('invalid api credentials')
-      else
-        raise
+      with_authentication_error_handler do
+        with_connection_error_handler do
+          @api_client = CarrotTop.new(host: api_config.host, port: api_config.port,
+                                      user: api_config.username, password: api_config.password,
+                                      ssl: api_config.ssl)
+          @api_client.exchanges
+        end
       end
     end
 
@@ -192,6 +180,36 @@ module Hutch
     end
 
     private
+
+    def api_config
+      @api_config ||= OpenStruct.new.tap do |config|
+        config.host = @config[:mq_api_host]
+        config.port = @config[:mq_api_port]
+        config.username = @config[:mq_username]
+        config.password = @config[:mq_password]
+        config.ssl = @config[:mq_api_ssl]
+        config.protocol = config.ssl ? "https://" : "http://"
+        config.management_uri = "#{config.protocol}#{config.username}:#{config.password}@#{config.host}:#{config.port}/"
+      end
+    end
+
+    def with_authentication_error_handler
+      yield
+    rescue Net::HTTPServerException => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      if ex.response.code == '401'
+        raise AuthenticationError.new('invalid api credentials')
+      else
+        raise
+      end
+    end
+
+    def with_connection_error_handler
+      yield
+    rescue Errno::ECONNREFUSED => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to api at #{api_config.management_uri}")
+    end
 
     def work_pool_threads
       @channel.work_pool.threads || []
