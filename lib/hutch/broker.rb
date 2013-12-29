@@ -34,8 +34,8 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      conn     = open_connection
-      @channel = open_channel(conn)
+      open_connection!
+      open_channel!
 
       exchange_name = @config[:mq_exchange]
       logger.info "using topic exchange '#{exchange_name}'"
@@ -45,7 +45,7 @@ module Hutch
       end
     end
 
-    def open_connection
+    def open_connection!
       host     = @config[:mq_host]
       port     = @config[:mq_port]
       vhost    = @config[:mq_vhost]
@@ -72,9 +72,9 @@ module Hutch
       @connection
     end
 
-    def open_channel(connection)
+    def open_channel!
       logger.info 'opening rabbitmq channel'
-      connection.create_channel
+      @channel = connection.create_channel
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
