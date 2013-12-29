@@ -39,16 +39,10 @@ module Hutch
 
       exchange_name = @config[:mq_exchange]
       logger.info "using topic exchange '#{exchange_name}'"
-      @exchange = @channel.topic(exchange_name, durable: true)
-    rescue Bunny::TCPConnectionFailed => ex
-      logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "#{protocol}#{host}:#{port}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
-    rescue Bunny::PreconditionFailed => ex
-      logger.error ex.message
-      raise WorkerSetupError.new('could not create exchange due to a type ' +
-                                 'conflict with an existing exchange, ' +
-                                 'remove the existing exchange and try again')
+
+      with_bunny_precondition_handler('exchange') do
+        @exchange = @channel.topic(exchange_name, durable: true)
+      end
     end
 
     def open_connection
@@ -62,6 +56,7 @@ module Hutch
       tls_cert = @config[:mq_tls_key]
       protocol = tls ? "amqps://" : "amqp://"
       uri      = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      sanitized_uri = "#{protocol}#{host}:#{port}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
@@ -69,7 +64,11 @@ module Hutch
                               username: username, password: password,
                               heartbeat: 30, automatically_recover: true,
                               network_recovery_interval: 1)
-      @connection.start
+
+      with_bunny_connection_handler(sanitized_uri) do
+        @connection.start
+      end
+
       @connection
     end
 
@@ -96,7 +95,9 @@ module Hutch
 
     # Create / get a durable queue.
     def queue(name)
-      @channel.queue(name, durable: true)
+      with_bunny_precondition_handler('queue') do
+        @channel.queue(name, durable: true)
+      end
     end
 
     # Return a mapping of queue names to the routing keys they're bound to.
@@ -174,13 +175,8 @@ module Hutch
     end
 
     def ensure_connection!(routing_key, message)
-      unless @connection
-        raise_publish_error('no connection to broker', routing_key, message)
-      end
-
-      unless @connection.open?
-        raise_publish_error('connection is closed', routing_key, message)
-      end
+      raise_publish_error('no connection to broker', routing_key, message) unless @connection
+      raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
     end
 
     def api_config
@@ -211,6 +207,22 @@ module Hutch
     rescue Errno::ECONNREFUSED => ex
       logger.error "api connection error: #{ex.message.downcase}"
       raise ConnectionError.new("couldn't connect to api at #{api_config.management_uri}")
+    end
+
+    def with_bunny_precondition_handler(item)
+      yield
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      raise WorkerSetupError.new("could not create #{item} due to a type " +
+                                 "conflict with an existing #{item}, remove " +
+                                 "the existing #{item} and try again")
+    end
+
+    def with_bunny_connection_handler(uri)
+      yield
+    rescue Bunny::TCPConnectionFailed => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
     end
 
     def work_pool_threads

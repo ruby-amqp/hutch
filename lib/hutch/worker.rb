@@ -24,11 +24,6 @@ module Hutch
       # Take a break from Thread#join every 0.1 seconds to check if we've
       # been sent any signals
       handle_signals until @broker.wait_on_threads(0.1)
-    rescue Bunny::PreconditionFailed => ex
-      logger.error ex.message
-      raise WorkerSetupError.new('could not create queue due to a type ' +
-                                 'conflict with an existing queue, remove ' +
-                                 'the existing queue and try again')
     end
 
     # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
