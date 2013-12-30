@@ -31,6 +31,15 @@ describe Hutch::Broker do
         broker.connect { }
       end
     end
+
+    context "with options" do
+      let(:options) { { enable_http_api_use: false } }
+
+      it "doesnt set up api" do
+        broker.should_not_receive(:set_up_api_connection)
+        broker.connect options
+      end
+    end
   end
 
   describe '#set_up_amqp_connection', rabbitmq: true do

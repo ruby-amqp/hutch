@@ -14,9 +14,9 @@ module Hutch
       @config = config || Hutch::Config
     end
 
-    def connect
+    def connect(options = {})
       set_up_amqp_connection
-      set_up_api_connection
+      set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       if block_given?
         yield
