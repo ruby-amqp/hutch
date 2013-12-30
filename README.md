@@ -68,7 +68,8 @@ logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 Hutch::Logging.logger = Rails.logger
 ```
 
-[topic-docs]: http://www.rabbitmq.com/tutorials/tutorial-five-python.html
+See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
+to learn more.
 
 
 ## Running Hutch
