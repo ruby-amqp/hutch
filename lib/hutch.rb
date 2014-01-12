@@ -29,10 +29,10 @@ module Hutch
     @global_properties ||= {}
   end
 
-  def self.connect(config = Hutch::Config)
+  def self.connect(options = {}, config = Hutch::Config)
     unless connected?
       @broker = Hutch::Broker.new(config)
-      @broker.connect
+      @broker.connect(options)
       @connected = true
     end
   end
