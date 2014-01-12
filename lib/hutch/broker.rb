@@ -34,24 +34,18 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      conn     = open_connection
-      @channel = open_channel(conn)
+      open_connection!
+      open_channel!
 
       exchange_name = @config[:mq_exchange]
       logger.info "using topic exchange '#{exchange_name}'"
-      @exchange = @channel.topic(exchange_name, durable: true)
-    rescue Bunny::TCPConnectionFailed => ex
-      logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "#{protocol}#{host}:#{port}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
-    rescue Bunny::PreconditionFailed => ex
-      logger.error ex.message
-      raise WorkerSetupError.new('could not create exchange due to a type ' +
-                                 'conflict with an existing exchange, ' +
-                                 'remove the existing exchange and try again')
+
+      with_bunny_precondition_handler('exchange') do
+        @exchange = @channel.topic(exchange_name, durable: true)
+      end
     end
 
-    def open_connection
+    def open_connection!
       host     = @config[:mq_host]
       port     = @config[:mq_port]
       vhost    = @config[:mq_vhost]
@@ -62,6 +56,7 @@ module Hutch
       tls_cert = @config[:mq_tls_key]
       protocol = tls ? "amqps://" : "amqp://"
       uri      = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      sanitized_uri = "#{protocol}#{host}:#{port}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
@@ -69,13 +64,17 @@ module Hutch
                               username: username, password: password,
                               heartbeat: 30, automatically_recover: true,
                               network_recovery_interval: 1)
-      @connection.start
+
+      with_bunny_connection_handler(sanitized_uri) do
+        @connection.start
+      end
+
       @connection
     end
 
-    def open_channel(connection)
+    def open_channel!
       logger.info 'opening rabbitmq channel'
-      connection.create_channel
+      @channel = connection.create_channel
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
@@ -96,7 +95,9 @@ module Hutch
 
     # Create / get a durable queue.
     def queue(name)
-      @channel.queue(name, durable: true)
+      with_bunny_precondition_handler('queue') do
+        @channel.queue(name, durable: true)
+      end
     end
 
     # Return a mapping of queue names to the routing keys they're bound to.
@@ -149,21 +150,7 @@ module Hutch
     end
 
     def publish(routing_key, message, properties = {})
-      payload = JSON.dump(message)
-
-      unless @connection
-        msg = "Unable to publish - no connection to broker. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
-      end
-
-      unless @connection.open?
-        msg = "Unable to publish - connection is closed. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
-      end
+      ensure_connection!(routing_key, message)
 
       non_overridable_properties = {
         routing_key: routing_key,
@@ -173,13 +160,24 @@ module Hutch
       properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(payload, {persistent: true}.
+      @exchange.publish(JSON.dump(message), {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
     end
 
     private
+
+    def raise_publish_error(reason, routing_key, message)
+      msg = "Unable to publish - #{reason}. Message: #{message.inspect}, Routing key: #{routing_key}."
+      logger.error(msg)
+      raise PublishError, msg
+    end
+
+    def ensure_connection!(routing_key, message)
+      raise_publish_error('no connection to broker', routing_key, message) unless @connection
+      raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
+    end
 
     def api_config
       @api_config ||= OpenStruct.new.tap do |config|
@@ -209,6 +207,21 @@ module Hutch
     rescue Errno::ECONNREFUSED => ex
       logger.error "api connection error: #{ex.message.downcase}"
       raise ConnectionError.new("couldn't connect to api at #{api_config.management_uri}")
+    end
+
+    def with_bunny_precondition_handler(item)
+      yield
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      raise WorkerSetupError.new("RabbitMQ responded with Precondition Failed when creating this #{item}. " +
+                                 "Perhaps it is being redeclared with non-matching attributes"
+    end
+
+    def with_bunny_connection_handler(uri)
+      yield
+    rescue Bunny::TCPConnectionFailed => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
     end
 
     def work_pool_threads
