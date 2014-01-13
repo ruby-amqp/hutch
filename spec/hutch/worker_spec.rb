@@ -4,7 +4,7 @@ require 'hutch/worker'
 describe Hutch::Worker do
   before { Raven.as_null_object }
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
-                          queue_name: 'consumer') }
+                          get_queue_name: 'consumer') }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }
@@ -24,7 +24,7 @@ describe Hutch::Worker do
     before { broker.stub(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
-      broker.should_receive(:queue).with(consumer.queue_name).and_return(queue)
+      broker.should_receive(:queue).with(consumer.get_queue_name).and_return(queue)
       worker.setup_queue(consumer)
     end
 

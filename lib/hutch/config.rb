@@ -24,7 +24,8 @@ module Hutch
         log_level: Logger::INFO,
         require_paths: [],
         autoload_rails: true,
-        error_handlers: [Hutch::ErrorHandlers::Logger.new]
+        error_handlers: [Hutch::ErrorHandlers::Logger.new],
+        namespace: nil
       }
     end
 
