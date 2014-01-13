@@ -31,6 +31,15 @@ describe Hutch::Broker do
         broker.connect { }
       end
     end
+
+    context "with options" do
+      let(:options) { { enable_http_api_use: false } }
+
+      it "doesnt set up api" do
+        broker.should_not_receive(:set_up_api_connection)
+        broker.connect options
+      end
+    end
   end
 
   describe '#set_up_amqp_connection', rabbitmq: true do
@@ -156,6 +165,48 @@ describe Hutch::Broker do
       it 'publishes to the exchange' do
         broker.exchange.should_receive(:publish).once
         broker.publish('test.key', 'message')
+      end
+
+      it 'sets default properties' do
+        broker.exchange.should_receive(:publish).with(
+          JSON.dump("message"),
+          hash_including(
+            persistent: true,
+            routing_key: 'test.key',
+            content_type: 'application/json'
+          )
+        )
+
+        broker.publish('test.key', 'message')
+      end
+
+      it 'allows passing message properties' do
+        broker.exchange.should_receive(:publish).once
+        broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
+      end
+
+      context 'when there are global properties' do
+        context 'as a hash' do
+          before do
+            Hutch.stub global_properties: { app_id: 'app' }
+          end
+
+          it 'merges the properties' do
+            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish('test.key', 'message')
+          end
+        end
+
+        context 'as a callable object' do
+          before do
+            Hutch.stub global_properties: proc { { app_id: 'app' } }
+          end
+
+          it 'calls the proc and merges the properties' do
+            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish('test.key', 'message')
+          end
+        end
       end
     end
 

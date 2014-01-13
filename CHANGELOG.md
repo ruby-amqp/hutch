@@ -1,3 +1,11 @@
+## 0.7.0 — unreleased
+
+- [Global properties can now be specified](https://github.com/gocardless/hutch/pull/62) for publishing
+
+## 0.6.0 - November 4, 2013
+
+- Metadata can now be passed in to `#publish`
+
 ## 0.5.1 - October 17, 2013
 
 - Raise an exception when publishing fails

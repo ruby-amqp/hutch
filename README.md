@@ -11,7 +11,7 @@ in a service-oriented architecture, using RabbitMQ.
 To install with RubyGems:
 
 ```
-gem install hutch
+$ gem install hutch
 ```
 
 ## Project Maturity
@@ -83,7 +83,8 @@ logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 Hutch::Logging.logger = Rails.logger
 ```
 
-[topic-docs]: http://www.rabbitmq.com/tutorials/tutorial-five-python.html
+See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
+to learn more.
 
 
 ## Running Hutch
@@ -96,17 +97,19 @@ $ hutch -h
 usage: hutch [options]
         --mq-host HOST               Set the RabbitMQ host
         --mq-port PORT               Set the RabbitMQ port
-        --mq-tls                     Use TLS for the AMQP connection
+    -t, --[no-]mq-tls                Use TLS for the AMQP connection
+        --mq-tls-cert FILE           Certificate  for TLS client verification
+        --mq-tls-key FILE            Private key for TLS client verification
         --mq-exchange EXCHANGE       Set the RabbitMQ exchange
         --mq-vhost VHOST             Set the RabbitMQ vhost
         --mq-username USERNAME       Set the RabbitMQ username
         --mq-password PASSWORD       Set the RabbitMQ password
         --mq-api-host HOST           Set the RabbitMQ API host
         --mq-api-port PORT           Set the RabbitMQ API port
-        --mq-api-ssl                 Use SSL for the RabbitMQ API
+    -s, --[no-]mq-api-ssl            Use SSL for the RabbitMQ API
         --config FILE                Load Hutch configuration from a file
-
         --require PATH               Require a Rails app or path
+        --[no-]autoload-rails        Require the current rails app directory
     -q, --quiet                      Quiet logging
     -v, --verbose                    Verbose logging
         --version                    Print the version and exit
@@ -198,3 +201,6 @@ are recommended.
 [pc-issue]: https://github.com/ruby-amqp/amqp/issues/92
 [pc-gist]: https://gist.github.com/3042381
 
+---
+
+GoCardless ♥ open source. If you do too, come [join us](https://gocardless.com/jobs/backend_developer).

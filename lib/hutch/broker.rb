@@ -14,9 +14,9 @@ module Hutch
       @config = config || Hutch::Config
     end
 
-    def connect
+    def connect(options = {})
       set_up_amqp_connection
-      set_up_api_connection
+      set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       if block_given?
         yield
@@ -34,71 +34,72 @@ module Hutch
     # channel we use for talking to RabbitMQ. It also ensures the existance of
     # the exchange we'll be using.
     def set_up_amqp_connection
-      host, port, vhost = @config[:mq_host], @config[:mq_port]
-      username, password = @config[:mq_username], @config[:mq_password]
-      vhost, tls = @config[:mq_vhost], @config[:mq_tls]
-      tls_key, tls_cert = @config[:mq_tls_key], @config[:mq_tls_cert]
+      open_connection!
+      open_channel!
+
+      exchange_name = @config[:mq_exchange]
+      logger.info "using topic exchange '#{exchange_name}'"
+
+      with_bunny_precondition_handler('exchange') do
+        @exchange = @channel.topic(exchange_name, durable: true)
+      end
+    end
+
+    def open_connection!
+      host     = @config[:mq_host]
+      port     = @config[:mq_port]
+      vhost    = @config[:mq_vhost]
+      username = @config[:mq_username]
+      password = @config[:mq_password]
+      tls      = @config[:mq_tls]
+      tls_key  = @config[:mq_tls_cert]
+      tls_cert = @config[:mq_tls_key]
       protocol = tls ? "amqps://" : "amqp://"
-      uri = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      uri      = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      sanitized_uri = "#{protocol}#{host}:#{port}"
       logger.info "connecting to rabbitmq (#{protocol}#{uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
-                              heartbeat: 1, automatically_recover: true,
+                              heartbeat: 30, automatically_recover: true,
                               network_recovery_interval: 1)
-      @connection.start
 
+      with_bunny_connection_handler(sanitized_uri) do
+        @connection.start
+      end
+
+      @connection
+    end
+
+    def open_channel!
       logger.info 'opening rabbitmq channel'
-      @channel = @connection.create_channel
-
-      exchange_name = @config[:mq_exchange]
-      logger.info "using topic exchange '#{exchange_name}'"
-      @exchange = @channel.topic(exchange_name, durable: true)
-    rescue Bunny::TCPConnectionFailed => ex
-      logger.error "amqp connection error: #{ex.message.downcase}"
-      uri = "#{protocol}#{host}:#{port}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
-    rescue Bunny::PreconditionFailed => ex
-      logger.error ex.message
-      raise WorkerSetupError.new('could not create exchange due to a type ' +
-                                 'conflict with an existing exchange, ' +
-                                 'remove the existing exchange and try again')
+      @channel = connection.create_channel
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      host, port = @config[:mq_api_host], @config[:mq_api_port]
-      username, password = @config[:mq_username], @config[:mq_password]
-      ssl = @config[:mq_api_ssl]
+      logger.info "connecting to rabbitmq management api (#{api_config.management_uri})"
 
-      protocol = ssl ? "https://" : "http://"
-      management_uri = "#{protocol}#{username}:#{password}@#{host}:#{port}/"
-      logger.info "connecting to rabbitmq management api (#{management_uri})"
-
-      @api_client = CarrotTop.new(host: host, port: port,
-                                  user: username, password: password,
-                                  ssl: ssl)
-      @api_client.exchanges
-    rescue Errno::ECONNREFUSED => ex
-      logger.error "api connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to api at #{management_uri}")
-    rescue Net::HTTPServerException => ex
-      logger.error "api connection error: #{ex.message.downcase}"
-      if ex.response.code == '401'
-        raise AuthenticationError.new('invalid api credentials')
-      else
-        raise
+      with_authentication_error_handler do
+        with_connection_error_handler do
+          @api_client = CarrotTop.new(host: api_config.host, port: api_config.port,
+                                      user: api_config.username, password: api_config.password,
+                                      ssl: api_config.ssl)
+          @api_client.exchanges
+        end
       end
     end
 
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
-      namespace = @config[:namespace].to_s.downcase.gsub(/\W|:/, "")
-      name = name.prepend(namespace + ":") unless namespace.empty?
-      channel.queue(name, durable: true)
+      with_bunny_precondition_handler('queue') do
+        namespace = @config[:namespace].to_s.downcase.gsub(/\W|:/, "")
+        name = name.prepend(namespace + ":") unless namespace.empty?
+        channel.queue(name, durable: true)
+      end
     end
 
     # Return a mapping of queue names to the routing keys they're bound to.
@@ -150,29 +151,81 @@ module Hutch
       @channel.ack(delivery_tag, false)
     end
 
-    def publish(routing_key, message)
-      payload = JSON.dump(message)
+    def publish(routing_key, message, properties = {})
+      ensure_connection!(routing_key, message)
 
-      unless @connection
-        msg = "Unable to publish - no connection to broker. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
-      end
-
-      unless @connection.open?
-        msg = "Unable to publish - connection is closed. " +
-              "Message: #{message.inspect}, Routing key: #{routing_key}."
-        logger.error(msg)
-        raise PublishError, msg
-      end
+      non_overridable_properties = {
+        routing_key: routing_key,
+        timestamp: Time.now.to_i,
+        content_type: 'application/json'
+      }
+      properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(payload, routing_key: routing_key, persistent: true,
-                        timestamp: Time.now.to_i, message_id: generate_id)
+      @exchange.publish(JSON.dump(message), {persistent: true}.
+        merge(properties).
+        merge(global_properties).
+        merge(non_overridable_properties))
     end
 
     private
+
+    def raise_publish_error(reason, routing_key, message)
+      msg = "Unable to publish - #{reason}. Message: #{message.inspect}, Routing key: #{routing_key}."
+      logger.error(msg)
+      raise PublishError, msg
+    end
+
+    def ensure_connection!(routing_key, message)
+      raise_publish_error('no connection to broker', routing_key, message) unless @connection
+      raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
+    end
+
+    def api_config
+      @api_config ||= OpenStruct.new.tap do |config|
+        config.host = @config[:mq_api_host]
+        config.port = @config[:mq_api_port]
+        config.username = @config[:mq_username]
+        config.password = @config[:mq_password]
+        config.ssl = @config[:mq_api_ssl]
+        config.protocol = config.ssl ? "https://" : "http://"
+        config.management_uri = "#{config.protocol}#{config.username}:#{config.password}@#{config.host}:#{config.port}/"
+      end
+    end
+
+    def with_authentication_error_handler
+      yield
+    rescue Net::HTTPServerException => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      if ex.response.code == '401'
+        raise AuthenticationError.new('invalid api credentials')
+      else
+        raise
+      end
+    end
+
+    def with_connection_error_handler
+      yield
+    rescue Errno::ECONNREFUSED => ex
+      logger.error "api connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to api at #{api_config.management_uri}")
+    end
+
+    def with_bunny_precondition_handler(item)
+      yield
+    rescue Bunny::PreconditionFailed => ex
+      logger.error ex.message
+      s = "RabbitMQ responded with Precondition Failed when creating this #{item}. " +
+          "Perhaps it is being redeclared with non-matching attributes"
+      raise WorkerSetupError.new(s)
+    end
+
+    def with_bunny_connection_handler(uri)
+      yield
+    rescue Bunny::TCPConnectionFailed => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+    end
 
     def work_pool_threads
       @channel.work_pool.threads || []
@@ -180,6 +233,10 @@ module Hutch
 
     def generate_id
       SecureRandom.uuid
+    end
+
+    def global_properties
+      Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
   end
 end

@@ -21,10 +21,18 @@ module Hutch
     Hutch::Logging.logger
   end
 
-  def self.connect(config = Hutch::Config)
+  def self.global_properties=(properties)
+    @global_properties = properties
+  end
+
+  def self.global_properties
+    @global_properties ||= {}
+  end
+
+  def self.connect(options = {}, config = Hutch::Config)
     unless connected?
       @broker = Hutch::Broker.new(config)
-      @broker.connect
+      @broker.connect(options)
       @connected = true
     end
   end
@@ -37,8 +45,8 @@ module Hutch
     @connected
   end
 
-  def self.publish(routing_key, message)
-    @broker.publish(routing_key, message)
+  def self.publish(*args)
+    broker.publish(*args)
   end
 end
 
