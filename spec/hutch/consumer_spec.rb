@@ -58,22 +58,42 @@ describe Hutch::Consumer do
   end
 
   describe '.queue_name' do
-    it 'replaces module separators with colons' do
-      module Foo
-        class Bar
-          include Hutch::Consumer
-        end
-      end
+    it 'overrides the queue name' do
+      
+    end
+  end
 
-      Foo::Bar.queue_name.should == 'foo:bar'
+  describe '.get_queue_name' do
+
+    context 'when queue name has been set explicitly' do
+      it 'returns the give queue name' do
+        class Foo
+          include Hutch::Consumer
+          queue_name "bar"
+        end
+
+        Foo.get_queue_name.should == "bar"
+      end
     end
 
-    it 'converts camelcase class names to snake case' do
-      class FooBarBAZ
-        include Hutch::Consumer
+    context 'when no queue name has been set' do
+      it 'replaces module separators with colons' do
+        module Foo
+          class Bar
+            include Hutch::Consumer
+          end
+        end
+
+        Foo::Bar.get_queue_name.should == 'foo:bar'
       end
 
-      FooBarBAZ.queue_name.should == 'foo_bar_baz'
+      it 'converts camelcase class names to snake case' do
+        class FooBarBAZ
+          include Hutch::Consumer
+        end
+
+        FooBarBAZ.get_queue_name.should == 'foo_bar_baz'
+      end
     end
   end
 end
