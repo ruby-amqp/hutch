@@ -61,6 +61,21 @@ class FailedPaymentConsumer
 end
 ```
 
+By default, the queue name will be named using the consumer class. You can set
+the queue name explicitly by using the `queue_name` method:
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  queue_name 'failed_payments'
+
+  def process(message)
+    mark_payment_as_failed(message[:id])
+  end
+end
+```
+
 If you are using Hutch with Rails and want to make Hutch log to the Rails
 logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 
