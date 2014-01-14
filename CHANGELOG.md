@@ -1,5 +1,23 @@
 ## 0.7.0 — January 14, 2014
 
+### Optional HTTP API Use
+
+It is now possible to make Hutch [not use RabbitMQ HTTP
+API](https://github.com/gocardless/hutch/pull/69) (e.g. when the
+RabbitMQ management plugin that provides it is not available).
+
+
+### Extra Arguments for Hutch::Broker#publish
+
+Extra options [passed to `Hutch::Broker#publish` will now be propagated](https://github.com/gocardless/hutch/pull/61).
+
+
+### Content-Type for Messages
+
+Messages published with Hutch now have content type set
+to `application/json`.
+
+
 ### Greater Heartbeat Interval
 
 Hutch now uses heartbeat interval of 30, so heartbeats won't interfere with transfers
