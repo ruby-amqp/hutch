@@ -1,6 +1,30 @@
-## 0.7.0 — unreleased
+## 0.7.0 — January 14, 2014
 
-- [Global properties can now be specified](https://github.com/gocardless/hutch/pull/62) for publishing
+### Custom Queue Names
+
+It is now possible to [specify an optional queue name](https://github.com/gocardless/hutch/pull/49):
+
+``` ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  queue_name 'failed_payments'
+
+  def process(message)
+    mark_payment_as_failed(message[:id])
+  end
+end
+```
+
+### Global Properties for Publishers
+
+[Global properties can now be specified](https://github.com/gocardless/hutch/pull/62) for publishing:
+
+``` ruby
+Hutch.global_properties = proc {
+  { app_id: 'api', headers: { request_id: RequestId.request_id } }
+}
+```
 
 ## 0.6.0 - November 4, 2013
 
