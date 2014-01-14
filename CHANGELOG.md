@@ -1,5 +1,11 @@
 ## 0.7.0 — January 14, 2014
 
+### Greater Heartbeat Interval
+
+Hutch now uses heartbeat interval of 30, so heartbeats won't interfere with transfers
+of large messages over high latency networks (e.g. between AWS availability regions).
+
+
 ### Custom Queue Names
 
 It is now possible to [specify an optional queue name](https://github.com/gocardless/hutch/pull/49):
