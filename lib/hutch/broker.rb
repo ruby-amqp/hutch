@@ -215,7 +215,7 @@ module Hutch
       yield
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
-      s = "RabbitMQ responded with Precondition Failed when creating this #{item}. " +
+      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " +
           "Perhaps it is being redeclared with non-matching attributes"
       raise WorkerSetupError.new(s)
     end
