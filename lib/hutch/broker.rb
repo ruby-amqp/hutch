@@ -81,7 +81,7 @@ module Hutch
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      logger.info "connecting to rabbitmq management api (#{api_config.management_uri})"
+      logger.info "connecting to rabbitmq HTTP API (#{api_config.management_uri})"
 
       with_authentication_error_handler do
         with_connection_error_handler do
@@ -198,7 +198,7 @@ module Hutch
     rescue Net::HTTPServerException => ex
       logger.error "api connection error: #{ex.message.downcase}"
       if ex.response.code == '401'
-        raise AuthenticationError.new('invalid api credentials')
+        raise AuthenticationError.new('invalid HTTP API credentials')
       else
         raise
       end
@@ -208,7 +208,7 @@ module Hutch
       yield
     rescue Errno::ECONNREFUSED => ex
       logger.error "api connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to api at #{api_config.management_uri}")
+      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.management_uri}")
     end
 
     def with_bunny_precondition_handler(item)
