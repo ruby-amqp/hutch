@@ -196,7 +196,7 @@ module Hutch
     def with_authentication_error_handler
       yield
     rescue Net::HTTPServerException => ex
-      logger.error "api connection error: #{ex.message.downcase}"
+      logger.error "HTTP API connection error: #{ex.message.downcase}"
       if ex.response.code == '401'
         raise AuthenticationError.new('invalid HTTP API credentials')
       else
@@ -207,7 +207,7 @@ module Hutch
     def with_connection_error_handler
       yield
     rescue Errno::ECONNREFUSED => ex
-      logger.error "api connection error: #{ex.message.downcase}"
+      logger.error "HTTP API connection error: #{ex.message.downcase}"
       raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.management_uri}")
     end
 
