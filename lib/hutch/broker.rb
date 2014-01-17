@@ -74,7 +74,9 @@ module Hutch
 
     def open_channel!
       logger.info 'opening rabbitmq channel'
-      @channel = connection.create_channel
+      @channel = connection.create_channel.tap do |ch|
+        ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
+      end
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
