@@ -1,3 +1,12 @@
+## 0.8.0 — unreleased
+
+### basic.qos Configuration
+
+It is now possible to configure `basic.qos` (aka channel prefetch) setting
+used by Hutch using the `:channel_prefetch` config key.
+
+
+
 ## 0.7.0 — January 14, 2014
 
 ### Optional HTTP API Use
