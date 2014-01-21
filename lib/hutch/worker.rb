@@ -97,8 +97,7 @@ module Hutch
 
     def consumers=(val)
       if val.empty?
-        logger.warn 'no consumer loaded, ensure there\'s' +
-                    'no configuration issue'
+        logger.warn "no consumer loaded, ensure there's no configuration issue"
       end
       @consumers = val
     end
