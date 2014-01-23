@@ -82,8 +82,8 @@ describe Hutch::Broker do
     before { broker.stub(:channel) { channel } }
 
     it 'applies a global namespace' do
-      config[:namespace] = 'service'
-      broker.channel.should_receive(:queue).with { |*args| args.first == 'service:test' }
+      config[:namespace] = 'mirror-all.service'
+      broker.channel.should_receive(:queue).with { |*args| args.first == 'mirror-all.service:test' }
       broker.queue('test')
     end
   end
@@ -108,7 +108,7 @@ describe Hutch::Broker do
   end
 
   describe '#bind_queue' do
-    
+
     around { |example| broker.connect { example.run } }
 
     let(:routing_keys) { %w( a b c ) }
