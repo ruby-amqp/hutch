@@ -98,7 +98,7 @@ module Hutch
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
       with_bunny_precondition_handler('queue') do
-        namespace = @config[:namespace].to_s.downcase.gsub(/\W|:/, "")
+        namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
         name = name.prepend(namespace + ":") unless namespace.empty?
         channel.queue(name, durable: true)
       end
