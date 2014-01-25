@@ -1,5 +1,12 @@
 ## 0.8.0 — unreleased
 
+### Relaxed Queue Namespace Validation
+
+Namespaces now can include any characters that are valid in RabbitMQ
+queue names.
+
+Contributed by Garrett Johnson.
+
 ### basic.qos Configuration
 
 It is now possible to configure `basic.qos` (aka channel prefetch) setting
