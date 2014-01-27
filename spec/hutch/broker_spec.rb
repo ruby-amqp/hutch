@@ -58,6 +58,17 @@ describe Hutch::Broker do
 
       specify { set_up_amqp_connection.should raise_error }
     end
+
+    context 'with channel_prefetch set' do
+      let(:prefetch_value) { 1 }
+      before { config[:channel_prefetch] = prefetch_value }
+      after  { broker.disconnect }
+
+      it "set's channel's prefetch" do
+        Bunny::Channel.any_instance.should_receive(:prefetch).with(prefetch_value)
+        broker.set_up_amqp_connection
+      end
+    end
   end
 
   describe '#set_up_api_connection', rabbitmq: true do
