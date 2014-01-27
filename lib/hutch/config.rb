@@ -25,7 +25,8 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
-        namespace: nil
+        namespace: nil,
+        channel_prefetch: nil
       }
     end
 
