@@ -55,9 +55,8 @@ module Hutch
       tls_key  = @config[:mq_tls_cert]
       tls_cert = @config[:mq_tls_key]
       protocol = tls ? "amqps://" : "amqp://"
-      uri      = "#{username}:#{password}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
-      sanitized_uri = "#{protocol}#{host}:#{port}"
-      logger.info "connecting to rabbitmq (#{protocol}#{uri})"
+      sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      logger.info "connecting to rabbitmq (#{sanitized_uri})"
 
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
@@ -83,7 +82,7 @@ module Hutch
     # is necessary to do a few things that are impossible over AMQP. E.g.
     # listing queues and bindings.
     def set_up_api_connection
-      logger.info "connecting to rabbitmq HTTP API (#{api_config.management_uri})"
+      logger.info "connecting to rabbitmq HTTP API (#{api_config.sanitized_uri})"
 
       with_authentication_error_handler do
         with_connection_error_handler do
@@ -191,7 +190,7 @@ module Hutch
         config.password = @config[:mq_password]
         config.ssl = @config[:mq_api_ssl]
         config.protocol = config.ssl ? "https://" : "http://"
-        config.management_uri = "#{config.protocol}#{config.username}:#{config.password}@#{config.host}:#{config.port}/"
+        config.sanitized_uri = "#{config.protocol}#{config.username}@#{config.host}:#{config.port}/"
       end
     end
 
@@ -210,7 +209,7 @@ module Hutch
       yield
     rescue Errno::ECONNREFUSED => ex
       logger.error "HTTP API connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.management_uri}")
+      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.sanitized_uri}")
     end
 
     def with_bunny_precondition_handler(item)
