@@ -1,5 +1,10 @@
 ## 0.8.0 — unreleased
 
+### Missing Require
+
+`hutch/consumer.rb` no longer fails to load with the
+apps that do not `require "set"`.
+
 ### Relaxed Queue Namespace Validation
 
 Namespaces now can include any characters that are valid in RabbitMQ
