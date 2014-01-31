@@ -1,3 +1,5 @@
+require 'set'
+
 module Hutch
   # Include this module in a class to register it as a consumer. Consumers
   # gain a class method called `consume`, which should be used to register
