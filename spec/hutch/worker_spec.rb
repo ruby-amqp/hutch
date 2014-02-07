@@ -47,6 +47,7 @@ describe Hutch::Worker do
     let(:properties) { double('Properties', message_id: nil) }
     before { consumer.stub(new: consumer_instance) }
     before { broker.stub(:ack) }
+    before { broker.stub(:nack) }
 
     it 'passes the message to the consumer' do
       consumer_instance.should_receive(:process).
@@ -70,8 +71,8 @@ describe Hutch::Worker do
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
 
-      it 'acknowledges the message' do
-        broker.should_receive(:ack).with(delivery_info.delivery_tag)
+      it 'rejects the message' do
+        broker.should_receive(:nack).with(delivery_info.delivery_tag)
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
     end
@@ -86,8 +87,8 @@ describe Hutch::Worker do
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
 
-      it 'acknowledges the message' do
-        broker.should_receive(:ack).with(delivery_info.delivery_tag)
+      it 'rejects the message' do
+        broker.should_receive(:nack).with(delivery_info.delivery_tag)
         worker.handle_message(consumer, delivery_info, properties, payload)
       end
     end
