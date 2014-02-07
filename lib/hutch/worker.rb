@@ -85,7 +85,7 @@ module Hutch
         broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
         handle_error(properties.message_id, consumer, ex)
-        broker.ack(delivery_info.delivery_tag)
+        broker.nack(delivery_info.delivery_tag)
       end
     end
 

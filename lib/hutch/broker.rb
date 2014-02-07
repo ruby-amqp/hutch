@@ -152,6 +152,10 @@ module Hutch
       @channel.ack(delivery_tag, false)
     end
 
+    def nack(delivery_tag)
+      @channel.nack(delivery_tag, false, false)
+    end
+
     def publish(routing_key, message, properties = {})
       ensure_connection!(routing_key, message)
 
