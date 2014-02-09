@@ -1,5 +1,12 @@
 ## 0.8.0 — unreleased
 
+### Uncaught Exceptions Result in Rejected Messages
+
+Uncaught exceptions in consumers now result in Hutch rejecting
+messages (deliveries) using `basic.nack`. This way they are [dead lettered](http://www.rabbitmq.com/dlx.html).
+
+Contributed by Garrett Johnson.
+
 ### Missing Require
 
 `hutch/consumer.rb` no longer fails to load with the
