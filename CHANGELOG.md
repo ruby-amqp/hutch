@@ -1,4 +1,9 @@
-## 0.8.0 — unreleased
+## 0.9.0 — unreleased
+
+No changes yet.
+
+
+## 0.8.0 — February 13, 2014
 
 ### Uncaught Exceptions Result in Rejected Messages
 
