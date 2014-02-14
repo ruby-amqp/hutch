@@ -17,6 +17,8 @@ Contributed by Garrett Johnson.
 `hutch/consumer.rb` no longer fails to load with the
 apps that do not `require "set"`.
 
+Contributed by Garrett Johnson.
+
 ### Relaxed Queue Namespace Validation
 
 Namespaces now can include any characters that are valid in RabbitMQ
