@@ -1,6 +1,10 @@
 ## 0.9.0 — unreleased
 
-No changes yet.
+### Bunny Update
+
+Bunny is updated to 1.1.3+ which should offer
+[much better latency](https://github.com/ruby-amqp/bunny/pull/187) for
+workloads with lots of small messages published frequently.
 
 
 ## 0.8.0 — February 13, 2014
