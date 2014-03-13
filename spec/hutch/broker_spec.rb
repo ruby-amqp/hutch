@@ -231,6 +231,18 @@ describe Hutch::Broker do
         broker.logger.should_receive(:error)
         broker.publish('test.key', 'message') rescue nil
       end
+
+      context "because of closed connection" do
+        before do
+          broker.set_up_amqp_connection
+          broker.disconnect
+        end
+
+        it "logs an error" do
+          broker.logger.should_receive(:error)
+          broker.publish('test.key', 'message') rescue nil
+        end
+      end
     end
   end
 end

@@ -183,7 +183,9 @@ module Hutch
 
     def ensure_connection!(routing_key, message)
       raise_publish_error('no connection to broker', routing_key, message) unless @connection
-      raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
+      unless @connection.open?
+        raise_publish_error("connection is #{@connection.status}. Bunny transport status: #{@connection.transport.status}", routing_key, message)
+      end
     end
 
     def api_config
