@@ -52,8 +52,8 @@ module Hutch
       username = @config[:mq_username]
       password = @config[:mq_password]
       tls      = @config[:mq_tls]
-      tls_key  = @config[:mq_tls_cert]
-      tls_cert = @config[:mq_tls_key]
+      tls_key  = @config[:mq_tls_key]
+      tls_cert = @config[:mq_tls_cert]
       protocol = tls ? "amqps://" : "amqp://"
       sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
