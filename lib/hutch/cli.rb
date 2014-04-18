@@ -9,8 +9,8 @@ module Hutch
     include Logging
 
     # Run a Hutch worker with the command line interface.
-    def run
-      parse_options
+    def run(argv)
+      parse_options(argv)
 
       Hutch.logger.info "hutch booted with pid #{Process.pid}"
 

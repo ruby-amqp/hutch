@@ -4,5 +4,5 @@ require_relative '../lib/hutch'
 require_relative '../lib/hutch/cli'
 
 cli = Hutch::CLI.new
-cli.run
+cli.run(ARGV)
 
