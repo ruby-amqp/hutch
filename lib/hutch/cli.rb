@@ -12,6 +12,8 @@ module Hutch
     def run(argv = ARGV)
       parse_options(argv)
 
+      Process.daemon(true) if Hutch::Config.daemonise
+
       Hutch.logger.info "hutch booted with pid #{Process.pid}"
 
       if load_app && start_work_loop == :success
@@ -168,6 +170,10 @@ module Hutch
 
         opts.on('--namespace NAMESPACE', 'Queue namespace') do |namespace|
           Hutch::Config.namespace = namespace
+        end
+
+        opts.on('-d', '--daemonise', 'Daemonise') do |daemonise|
+          Hutch::Config.daemonise = daemonise
         end
 
         opts.on('--version', 'Print the version and exit') do

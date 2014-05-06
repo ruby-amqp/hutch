@@ -26,6 +26,7 @@ module Hutch
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
         namespace: nil,
+        daemonise: false,
         channel_prefetch: 0
       }
     end
