@@ -30,7 +30,7 @@ module Hutch
     # gracefully. Forceful shutdowns are very bad!
     def register_signal_handlers
       Thread.main[:signal_queue] = []
-      %w(QUIT TERM INT).map(&:to_sym).each do |sig|
+      %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym).each do |sig|
         # This needs to be reentrant, so we queue up signals to be handled
         # in the run loop, rather than acting on signals here
         trap(sig) do
