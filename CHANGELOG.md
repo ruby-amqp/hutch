@@ -1,4 +1,8 @@
-## 0.9.0 — unreleased
+## 0.10.0 — unreleased
+
+No changes yet.
+
+## 0.9.0 — May 13, 2014
 
 ### Platform-aware Signal Registration
 
