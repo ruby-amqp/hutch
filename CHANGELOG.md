@@ -1,10 +1,29 @@
 ## 0.9.0 — unreleased
 
+### Platform-aware Signal Registration
+
+Hutch will no longer attempt to register signal traps
+for signals not supported by the environment (e.g. on by certain OSes).
+
+Contributed by Tobias Matthies.
+
+### TLS Fixes
+
+Hutch now properly passes client TLS key and certificate to
+Bunny.
+
+Contributed by Eric Nelson.
+
 ### Bunny Update
 
-Bunny is updated to 1.1.3+ which should offer
+Bunny is updated to 1.2.x which should offer
 [much better latency](https://github.com/ruby-amqp/bunny/pull/187) for
 workloads with lots of small messages published frequently.
+
+### More Unit Testing Friendly CLI/Runner
+
+`Hutch::CLI#run` now accepts a parameter and is easier to use
+in automated tests.
 
 
 ## 0.8.0 — February 13, 2014
