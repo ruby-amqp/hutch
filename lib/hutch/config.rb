@@ -7,7 +7,7 @@ module Hutch
   module Config
     require 'yaml'
 
-    def self.initialize
+    def self.initialize(params={})
       @config = {
         mq_host: 'localhost',
         mq_port: 5672,
@@ -28,7 +28,7 @@ module Hutch
         namespace: nil,
         daemonise: false,
         channel_prefetch: 0
-      }
+      }.merge(params)
     end
 
     def self.get(attr)
