@@ -29,8 +29,8 @@ describe Hutch::Consumer do
 
   describe 'module inclusion' do
     it 'registers the class as a consumer' do
-      Hutch.should_receive(:register_consumer) do |klass|
-        klass.should == simple_consumer
+      expect(Hutch).to receive(:register_consumer) do |klass|
+        expect(klass).to eq(simple_consumer)
       end
 
       simple_consumer
@@ -40,20 +40,24 @@ describe Hutch::Consumer do
 
   describe '.consume' do
     it 'saves the routing key to the consumer' do
-      simple_consumer.routing_keys.should include 'hutch.test1'
+      expect(simple_consumer.routing_keys).to include 'hutch.test1'
     end
 
     context 'with multiple routing keys' do
       it 'registers the class once for each routing key' do
-        complex_consumer.routing_keys.should include 'hutch.test1'
-        complex_consumer.routing_keys.should include 'hutch.test2'
+        expect(complex_consumer.routing_keys).to include 'hutch.test1'
+        expect(complex_consumer.routing_keys).to include 'hutch.test2'
       end
     end
 
     context 'when given the same routing key multiple times' do
       subject { simple_consumer.routing_keys }
       before { simple_consumer.consume 'hutch.test1' }
-      its(:length) { should == 1}
+
+      describe '#length' do
+        subject { super().length }
+        it { is_expected.to eq(1)}
+      end
     end
   end
 
@@ -72,7 +76,7 @@ describe Hutch::Consumer do
           queue_name "bar"
         end
 
-        Foo.get_queue_name.should == "bar"
+        expect(Foo.get_queue_name).to eq("bar")
       end
     end
 
@@ -84,7 +88,7 @@ describe Hutch::Consumer do
           end
         end
 
-        Foo::Bar.get_queue_name.should == 'foo:bar'
+        expect(Foo::Bar.get_queue_name).to eq('foo:bar')
       end
 
       it 'converts camelcase class names to snake case' do
@@ -92,7 +96,7 @@ describe Hutch::Consumer do
           include Hutch::Consumer
         end
 
-        FooBarBAZ.get_queue_name.should == 'foo_bar_baz'
+        expect(FooBarBAZ.get_queue_name).to eq('foo_bar_baz')
       end
     end
   end

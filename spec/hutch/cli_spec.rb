@@ -8,7 +8,7 @@ describe Hutch::CLI do
     context "--config" do
       context "when the config file does not exist" do
         let(:file) { "/path/to/nonexistant/file" }
-        before { STDERR.stub(:write) }
+        before { allow(STDERR).to receive(:write) }
 
         it "bails" do
           expect {
@@ -23,7 +23,7 @@ describe Hutch::CLI do
         end
 
         it "parses the config" do
-          Hutch::Config.should_receive(:load_from_file)
+          expect(Hutch::Config).to receive(:load_from_file)
           cli.parse_options(["--config=#{file}"])
         end
       end
@@ -32,7 +32,7 @@ describe Hutch::CLI do
     context "--mq-tls-key" do
       context "when the keyfile file does not exist" do
         let(:file) { "/path/to/nonexistant/file" }
-        before { STDERR.stub(:write) }
+        before { allow(STDERR).to receive(:write) }
 
         it "bails" do
           expect {
@@ -47,7 +47,7 @@ describe Hutch::CLI do
         end
 
         it "sets mq_tls_key to the file" do
-          Hutch::Config.should_receive(:mq_tls_key=)
+          expect(Hutch::Config).to receive(:mq_tls_key=)
           cli.parse_options(["--mq-tls-key=#{file}"])
         end
       end
@@ -56,7 +56,7 @@ describe Hutch::CLI do
     context "--mq-tls-cert" do
       context "when the certfile file does not exist" do
         let(:file) { "/path/to/nonexistant/file" }
-        before { STDERR.stub(:write) }
+        before { allow(STDERR).to receive(:write) }
 
         it "bails" do
           expect {
@@ -71,7 +71,7 @@ describe Hutch::CLI do
         end
 
         it "sets mq_tls_cert to the file" do
-          Hutch::Config.should_receive(:mq_tls_cert=)
+          expect(Hutch::Config).to receive(:mq_tls_cert=)
           cli.parse_options(["--mq-tls-cert=#{file}"])
         end
       end

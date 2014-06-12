@@ -15,6 +15,7 @@ require 'logger'
 
 RSpec.configure do |config|
   config.before(:all) { Hutch::Config.log_level = Logger::FATAL }
+  config.raise_errors_for_deprecations!
 end
 
 # Constants (classes, etc) defined within a block passed to this method
