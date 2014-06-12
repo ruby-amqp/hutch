@@ -11,16 +11,16 @@ describe Hutch::Logging do
     context 'with the default logger' do
       subject { Hutch::Logging.logger }
 
-      it { should be_instance_of(Logger) }
+      it { is_expected.to be_instance_of(Logger) }
     end
 
     context 'with a custom logger' do
-      let(:dummy_logger) { mock("Dummy logger", warn: true, info: true) }
+      let(:dummy_logger) { double("Dummy logger", warn: true, info: true) }
       after { Hutch::Logging.setup_logger }
 
       it "users the custom logger" do
         Hutch::Logging.logger = dummy_logger
-        Hutch::Logging.logger.should == dummy_logger
+        expect(Hutch::Logging.logger).to eq(dummy_logger)
       end
     end
   end
