@@ -2,8 +2,17 @@ require 'spec_helper'
 require 'hutch/broker'
 
 describe Hutch::Broker do
+  let(:channel) { double(:bunny_channel, prefetch: nil, topic: nil) }
+  let(:connection) { double(:bunny_session, start: nil, create_channel: channel) }
+  let(:bunny_class) { double(:bunny, new: bunny) }
+  let(:bunny) { double(:bunny, new: connection, start: nil, create_channel: nil) }
+
   let(:config) { deep_copy(Hutch::Config.user_config) }
   subject(:broker) { Hutch::Broker.new(config) }
+
+  before :each do
+    broker.message_broker = bunny
+  end
 
   describe '#connect' do
     before { allow(broker).to receive(:set_up_amqp_connection) }

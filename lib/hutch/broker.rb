@@ -9,9 +9,14 @@ module Hutch
     include Logging
 
     attr_accessor :connection, :channel, :exchange, :api_client
+    attr_writer :message_broker
 
     def initialize(config = nil)
       @config = config || Hutch::Config
+    end
+
+    def message_broker
+      @message_broker ||= Bunny
     end
 
     def connect(options = {})
@@ -58,7 +63,7 @@ module Hutch
       sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
 
-      @connection = Bunny.new(host: host, port: port, vhost: vhost,
+      @connection = message_broker.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
                               heartbeat: 30, automatically_recover: true,

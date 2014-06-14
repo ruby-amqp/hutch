@@ -16,4 +16,5 @@ end
 group :development, :darwin do
   gem "rb-fsevent", "~> 0.9"
   gem "growl", "~> 1.0.3"
+  gem "pry", "0.9.12.6"
 end
