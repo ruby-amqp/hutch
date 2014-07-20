@@ -82,12 +82,16 @@ module Hutch
       begin
         message = Message.new(delivery_info, properties, payload)
 
-        consumer.new.process(message)
+        message_type = catch(:hutch_message) { consumer.new.process(message) }
+
+        case message_type
+        when :reject
+          return broker.reject(delivery_info.delivery_tag)
+        when :requeue
+          return broker.requeue(delivery_info.delivery_tag)
+        end
+
         broker.ack(delivery_info.delivery_tag)
-      rescue Requeue
-        broker.requeue(delivery_info.delivery_tag)
-      rescue Reject
-        broker.reject(delivery_info.delivery_tag)
       rescue StandardError => ex
         handle_error(properties.message_id, consumer, ex)
         broker.nack(delivery_info.delivery_tag)

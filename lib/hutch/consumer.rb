@@ -10,6 +10,14 @@ module Hutch
       Hutch.register_consumer(base)
     end
 
+    def reject!
+      throw :hutch_message, :reject
+    end
+
+    def requeue!
+      throw :hutch_message, :requeue
+    end
+
     module ClassMethods
       # Add one or more routing keys to the set of routing keys the consumer
       # wants to subscribe to.
