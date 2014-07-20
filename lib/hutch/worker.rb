@@ -81,8 +81,13 @@ module Hutch
       broker = @broker
       begin
         message = Message.new(delivery_info, properties, payload)
+
         consumer.new.process(message)
         broker.ack(delivery_info.delivery_tag)
+      rescue Requeue
+        broker.requeue(delivery_info.delivery_tag)
+      rescue Reject
+        broker.reject(delivery_info.delivery_tag)
       rescue StandardError => ex
         handle_error(properties.message_id, consumer, ex)
         broker.nack(delivery_info.delivery_tag)
