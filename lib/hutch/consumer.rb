@@ -5,17 +5,19 @@ module Hutch
   # gain a class method called `consume`, which should be used to register
   # the routing keys a consumer is interested in.
   module Consumer
+    attr_accessor :broker, :delivery_info
+
     def self.included(base)
       base.extend(ClassMethods)
       Hutch.register_consumer(base)
     end
 
     def reject!
-      throw :hutch_message, :reject
+      broker.reject(delivery_info.delivery_tag)
     end
 
     def requeue!
-      throw :hutch_message, :requeue
+      broker.requeue(delivery_info.delivery_tag)
     end
 
     module ClassMethods
