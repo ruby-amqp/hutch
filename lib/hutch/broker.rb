@@ -148,6 +148,14 @@ module Hutch
       @channel.work_pool.kill
     end
 
+    def requeue(delivery_tag)
+      @channel.reject(delivery_tag, true)
+    end
+
+    def reject(delivery_tag, requeue=false)
+      @channel.reject(delivery_tag, requeue)
+    end
+
     def ack(delivery_tag)
       @channel.ack(delivery_tag, false)
     end
