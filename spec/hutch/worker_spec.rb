@@ -47,6 +47,8 @@ describe Hutch::Worker do
     before { allow(consumer).to receive_messages(new: consumer_instance) }
     before { allow(broker).to receive(:ack) }
     before { allow(broker).to receive(:nack) }
+    before { allow(consumer_instance).to receive(:broker=) }
+    before { allow(consumer_instance).to receive(:delivery_info=) }
 
     it 'passes the message to the consumer' do
       expect(consumer_instance).to receive(:process).
