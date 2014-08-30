@@ -19,8 +19,11 @@ module Hutch
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       if block_given?
-        yield
-        disconnect
+        begin
+          yield
+        ensure
+          disconnect
+        end
       end
     end
 

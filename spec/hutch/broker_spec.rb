@@ -32,6 +32,17 @@ describe Hutch::Broker do
       end
     end
 
+    context 'when given a block that fails' do
+      let(:exception) { Class.new(StandardError) }
+
+      it 'disconnects' do
+        expect(broker).to receive(:disconnect).once
+        expect do
+          broker.connect { fail exception }
+        end.to raise_error(exception)
+      end
+    end
+
     context "with options" do
       let(:options) { { enable_http_api_use: false } }
 
