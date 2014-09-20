@@ -27,6 +27,7 @@ module Hutch
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
         namespace: nil,
         daemonise: false,
+        pidfile: nil,
         channel_prefetch: 0
       }.merge(params)
     end
