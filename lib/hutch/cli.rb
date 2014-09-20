@@ -12,9 +12,11 @@ module Hutch
     def run(argv = ARGV)
       parse_options(argv)
 
-      Process.daemon(true) if Hutch::Config.daemonise
+      ::Process.daemon(true) if Hutch::Config.daemonise
 
-      Hutch.logger.info "hutch booted with pid #{Process.pid}"
+      write_pid if Hutch::Config.pidfile
+
+      Hutch.logger.info "hutch booted with pid #{::Process.pid}"
 
       if load_app && start_work_loop == :success
         # If we got here, the worker was shut down nicely
@@ -176,6 +178,10 @@ module Hutch
           Hutch::Config.daemonise = daemonise
         end
 
+        opts.on('--pidfile PIDFILE', 'Pidfile') do |pidfile|
+          Hutch::Config.pidfile = pidfile
+        end
+
         opts.on('--version', 'Print the version and exit') do
           puts "hutch v#{VERSION}"
           exit 0
@@ -187,5 +193,12 @@ module Hutch
         end
       end.parse!(args)
     end
+
+    def write_pid
+      pidfile = File.expand_path(Hutch::Config.pidfile)
+      Hutch.logger.info "writing pid in #{pidfile}"
+      File.open(pidfile, 'w') { |f| f.puts ::Process.pid }
+    end
+
   end
 end
