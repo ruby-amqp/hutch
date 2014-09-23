@@ -19,8 +19,11 @@ module Hutch
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       if block_given?
-        yield
-        disconnect
+        begin
+          yield
+        ensure
+          disconnect
+        end
       end
     end
 
@@ -146,6 +149,14 @@ module Hutch
 
     def stop
       @channel.work_pool.kill
+    end
+
+    def requeue(delivery_tag)
+      @channel.reject(delivery_tag, true)
+    end
+
+    def reject(delivery_tag, requeue=false)
+      @channel.reject(delivery_tag, requeue)
     end
 
     def ack(delivery_tag)

@@ -6,29 +6,40 @@ describe Hutch::Broker do
   subject(:broker) { Hutch::Broker.new(config) }
 
   describe '#connect' do
-    before { broker.stub(:set_up_amqp_connection) }
-    before { broker.stub(:set_up_api_connection) }
-    before { broker.stub(:disconnect) }
+    before { allow(broker).to receive(:set_up_amqp_connection) }
+    before { allow(broker).to receive(:set_up_api_connection) }
+    before { allow(broker).to receive(:disconnect) }
 
     it 'sets up the amqp connection' do
-      broker.should_receive(:set_up_amqp_connection)
+      expect(broker).to receive(:set_up_amqp_connection)
       broker.connect
     end
 
     it 'sets up the api connection' do
-      broker.should_receive(:set_up_api_connection)
+      expect(broker).to receive(:set_up_api_connection)
       broker.connect
     end
 
     it 'does not disconnect' do
-      broker.should_not_receive(:disconnect)
+      expect(broker).not_to receive(:disconnect)
       broker.connect
     end
 
     context 'when given a block' do
       it 'disconnects' do
-        broker.should_receive(:disconnect).once
+        expect(broker).to receive(:disconnect).once
         broker.connect { }
+      end
+    end
+
+    context 'when given a block that fails' do
+      let(:exception) { Class.new(StandardError) }
+
+      it 'disconnects' do
+        expect(broker).to receive(:disconnect).once
+        expect do
+          broker.connect { fail exception }
+        end.to raise_error(exception)
       end
     end
 
@@ -36,7 +47,7 @@ describe Hutch::Broker do
       let(:options) { { enable_http_api_use: false } }
 
       it "doesnt set up api" do
-        broker.should_not_receive(:set_up_api_connection)
+        expect(broker).not_to receive(:set_up_api_connection)
         broker.connect options
       end
     end
@@ -47,16 +58,27 @@ describe Hutch::Broker do
       before { broker.set_up_amqp_connection }
       after  { broker.disconnect }
 
-      its(:connection) { should be_a Bunny::Session }
-      its(:channel)    { should be_a Bunny::Channel }
-      its(:exchange)   { should be_a Bunny::Exchange }
+      describe '#connection' do
+        subject { super().connection }
+        it { is_expected.to be_a Bunny::Session }
+      end
+
+      describe '#channel' do
+        subject { super().channel }
+        it { is_expected.to be_a Bunny::Channel }
+      end
+
+      describe '#exchange' do
+        subject { super().exchange }
+        it { is_expected.to be_a Bunny::Exchange }
+      end
     end
 
     context 'when given invalid details' do
       before { config[:mq_host] = 'notarealhost' }
       let(:set_up_amqp_connection) { ->{ broker.set_up_amqp_connection } }
 
-      specify { set_up_amqp_connection.should raise_error }
+      specify { expect(set_up_amqp_connection).to raise_error }
     end
 
     context 'with channel_prefetch set' do
@@ -65,7 +87,8 @@ describe Hutch::Broker do
       after  { broker.disconnect }
 
       it "set's channel's prefetch" do
-        Bunny::Channel.any_instance.should_receive(:prefetch).with(prefetch_value)
+        expect_any_instance_of(Bunny::Channel).
+          to receive(:prefetch).with(prefetch_value)
         broker.set_up_amqp_connection
       end
     end
@@ -76,7 +99,10 @@ describe Hutch::Broker do
       before { broker.set_up_api_connection }
       after  { broker.disconnect }
 
-      its(:api_client) { should be_a CarrotTop }
+      describe '#api_client' do
+        subject { super().api_client }
+        it { is_expected.to be_a CarrotTop }
+      end
     end
 
     context 'when given invalid details' do
@@ -84,17 +110,19 @@ describe Hutch::Broker do
       after  { broker.disconnect }
       let(:set_up_api_connection) { ->{ broker.set_up_api_connection } }
 
-      specify { set_up_api_connection.should raise_error }
+      specify { expect(set_up_api_connection).to raise_error }
     end
   end
 
   describe '#queue' do
     let(:channel) { double('Channel') }
-    before { broker.stub(:channel) { channel } }
+    before { allow(broker).to receive(:channel) { channel } }
 
     it 'applies a global namespace' do
       config[:namespace] = 'mirror-all.service'
-      broker.channel.should_receive(:queue).with { |*args| args.first == 'mirror-all.service:test' }
+      expect(broker.channel).to receive(:queue) do |*args|
+        args.first == 'mirror-all.service:test'
+      end
       broker.queue('test')
     end
   end
@@ -104,7 +132,10 @@ describe Hutch::Broker do
     subject { broker.bindings }
 
     context 'with no bindings' do
-      its(:keys) { should_not include 'test' }
+      describe '#keys' do
+        subject { super().keys }
+        it { is_expected.not_to include 'test' }
+      end
     end
 
     context 'with a binding' do
@@ -114,7 +145,7 @@ describe Hutch::Broker do
         queue.unbind(broker.exchange, routing_key: 'key').delete
       end
 
-      it { should include({ 'test' => ['key'] }) }
+      it { is_expected.to include({ 'test' => ['key'] }) }
     end
   end
 
@@ -124,17 +155,17 @@ describe Hutch::Broker do
 
     let(:routing_keys) { %w( a b c ) }
     let(:queue) { double('Queue', bind: nil, unbind: nil, name: 'consumer') }
-    before { broker.stub(bindings: { 'consumer' => ['d'] }) }
+    before { allow(broker).to receive(:bindings).and_return('consumer' => ['d']) }
 
     it 'calls bind for each routing key' do
       routing_keys.each do |key|
-        queue.should_receive(:bind).with(broker.exchange, routing_key: key)
+        expect(queue).to receive(:bind).with(broker.exchange, routing_key: key)
       end
       broker.bind_queue(queue, routing_keys)
     end
 
     it 'calls unbind for each redundant existing binding' do
-      queue.should_receive(:unbind).with(broker.exchange, routing_key: 'd')
+      expect(queue).to receive(:unbind).with(broker.exchange, routing_key: 'd')
       broker.bind_queue(queue, routing_keys)
     end
 
@@ -142,29 +173,29 @@ describe Hutch::Broker do
       let(:queue) { broker.queue('consumer') }
       let(:routing_key) { 'key' }
 
-      before { broker.unstub(:bindings) }
+      before { allow(broker).to receive(:bindings).and_call_original }
       before { queue.bind(broker.exchange, routing_key: 'redundant-key') }
       after { queue.unbind(broker.exchange, routing_key: routing_key).delete }
 
       it 'results in the correct bindings' do
         broker.bind_queue(queue, [routing_key])
-        broker.bindings.should include({ queue.name => [routing_key] })
+        expect(broker.bindings).to include({ queue.name => [routing_key] })
       end
     end
   end
 
   describe '#wait_on_threads' do
     let(:thread) { double('Thread') }
-    before { broker.stub(work_pool_threads: threads) }
+    before { allow(broker).to receive(:work_pool_threads).and_return(threads) }
 
     context 'when all threads finish within the timeout' do
       let(:threads) { [double(join: thread), double(join: thread)] }
-      specify { expect(broker.wait_on_threads(1)).to be_true }
+      specify { expect(broker.wait_on_threads(1)).to be_truthy }
     end
 
     context 'when timeout expires for one thread' do
       let(:threads) { [double(join: thread), double(join: nil)] }
-      specify { expect(broker.wait_on_threads(1)).to be_false }
+      specify { expect(broker.wait_on_threads(1)).to be_falsey }
     end
   end
 
@@ -174,12 +205,12 @@ describe Hutch::Broker do
       after  { broker.disconnect }
 
       it 'publishes to the exchange' do
-        broker.exchange.should_receive(:publish).once
+        expect(broker.exchange).to receive(:publish).once
         broker.publish('test.key', 'message')
       end
 
       it 'sets default properties' do
-        broker.exchange.should_receive(:publish).with(
+        expect(broker.exchange).to receive(:publish).with(
           JSON.dump("message"),
           hash_including(
             persistent: true,
@@ -192,29 +223,31 @@ describe Hutch::Broker do
       end
 
       it 'allows passing message properties' do
-        broker.exchange.should_receive(:publish).once
+        expect(broker.exchange).to receive(:publish).once
         broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
       end
 
       context 'when there are global properties' do
         context 'as a hash' do
           before do
-            Hutch.stub global_properties: { app_id: 'app' }
+            allow(Hutch).to receive(:global_properties).and_return(app_id: 'app')
           end
 
           it 'merges the properties' do
-            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            expect(broker.exchange).
+              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
             broker.publish('test.key', 'message')
           end
         end
 
         context 'as a callable object' do
           before do
-            Hutch.stub global_properties: proc { { app_id: 'app' } }
+            allow(Hutch).to receive(:global_properties).and_return(proc { { app_id: 'app' } })
           end
 
           it 'calls the proc and merges the properties' do
-            broker.exchange.should_receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            expect(broker.exchange).
+              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
             broker.publish('test.key', 'message')
           end
         end
@@ -228,7 +261,7 @@ describe Hutch::Broker do
       end
 
       it 'logs an error' do
-        broker.logger.should_receive(:error)
+        expect(broker.logger).to receive(:error)
         broker.publish('test.key', 'message') rescue nil
       end
     end

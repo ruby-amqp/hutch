@@ -8,8 +8,8 @@ describe Hutch do
     it 'saves the consumers in the global consumer list' do
       Hutch.register_consumer(consumer_a)
       Hutch.register_consumer(consumer_b)
-      Hutch.consumers.should include consumer_a
-      Hutch.consumers.should include consumer_b
+      expect(Hutch.consumers).to include consumer_a
+      expect(Hutch.consumers).to include consumer_b
     end
   end
 
@@ -21,8 +21,8 @@ describe Hutch do
       let(:action)  { Hutch.connect(options, config) }
 
       it 'passes options and config' do
-        Hutch::Broker.should_receive(:new).with(config).and_return broker
-        broker.should_receive(:connect).with options
+        expect(Hutch::Broker).to receive(:new).with(config).and_return broker
+        expect(broker).to receive(:connect).with options
 
         action
       end
@@ -30,15 +30,15 @@ describe Hutch do
       it 'sets @connect' do
         action
 
-        expect(Hutch.connected?).to be_true
+        expect(Hutch.connected?).to be_truthy
       end
     end
 
     context 'connected' do
-      before { Hutch.stub(:connected?).and_return true }
+      before { allow(Hutch).to receive(:connected?).and_return true }
 
       it 'does not reconnect' do
-        Hutch::Broker.should_not_receive :new
+        expect(Hutch::Broker).not_to receive :new
         Hutch.connect
       end
     end
@@ -48,12 +48,10 @@ describe Hutch do
     let(:broker) { double(Hutch::Broker) }
     let(:args) { ['test.key', 'message', { headers: { foo: 'bar' } }] }
 
-    before do
-      Hutch.stub broker: broker
-    end
+    before { allow(Hutch).to receive(:broker).and_return(broker) }
 
     it 'delegates to Hutch::Broker#publish' do
-      broker.should_receive(:publish).with(*args)
+      expect(broker).to receive(:publish).with(*args)
       Hutch.publish(*args)
     end
   end

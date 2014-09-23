@@ -5,6 +5,8 @@ module Hutch
   class Message
     extend Forwardable
 
+    attr_reader :delivery_info, :properties, :payload
+
     def initialize(delivery_info, properties, payload)
       @delivery_info = delivery_info
       @properties    = properties

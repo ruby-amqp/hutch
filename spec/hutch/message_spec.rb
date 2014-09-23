@@ -7,17 +7,20 @@ describe Hutch::Message do
   let(:json_body) { MultiJson.dump(body) }
   subject(:message) { Hutch::Message.new(delivery_info, props, json_body) }
 
-  its(:body) { should == body }
+  describe '#body' do
+    subject { super().body }
+    it { is_expected.to eq(body) }
+  end
 
   describe '[]' do
     subject { message[:foo] }
-    it { should == 'bar' }
+    it { is_expected.to eq('bar') }
   end
 
   [:message_id, :timestamp].each do |method|
     describe method.to_s do
       it 'delegates to @properties' do
-        props.should_receive(method)
+        expect(props).to receive(method)
         message.send(method)
       end
     end
@@ -26,7 +29,7 @@ describe Hutch::Message do
   [:routing_key, :exchange].each do |method|
     describe method.to_s do
       it 'delegates to @delivery_info' do
-        delivery_info.should_receive(method)
+        expect(delivery_info).to receive(method)
         message.send(method)
       end
     end
