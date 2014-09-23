@@ -1,5 +1,9 @@
 ## 0.10.0 — unreleased
 
+### Bunny Update
+
+Bunny is updated to `1.4.x`.
+
 ### Exceptions in Error Handlers Don't Prevent Nacks
 
 Exceptions in error handlers no longer prevent messages from being
