@@ -1,6 +1,10 @@
 ## 0.10.0 — unreleased
 
-No changes yet.
+### Exceptions in Error Handlers Don't Prevent Nacks
+
+Exceptions in error handlers no longer prevent messages from being
+`basic.nack`-ed.
+
 
 ## 0.9.0 — May 13, 2014
 
