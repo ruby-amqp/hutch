@@ -85,13 +85,13 @@ module Hutch
         broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
         broker.nack(delivery_info.delivery_tag)
-        handle_error(properties.message_id, consumer, ex)
+        handle_error(properties.message_id, payload, consumer, ex)
       end
     end
 
-    def handle_error(message_id, consumer, ex)
+    def handle_error(message_id, payload, consumer, ex)
       Hutch::Config[:error_handlers].each do |backend|
-        backend.handle(message_id, consumer, ex)
+        backend.handle(message_id, payload, consumer, ex)
       end
     end
 
