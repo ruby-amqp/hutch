@@ -14,7 +14,7 @@ describe Hutch::ErrorHandlers::Sentry do
 
     it "logs the error to Sentry" do
       expect(Raven).to receive(:capture_exception).with(error)
-      error_handler.handle("1", double, error)
+      error_handler.handle("1", "{}", double, error)
     end
   end
 end

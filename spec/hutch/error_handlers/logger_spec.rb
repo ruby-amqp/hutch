@@ -9,7 +9,7 @@ describe Hutch::ErrorHandlers::Logger do
 
     it "logs three separate lines" do
       expect(Hutch::Logging.logger).to receive(:error).exactly(3).times
-      error_handler.handle("1", double, error)
+      error_handler.handle("1", "{}", double, error)
     end
   end
 end
