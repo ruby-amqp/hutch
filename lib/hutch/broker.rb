@@ -49,6 +49,18 @@ module Hutch
     end
 
     def open_connection!
+      if @config[:uri] && !@config[:uri].empty?
+        u = URI.parse(@config[:uri])
+
+        @config[:mq_host]     = u.host
+        @config[:mq_port]     = u.port
+        @config[:mq_vhost]    = u.path.sub(/^\//, "")
+        @config[:mq_username] = u.user
+        @config[:mq_password] = u.password
+
+        @config[:mq_tls]      = (u.port == )
+      end
+
       host     = @config[:mq_host]
       port     = @config[:mq_port]
       vhost    = @config[:mq_vhost]
@@ -60,7 +72,6 @@ module Hutch
       protocol = tls ? "amqps://" : "amqp://"
       sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
-
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
@@ -71,6 +82,7 @@ module Hutch
         @connection.start
       end
 
+      logger.info "connected to RabbitMQ at #{host} as #{username}"
       @connection
     end
 
