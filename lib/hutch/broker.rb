@@ -57,8 +57,6 @@ module Hutch
         @config[:mq_vhost]    = u.path.sub(/^\//, "")
         @config[:mq_username] = u.user
         @config[:mq_password] = u.password
-
-        @config[:mq_tls]      = (u.port == )
       end
 
       host     = @config[:mq_host]
