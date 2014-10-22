@@ -1,8 +1,17 @@
 ## 0.10.0 — unreleased
 
+### Configuration via URI
+
+Hutch now supports a new configuration key, `:uri`, which allows
+connection configuration via a URI.
+
+Note that since the URI has to include credentials, this option
+is not available on the command line.
+
 ### Bunny Update
 
-Bunny is updated to `1.4.x`.
+Bunny is updated to `1.5.1`, which mitigates the POODLE attack
+by disabling SSL 3.0 where possible.
 
 ### Exceptions in Error Handlers Don't Prevent Nacks
 
