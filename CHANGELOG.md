@@ -36,6 +36,20 @@ PID in a file at provided path.
 
 Contributed by Rustam Sharshenov.
 
+### More Info on Message
+
+Bunny's `delivery_info`, `properties` and payload are now accessible on `Hutch::Message`.
+
+Contributed by gregory.
+
+
+### Optional Config Parameters
+
+`Hutch::Config` constructor now accepts an extra hash of optional
+configuration parameters.
+
+Contributed by Ignazio Mostallino.
+
 
 ## 0.9.0 — May 13, 2014
 
