@@ -18,10 +18,23 @@ is not available on the command line.
 Bunny is updated to `1.5.1`, which mitigates the POODLE attack
 by disabling SSL 3.0 where possible.
 
+### Payload in Error Handlers
+
+Error handlers will now have access to message payload.
+
+Contributed by Daniel Farrell.
+
 ### Exceptions in Error Handlers Don't Prevent Nacks
 
 Exceptions in error handlers no longer prevent messages from being
 `basic.nack`-ed.
+
+### Pid File Support
+
+`:pidfile` is a new configuration option that stores Hutch process
+PID in a file at provided path.
+
+Contributed by Rustam Sharshenov.
 
 
 ## 0.9.0 — May 13, 2014
