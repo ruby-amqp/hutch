@@ -1,4 +1,9 @@
-## 0.10.0 — unreleased
+## 0.11.0 — unreleased
+
+No changes yet.
+
+
+## 0.10.0 — Oct 22, 2014
 
 ### Configuration via URI
 
