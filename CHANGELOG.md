@@ -1,6 +1,8 @@
 ## 0.11.0 — unreleased
 
-No changes yet.
+### Bunny Update
+
+Bunny is updated to [1.6.0](http://blog.rubyrabbitmq.info/blog/2014/10/31/bunny-1-dot-6-0-is-released/).
 
 
 ## 0.10.0 — Oct 22, 2014
