@@ -31,7 +31,8 @@ module Hutch
         namespace: nil,
         daemonise: false,
         pidfile: nil,
-        channel_prefetch: 0
+        channel_prefetch: 0,
+        publisher_confirms: false
       }.merge(params)
     end
 

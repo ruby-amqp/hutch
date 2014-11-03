@@ -88,6 +88,7 @@ module Hutch
       logger.info 'opening rabbitmq channel'
       @channel = connection.create_channel.tap do |ch|
         ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
+        ch.confirm_select if @config[:publisher_confirms]
       end
     end
 
@@ -188,10 +189,14 @@ module Hutch
       properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(JSON.dump(message), {persistent: true}.
+
+      response = @exchange.publish(JSON.dump(message), {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
+
+      channel.wait_for_confirms if @config[:publisher_confirms]
+      response
     end
 
     private
