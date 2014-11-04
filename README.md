@@ -26,6 +26,10 @@ over RabbitMQ. Hutch is opinionated: it uses topic exchanges for message
 distribution and makes some assumptions about how consumers and publishers
 should work.
 
+With Hutch, consumers are stored in separate files and include the `Hutch::Consumer` module.
+They are then loaded by a command line runner which connects to RabbitMQ, sets up queues and bindings,
+and so on. Publishers connect to RabbitMQ via `Hutch.connect` and publish using `Hutch.publish`.
+
 Hutch uses [Bunny](http://rubybunny.info) under the hood.
 
 
