@@ -8,7 +8,7 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :api_client
+    attr_accessor :connection, :channel, :exchange, :wait_exchange, :api_client
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -29,11 +29,12 @@ module Hutch
     def disconnect
       @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @channel, @connection, @api_client = nil, nil, nil
+      @exchange, @wait_exchange = nil, nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
-    # channel we use for talking to RabbitMQ. It also ensures the existance of
+    # channel we use for talking to RabbitMQ. It also ensures the existence of
     # the exchange we'll be using.
     def set_up_amqp_connection
       open_connection!
@@ -44,6 +45,32 @@ module Hutch
 
       with_bunny_precondition_handler('exchange') do
         @exchange = @channel.topic(exchange_name, durable: true)
+      end
+
+      set_up_wait_exchange
+    end
+
+    # Set up wait exchange as a fanout with queue
+    def set_up_wait_exchange
+      wait_exchange_name = @config[:mq_wait_exchange]
+      logger.info "using fanout wait exchange '#{wait_exchange_name}'"
+
+      with_bunny_precondition_handler('exchange') do
+        @wait_exchange = @channel.fanout(wait_exchange_name, durable: true)
+      end
+
+      wait_queue_name = @config[:mq_wait_queue]
+      logger.info "using wait queue '#{wait_queue_name}'"
+
+      with_bunny_precondition_handler('queue') do
+        wait_queue = channel.queue(
+          wait_queue_name,
+          durable: true,
+          arguments: {
+            'x-dead-letter-exchange' => @config[:mq_exchange]
+          }
+        )
+        wait_queue.bind(@wait_exchange)
       end
     end
 
