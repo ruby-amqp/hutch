@@ -56,4 +56,3 @@ describe Hutch do
     end
   end
 end
-

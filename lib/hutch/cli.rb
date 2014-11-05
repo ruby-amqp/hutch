@@ -66,7 +66,7 @@ module Hutch
       if File.directory?(path)
         # Smells like a Rails app if it's got a config/environment.rb file
         rails_path = File.expand_path(File.join(path, 'config/environment.rb'))
-        if File.exists?(rails_path)
+        if File.exist?(rails_path)
           logger.info "found rails project (#{path}), booting app"
           ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
           require rails_path
@@ -101,17 +101,17 @@ module Hutch
           Hutch::Config.mq_port = port
         end
 
-        opts.on("-t", "--[no-]mq-tls", 'Use TLS for the AMQP connection') do |tls|
+        opts.on('-t', '--[no-]mq-tls', 'Use TLS for the AMQP connection') do |tls|
           Hutch::Config.mq_tls = tls
         end
 
         opts.on('--mq-tls-cert FILE', 'Certificate  for TLS client verification') do |file|
-          abort "Certificate file '#{file}' not found" unless File.exists?(file)
+          abort "Certificate file '#{file}' not found" unless File.exist?(file)
           Hutch::Config.mq_tls_cert = file
         end
 
         opts.on('--mq-tls-key FILE', 'Private key for TLS client verification') do |file|
-          abort "Private key file '#{file}' not found" unless File.exists?(file)
+          abort "Private key file '#{file}' not found" unless File.exist?(file)
           Hutch::Config.mq_tls_key = file
         end
 
@@ -142,7 +142,7 @@ module Hutch
           Hutch::Config.mq_api_port = port
         end
 
-        opts.on("-s", "--[no-]mq-api-ssl", 'Use SSL for the RabbitMQ API') do |api_ssl|
+        opts.on('-s', '--[no-]mq-api-ssl', 'Use SSL for the RabbitMQ API') do |api_ssl|
           Hutch::Config.mq_api_ssl = api_ssl
         end
 
@@ -199,6 +199,5 @@ module Hutch
       Hutch.logger.info "writing pid in #{pidfile}"
       File.open(pidfile, 'w') { |f| f.puts ::Process.pid }
     end
-
   end
 end

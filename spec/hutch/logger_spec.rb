@@ -15,14 +15,13 @@ describe Hutch::Logging do
     end
 
     context 'with a custom logger' do
-      let(:dummy_logger) { double("Dummy logger", warn: true, info: true) }
+      let(:dummy_logger) { double('Dummy logger', warn: true, info: true) }
       after { Hutch::Logging.setup_logger }
 
-      it "users the custom logger" do
+      it 'users the custom logger' do
         Hutch::Logging.logger = dummy_logger
         expect(Hutch::Logging.logger).to eq(dummy_logger)
       end
     end
   end
 end
-

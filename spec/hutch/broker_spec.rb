@@ -28,7 +28,7 @@ describe Hutch::Broker do
     context 'when given a block' do
       it 'disconnects' do
         expect(broker).to receive(:disconnect).once
-        broker.connect { }
+        broker.connect {}
       end
     end
 
@@ -43,10 +43,10 @@ describe Hutch::Broker do
       end
     end
 
-    context "with options" do
+    context 'with options' do
       let(:options) { { enable_http_api_use: false } }
 
-      it "doesnt set up api" do
+      it "doesn't set up api" do
         expect(broker).not_to receive(:set_up_api_connection)
         broker.connect options
       end
@@ -76,7 +76,7 @@ describe Hutch::Broker do
 
     context 'when given invalid details' do
       before { config[:mq_host] = 'notarealhost' }
-      let(:set_up_amqp_connection) { ->{ broker.set_up_amqp_connection } }
+      let(:set_up_amqp_connection) { -> { broker.set_up_amqp_connection } }
 
       specify { expect(set_up_amqp_connection).to raise_error }
     end
@@ -87,8 +87,8 @@ describe Hutch::Broker do
       after  { broker.disconnect }
 
       it "set's channel's prefetch" do
-        expect_any_instance_of(Bunny::Channel).
-          to receive(:prefetch).with(prefetch_value)
+        expect_any_instance_of(Bunny::Channel)
+          .to receive(:prefetch).with(prefetch_value)
         broker.set_up_amqp_connection
       end
     end
@@ -108,7 +108,7 @@ describe Hutch::Broker do
     context 'when given invalid details' do
       before { config[:mq_api_host] = 'notarealhost' }
       after  { broker.disconnect }
-      let(:set_up_api_connection) { ->{ broker.set_up_api_connection } }
+      let(:set_up_api_connection) { -> { broker.set_up_api_connection } }
 
       specify { expect(set_up_api_connection).to raise_error }
     end
@@ -145,7 +145,7 @@ describe Hutch::Broker do
         queue.unbind(broker.exchange, routing_key: 'key').delete
       end
 
-      it { is_expected.to include({ 'test' => ['key'] }) }
+      it { is_expected.to include('test' => ['key']) }
     end
   end
 
@@ -179,7 +179,7 @@ describe Hutch::Broker do
 
       it 'results in the correct bindings' do
         broker.bind_queue(queue, [routing_key])
-        expect(broker.bindings).to include({ queue.name => [routing_key] })
+        expect(broker.bindings).to include(queue.name => [routing_key])
       end
     end
   end
@@ -211,7 +211,7 @@ describe Hutch::Broker do
 
       it 'sets default properties' do
         expect(broker.exchange).to receive(:publish).with(
-          JSON.dump("message"),
+          JSON.dump('message'),
           hash_including(
             persistent: true,
             routing_key: 'test.key',
@@ -224,7 +224,7 @@ describe Hutch::Broker do
 
       it 'allows passing message properties' do
         expect(broker.exchange).to receive(:publish).once
-        broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
+        broker.publish('test.key', 'message', expiration: '2000', persistent: false)
       end
 
       context 'when there are global properties' do
@@ -234,8 +234,8 @@ describe Hutch::Broker do
           end
 
           it 'merges the properties' do
-            expect(broker.exchange).
-              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            expect(broker.exchange)
+              .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
             broker.publish('test.key', 'message')
           end
         end
@@ -246,8 +246,8 @@ describe Hutch::Broker do
           end
 
           it 'calls the proc and merges the properties' do
-            expect(broker.exchange).
-              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            expect(broker.exchange)
+              .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
             broker.publish('test.key', 'message')
           end
         end
@@ -256,8 +256,8 @@ describe Hutch::Broker do
 
     context 'without a valid connection' do
       it 'raises an exception' do
-        expect { broker.publish('test.key', 'message') }.
-          to raise_exception(Hutch::PublishError)
+        expect { broker.publish('test.key', 'message') }
+          .to raise_exception(Hutch::PublishError)
       end
 
       it 'logs an error' do
@@ -267,4 +267,3 @@ describe Hutch::Broker do
     end
   end
 end
-

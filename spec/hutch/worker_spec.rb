@@ -2,8 +2,10 @@ require 'spec_helper'
 require 'hutch/worker'
 
 describe Hutch::Worker do
-  let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
-                          get_queue_name: 'consumer') }
+  let(:consumer) do
+    double('Consumer', routing_keys: %w( a b c ),
+                       get_queue_name: 'consumer')
+  end
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }
@@ -41,8 +43,10 @@ describe Hutch::Worker do
   describe '#handle_message' do
     let(:payload) { '{}' }
     let(:consumer_instance) { double('Consumer instance') }
-    let(:delivery_info) { double('Delivery Info', routing_key: '',
-                                 delivery_tag: 'dt') }
+    let(:delivery_info) do
+      double('Delivery Info', routing_key: '',
+                              delivery_tag: 'dt')
+    end
     let(:properties) { double('Properties', message_id: nil) }
     before { allow(consumer).to receive_messages(new: consumer_instance) }
     before { allow(broker).to receive(:ack) }
@@ -51,8 +55,8 @@ describe Hutch::Worker do
     before { allow(consumer_instance).to receive(:delivery_info=) }
 
     it 'passes the message to the consumer' do
-      expect(consumer_instance).to receive(:process).
-                        with(an_instance_of(Hutch::Message))
+      expect(consumer_instance).to receive(:process)
+        .with(an_instance_of(Hutch::Message))
       worker.handle_message(consumer, delivery_info, properties, payload)
     end
 
@@ -78,8 +82,8 @@ describe Hutch::Worker do
       end
     end
 
-    context "when the payload is not valid json" do
-      let(:payload) { "Not Valid JSON" }
+    context 'when the payload is not valid json' do
+      let(:payload) { 'Not Valid JSON' }
 
       it 'logs the error' do
         Hutch::Config[:error_handlers].each do |backend|
@@ -95,4 +99,3 @@ describe Hutch::Worker do
     end
   end
 end
-

@@ -18,12 +18,11 @@ module Hutch
       set_up_amqp_connection
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
-      if block_given?
-        begin
-          yield
-        ensure
-          disconnect
-        end
+      return unless block_given?
+      begin
+        yield
+      ensure
+        disconnect
       end
     end
 
@@ -54,7 +53,7 @@ module Hutch
 
         @config[:mq_host]     = u.host
         @config[:mq_port]     = u.port
-        @config[:mq_vhost]    = u.path.sub(/^\//, "")
+        @config[:mq_vhost]    = u.path.sub(/^\//, '')
         @config[:mq_username] = u.user
         @config[:mq_password] = u.password
       end
@@ -67,7 +66,7 @@ module Hutch
       tls      = @config[:mq_tls]
       tls_key  = @config[:mq_tls_key]
       tls_cert = @config[:mq_tls_cert]
-      protocol = tls ? "amqps://" : "amqp://"
+      protocol = tls ? 'amqps://' : 'amqp://'
       sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
@@ -110,8 +109,8 @@ module Hutch
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
       with_bunny_precondition_handler('queue') do
-        namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        name = name.prepend(namespace + ":") unless namespace.empty?
+        namespace = @config[:namespace].to_s.downcase.gsub(/[^-:\.\w]/, '')
+        name = name.prepend(namespace + ':') unless namespace.empty?
         channel.queue(name, durable: true)
       end
     end
@@ -133,8 +132,8 @@ module Hutch
     # routing keys will be unbound.
     def bind_queue(queue, routing_keys)
       # Find the existing bindings, and unbind any redundant bindings
-      queue_bindings = bindings.select { |dest, keys| dest == queue.name }
-      queue_bindings.each do |dest, keys|
+      queue_bindings = bindings.select { |dest, _keys| dest == queue.name }
+      queue_bindings.each do |_dest, keys|
         keys.reject { |key| routing_keys.include?(key) }.each do |key|
           logger.debug "removing redundant binding #{queue.name} <--> #{key}"
           queue.unbind(@exchange, routing_key: key)
@@ -188,10 +187,10 @@ module Hutch
       properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(JSON.dump(message), {persistent: true}.
-        merge(properties).
-        merge(global_properties).
-        merge(non_overridable_properties))
+      @exchange.publish(JSON.dump(message), { persistent: true }
+        .merge(properties)
+        .merge(global_properties)
+        .merge(non_overridable_properties))
     end
 
     private
@@ -214,7 +213,7 @@ module Hutch
         config.username = @config[:mq_username]
         config.password = @config[:mq_password]
         config.ssl = @config[:mq_api_ssl]
-        config.protocol = config.ssl ? "https://" : "http://"
+        config.protocol = config.ssl ? 'https://' : 'http://'
         config.sanitized_uri = "#{config.protocol}#{config.username}@#{config.host}:#{config.port}/"
       end
     end
@@ -224,7 +223,7 @@ module Hutch
     rescue Net::HTTPServerException => ex
       logger.error "HTTP API connection error: #{ex.message.downcase}"
       if ex.response.code == '401'
-        raise AuthenticationError.new('invalid HTTP API credentials')
+        raise AuthenticationError, 'invalid HTTP API credentials'
       else
         raise
       end
@@ -234,23 +233,23 @@ module Hutch
       yield
     rescue Errno::ECONNREFUSED => ex
       logger.error "HTTP API connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.sanitized_uri}")
+      raise ConnectionError, "couldn't connect to HTTP API at #{api_config.sanitized_uri}"
     end
 
     def with_bunny_precondition_handler(item)
       yield
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
-      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " +
-          "Perhaps it is being redeclared with non-matching attributes"
-      raise WorkerSetupError.new(s)
+      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " \
+          'Perhaps it is being redeclared with non-matching attributes'
+      raise WorkerSetupError, s
     end
 
     def with_bunny_connection_handler(uri)
       yield
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+      raise ConnectionError, "couldn't connect to rabbitmq at #{uri}"
     end
 
     def work_pool_threads
@@ -266,4 +265,3 @@ module Hutch
     end
   end
 end
-

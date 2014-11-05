@@ -21,8 +21,8 @@ module Hutch
     Hutch::Logging.logger
   end
 
-  def self.global_properties=(properties)
-    @global_properties = properties
+  class << self
+    attr_writer :global_properties
   end
 
   def self.global_properties
@@ -37,8 +37,8 @@ module Hutch
     end
   end
 
-  def self.broker
-    @broker
+  class << self
+    attr_reader :broker
   end
 
   def self.connected?
@@ -49,4 +49,3 @@ module Hutch
     broker.publish(*args)
   end
 end
-
