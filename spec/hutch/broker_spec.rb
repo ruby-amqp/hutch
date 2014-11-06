@@ -7,12 +7,27 @@ describe Hutch::Broker do
 
   describe '#connect' do
     before { allow(broker).to receive(:set_up_amqp_connection) }
+    before { allow(broker).to receive(:set_up_wait_exchange) }
     before { allow(broker).to receive(:set_up_api_connection) }
     before { allow(broker).to receive(:disconnect) }
 
     it 'sets up the amqp connection' do
       expect(broker).to receive(:set_up_amqp_connection)
       broker.connect
+    end
+
+    context 'when wait exchange enabled' do
+      it 'sets up the wait exchange' do
+        expect(broker).to receive(:set_up_wait_exchange)
+        broker.connect(enable_wait_exchange: true)
+      end
+    end
+
+    context 'when wait exchange not enabled' do
+      it 'does not set up the wait exchange' do
+        expect(broker).not_to receive(:set_up_wait_exchange)
+        broker.connect
+      end
     end
 
     it 'sets up the api connection' do
@@ -91,6 +106,22 @@ describe Hutch::Broker do
           .to receive(:prefetch).with(prefetch_value)
         broker.set_up_amqp_connection
       end
+    end
+  end
+
+  describe '#set_up_wait_exchange', rabbitmq: true do
+    before { broker.set_up_amqp_connection }
+    before { broker.set_up_wait_exchange }
+    after  { broker.disconnect }
+
+    describe '#wait_exchange' do
+      subject { super().wait_exchange }
+      it { is_expected.to be_a Bunny::Exchange }
+    end
+
+    describe 'wait queue' do
+      subject { super().wait_queue }
+      it { is_expected.to be_a Bunny::Queue }
     end
   end
 

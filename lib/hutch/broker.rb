@@ -8,7 +8,8 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :wait_exchange, :api_client
+    attr_accessor :connection, :channel, :exchange, :api_client,
+                  :wait_exchange, :wait_queue
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -16,6 +17,7 @@ module Hutch
 
     def connect(options = {})
       set_up_amqp_connection
+      set_up_wait_exchange if options.fetch(:enable_wait_exchange, false)
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       return unless block_given?
@@ -29,8 +31,8 @@ module Hutch
     def disconnect
       @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @api_client = nil, nil, nil
-      @exchange, @wait_exchange = nil, nil
+      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @wait_exchange, @wait_queue = nil, nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -46,8 +48,6 @@ module Hutch
       with_bunny_precondition_handler('exchange') do
         @exchange = @channel.topic(exchange_name, durable: true)
       end
-
-      set_up_wait_exchange
     end
 
     # Set up wait exchange as a fanout with queue
@@ -63,14 +63,14 @@ module Hutch
       logger.info "using wait queue '#{wait_queue_name}'"
 
       with_bunny_precondition_handler('queue') do
-        wait_queue = channel.queue(
+        @wait_queue = channel.queue(
           wait_queue_name,
           durable: true,
           arguments: {
             'x-dead-letter-exchange' => @config[:mq_exchange]
           }
         )
-        wait_queue.bind(@wait_exchange)
+        @wait_queue.bind(@wait_exchange)
       end
     end
 
