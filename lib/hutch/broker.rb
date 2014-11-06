@@ -220,6 +220,23 @@ module Hutch
         .merge(non_overridable_properties))
     end
 
+    def publish_wait(routing_key, message, properties = {})
+      ensure_connection!(routing_key, message)
+
+      non_overridable_properties = {
+        routing_key: routing_key,
+        content_type: 'application/json'
+      }
+      properties[:message_id] ||= generate_id
+      properties[:timestamp] ||= Time.now.to_i
+
+      logger.info("publishing message '#{message.inspect}' to wait exchange with #{routing_key}")
+      @wait_exchange.publish(JSON.dump(message), { persistent: true }
+        .merge(properties)
+        .merge(global_properties)
+        .merge(non_overridable_properties))
+    end
+
     private
 
     def raise_publish_error(reason, routing_key, message)

@@ -300,4 +300,79 @@ describe Hutch::Broker do
       end
     end
   end
+
+  describe '#publish_wait' do
+    context 'with a valid connection' do
+      before { broker.set_up_amqp_connection }
+      after  { broker.disconnect }
+
+      it 'publishes to the exchange' do
+        expect(broker.wait_exchange).to receive(:publish).once
+        broker.publish_wait('test.key', 'message')
+      end
+
+      it 'sets default properties' do
+        expect(broker.wait_exchange).to receive(:publish).with(
+          JSON.dump('message'),
+          hash_including(
+            persistent: true,
+            routing_key: 'test.key',
+            content_type: 'application/json'
+          )
+        )
+
+        broker.publish_wait('test.key', 'message')
+      end
+
+      it 'allows passing message properties' do
+        expect(broker.wait_exchange).to receive(:publish).with(
+          JSON.dump('message'),
+          hash_including(
+            persistent: false,
+            expiration: '2000'
+          )
+        )
+
+        broker.publish_wait('test.key', 'message', expiration: '2000', persistent: false)
+      end
+
+      context 'when there are global properties' do
+        context 'as a hash' do
+          before do
+            allow(Hutch).to receive(:global_properties).and_return(app_id: 'app')
+          end
+
+          it 'merges the properties' do
+            expect(broker.wait_exchange)
+              .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish_wait('test.key', 'message')
+          end
+        end
+
+        context 'as a callable object' do
+          before do
+            allow(Hutch).to receive(:global_properties).and_return(proc { { app_id: 'app' } })
+          end
+
+          it 'calls the proc and merges the properties' do
+            expect(broker.wait_exchange)
+              .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+            broker.publish_wait('test.key', 'message')
+          end
+        end
+      end
+    end
+
+    context 'without a valid connection' do
+      it 'raises an exception' do
+        expect { broker.publish_wait('test.key', 'message') }
+          .to raise_exception(Hutch::PublishError)
+      end
+
+      it 'logs an error' do
+        expect(broker.logger).to receive(:error)
+        broker.publish_wait('test.key', 'message') rescue nil
+      end
+    end
+  end
 end
