@@ -12,7 +12,7 @@ module Hutch
         mq_host: 'localhost',
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
-        mq_wait_exchange: 'wait-exchange',
+        mq_wait_exchange: nil,
         mq_wait_queue: 'wait-queue',
         mq_vhost: '/',
         mq_tls: false,

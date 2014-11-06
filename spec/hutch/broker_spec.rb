@@ -17,13 +17,15 @@ describe Hutch::Broker do
     end
 
     context 'when wait exchange enabled' do
+      before { config[:mq_wait_exchange] = 'wait-exchange' }
       it 'sets up the wait exchange' do
         expect(broker).to receive(:set_up_wait_exchange)
-        broker.connect(enable_wait_exchange: true)
+        broker.connect
       end
     end
 
     context 'when wait exchange not enabled' do
+      before { config[:mq_wait_exchange] = nil }
       it 'does not set up the wait exchange' do
         expect(broker).not_to receive(:set_up_wait_exchange)
         broker.connect
@@ -110,6 +112,7 @@ describe Hutch::Broker do
   end
 
   describe '#set_up_wait_exchange', rabbitmq: true do
+    before { config[:mq_wait_exchange] = 'wait-exchange' }
     before { broker.set_up_amqp_connection }
     before { broker.set_up_wait_exchange }
     after  { broker.disconnect }

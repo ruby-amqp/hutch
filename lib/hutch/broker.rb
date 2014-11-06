@@ -17,7 +17,7 @@ module Hutch
 
     def connect(options = {})
       set_up_amqp_connection
-      set_up_wait_exchange if options.fetch(:enable_wait_exchange, false)
+      set_up_wait_exchange unless @config[:mq_wait_exchange].nil?
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
       return unless block_given?
