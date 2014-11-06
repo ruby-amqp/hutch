@@ -89,6 +89,7 @@ module Hutch
       :error
     end
 
+    # rubocop:disable Metrics/AbcSize
     def parse_options(args = ARGV)
       OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
@@ -142,6 +143,14 @@ module Hutch
           Hutch::Config.mq_api_port = port
         end
 
+        opts.on('--mq-wait-exchange EXCHANGE', 'Set the RabbitMQ wait exchange name') do |exchange|
+          Hutch::Config.mq_wait_exchange = exchange
+        end
+
+        opts.on('--mq-wait-queue QUEUE', 'Set the RabbitMQ wait queue name') do |queue|
+          Hutch::Config.mq_wait_queue = queue
+        end
+
         opts.on('-s', '--[no-]mq-api-ssl', 'Use SSL for the RabbitMQ API') do |api_ssl|
           Hutch::Config.mq_api_ssl = api_ssl
         end
@@ -193,6 +202,7 @@ module Hutch
         end
       end.parse!(args)
     end
+    # rubocop:enable Metrics/AbcSize
 
     def write_pid
       pidfile = File.expand_path(Hutch::Config.pidfile)
