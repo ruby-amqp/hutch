@@ -48,4 +48,8 @@ module Hutch
   def self.publish(*args)
     broker.publish(*args)
   end
+
+  def self.publish_wait(*args)
+    broker.publish_wait(*args)
+  end
 end

@@ -55,4 +55,16 @@ describe Hutch do
       Hutch.publish(*args)
     end
   end
+
+  describe '#publish_wait' do
+    let(:broker) { double(Hutch::Broker) }
+    let(:args) { ['test.key', 'message', { headers: { foo: 'bar' } }] }
+
+    before { allow(Hutch).to receive(:broker).and_return(broker) }
+
+    it 'delegates to Hutch::Broker#publish_wait' do
+      expect(broker).to receive(:publish_wait).with(*args)
+      Hutch.publish_wait(*args)
+    end
+  end
 end

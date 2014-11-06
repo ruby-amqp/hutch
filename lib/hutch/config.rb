@@ -12,8 +12,6 @@ module Hutch
         mq_host: 'localhost',
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
-        mq_wait_exchange: nil,
-        mq_wait_queue: 'wait-queue',
         mq_vhost: '/',
         mq_tls: false,
         mq_tls_cert: nil,
@@ -23,6 +21,8 @@ module Hutch
         mq_api_host: 'localhost',
         mq_api_port: 15672,
         mq_api_ssl: false,
+        mq_wait_exchange: nil,
+        mq_wait_queue: 'wait-queue',
         # placeholder, allows specifying connection parameters
         # as a URI.
         uri: nil,
