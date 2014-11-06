@@ -222,6 +222,9 @@ module Hutch
 
     def publish_wait(routing_key, message, properties = {})
       ensure_connection!(routing_key, message)
+      if @config[:mq_wait_exchange].nil?
+        raise_publish_error('wait exchange not defined', routing_key, message)
+      end
 
       non_overridable_properties = {
         routing_key: routing_key,
