@@ -93,9 +93,9 @@ describe Hutch::Broker do
       end
     end
 
-    context 'with publisher_confirms set' do
-      let(:publisher_confirms_value) { true }
-      before { config[:publisher_confirms] = publisher_confirms_value }
+    context 'with force_publisher_confirms set' do
+      let(:force_publisher_confirms_value) { true }
+      before { config[:force_publisher_confirms] = force_publisher_confirms_value }
       after  { broker.disconnect }
 
       it 'waits for confirmation' do
@@ -265,7 +265,7 @@ describe Hutch::Broker do
         end
       end
 
-      context 'with publisher_confirms not set in the config' do
+      context 'with force_publisher_confirms not set in the config' do
         it 'does not wait for confirms on the channel' do
           expect_any_instance_of(Bunny::Channel).
             to_not receive(:wait_for_confirms)
@@ -273,11 +273,11 @@ describe Hutch::Broker do
         end
       end
 
-      context 'with publisher_confirms set in the config' do
-        let(:publisher_confirms_value) { true }
+      context 'with force_publisher_confirms set in the config' do
+        let(:force_publisher_confirms_value) { true }
 
         before do
-          config[:publisher_confirms] = publisher_confirms_value
+          config[:force_publisher_confirms] = force_publisher_confirms_value
         end
 
         it 'waits for confirms on the channel' do

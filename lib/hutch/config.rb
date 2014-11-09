@@ -32,7 +32,7 @@ module Hutch
         daemonise: false,
         pidfile: nil,
         channel_prefetch: 0,
-        publisher_confirms: false
+        force_publisher_confirms: false
       }.merge(params)
     end
 

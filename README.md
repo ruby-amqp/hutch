@@ -175,11 +175,13 @@ Hutch::Config.set(:mq_exchange, 'name')
 
 ### Publisher Confirms
 
-For maximum message reliability when producing messages, you will need to
-enable [Publisher Confirms](https://www.rabbitmq.com/confirms.html).
+For maximum message reliability when producing messages, you can force Hutch to use
+[Publisher Confirms](https://www.rabbitmq.com/confirms.html) and wait for a confirmation
+after every message published. This is the safest possible option for publishers
+but also results in a **significant throughput drop**.
 
 ```ruby
-Hutch::Config.set(:publisher_confirms, true)
+Hutch::Config.set(:force_publisher_confirms, true)
 ```
 
 ### Writing Well-Behaved Publishers
