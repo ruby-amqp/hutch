@@ -92,6 +92,18 @@ describe Hutch::Broker do
         broker.set_up_amqp_connection
       end
     end
+
+    context 'with publisher_confirms set' do
+      let(:publisher_confirms_value) { true }
+      before { config[:publisher_confirms] = publisher_confirms_value }
+      after  { broker.disconnect }
+
+      it 'waits for confirmation' do
+        expect_any_instance_of(Bunny::Channel).
+          to receive(:confirm_select)
+        broker.set_up_amqp_connection
+      end
+    end
   end
 
   describe '#set_up_api_connection', rabbitmq: true do
@@ -250,6 +262,28 @@ describe Hutch::Broker do
               to receive(:publish).with('"message"', hash_including(app_id: 'app'))
             broker.publish('test.key', 'message')
           end
+        end
+      end
+
+      context 'with publisher_confirms not set in the config' do
+        it 'does not wait for confirms on the channel' do
+          expect_any_instance_of(Bunny::Channel).
+            to_not receive(:wait_for_confirms)
+          broker.publish('test.key', 'message')
+        end
+      end
+
+      context 'with publisher_confirms set in the config' do
+        let(:publisher_confirms_value) { true }
+
+        before do
+          config[:publisher_confirms] = publisher_confirms_value
+        end
+
+        it 'waits for confirms on the channel' do
+          expect_any_instance_of(Bunny::Channel).
+            to receive(:wait_for_confirms)
+          broker.publish('test.key', 'message')
         end
       end
     end

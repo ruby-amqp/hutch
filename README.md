@@ -164,6 +164,24 @@ Hutch.connect
 Hutch.publish('routing.key', subject: 'payment', action: 'received')
 ```
 
+### Producer Configuration
+
+Producers are not run with the 'hutch' command. You can specify configuration
+options as follows:
+
+```ruby
+Hutch::Config.set(:mq_exchange, 'name')
+```
+
+### Publisher Confirms
+
+For maximum message reliability when producing messages, you will need to
+enable [Publisher Confirms](https://www.rabbitmq.com/confirms.html).
+
+```ruby
+Hutch::Config.set(:publisher_confirms, true)
+```
+
 ### Writing Well-Behaved Publishers
 
 You may need to send messages to Hutch from languages other than Ruby. This
