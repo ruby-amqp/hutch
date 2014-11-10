@@ -235,12 +235,14 @@ module Hutch
       properties[:message_id] ||= generate_id
       properties[:timestamp] ||= Time.now.to_i
 
-      logger.info("publishing message '#{message.inspect}' to wait exchange with routing key #{routing_key}")
-      exchange = @wait_exchanges.fetch(properties[:expiration].to_s, @default_wait_exchange)
-      exchange.publish(JSON.dump(message), { persistent: true }
-        .merge(properties)
-        .merge(global_properties)
-        .merge(non_overridable_properties))
+      message_properties = { persistent: true }
+                           .merge(properties)
+                           .merge(global_properties)
+                           .merge(non_overridable_properties)
+      exchange = @wait_exchanges.fetch(message_properties[:expiration].to_s, @default_wait_exchange)
+      logger.info("publishing message '#{message.inspect}' to '#{exchange.name}' with routing key '#{routing_key}'")
+
+      exchange.publish(JSON.dump(message), message_properties)
     end
 
     private
