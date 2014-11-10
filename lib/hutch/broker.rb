@@ -9,10 +9,11 @@ module Hutch
     include Logging
 
     attr_accessor :connection, :channel, :exchange, :api_client,
-                  :wait_exchange, :wait_queue
+                  :default_wait_exchange, :wait_exchanges
 
     def initialize(config = nil)
       @config = config || Hutch::Config
+      @wait_exchanges = {}
     end
 
     def connect(options = {})
@@ -32,7 +33,7 @@ module Hutch
       @channel.close    if @channel
       @connection.close if @connection
       @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
-      @wait_exchange, @wait_queue = nil, nil
+      @default_wait_exchange, @wait_exchanges = nil, {}
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -55,25 +56,25 @@ module Hutch
       wait_exchange_name = @config[:mq_wait_exchange]
       logger.info "using fanout wait exchange '#{wait_exchange_name}'"
 
-      with_bunny_precondition_handler('exchange') do
-        @wait_exchange = @channel.fanout(wait_exchange_name, durable: true)
-      end
+      @default_wait_exchange = declare_wait_exchange(wait_exchange_name)
 
       wait_queue_name = @config[:mq_wait_queue]
       logger.info "using wait queue '#{wait_queue_name}'"
 
-      with_bunny_precondition_handler('queue') do
-        @wait_queue = channel.queue(
-          wait_queue_name,
-          durable: true,
-          arguments: {
-            'x-dead-letter-exchange' => @config[:mq_exchange]
-          }
-        )
-        @wait_queue.bind(@wait_exchange)
+      declare_wait_queue(@default_wait_exchange, wait_queue_name)
+
+      expiration_suffices = (@config[:mq_wait_expiration_suffices] || []).map(&:to_s)
+
+      expiration_suffices.each do |suffix|
+        logger.info "using expiration suffix '_#{suffix}'"
+
+        suffix_exchange = declare_wait_exchange("#{wait_exchange_name}_#{suffix}")
+        @wait_exchanges[suffix] = suffix_exchange
+        declare_wait_queue(suffix_exchange, "#{wait_queue_name}_#{suffix}")
       end
     end
 
+    # rubocop:disable Metrics/AbcSize
     def open_connection!
       if @config[:uri] && !@config[:uri].empty?
         u = URI.parse(@config[:uri])
@@ -109,6 +110,7 @@ module Hutch
       logger.info "connected to RabbitMQ at #{host} as #{username}"
       @connection
     end
+    # rubocop:enable Metrics/AbcSize
 
     def open_channel!
       logger.info 'opening rabbitmq channel'
@@ -309,6 +311,23 @@ module Hutch
 
     def global_properties
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
+    end
+
+    def declare_wait_exchange(name)
+      with_bunny_precondition_handler('exchange') do
+        @channel.fanout(name, durable: true)
+      end
+    end
+
+    def declare_wait_queue(exchange, queue_name)
+      with_bunny_precondition_handler('queue') do
+        queue = @channel.queue(
+          queue_name,
+          durable: true,
+          arguments: { 'x-dead-letter-exchange' => @config[:mq_exchange] }
+        )
+        queue.bind(exchange)
+      end
     end
   end
 end

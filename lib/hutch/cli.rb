@@ -152,7 +152,7 @@ module Hutch
         end
 
         opts.on('--mq-wait-expiration-suffices SUFFICES', 'Set the wait queue expirations expected (comma-separated integers in milliseconds)') do |suffices|
-          Hutch::Config.mq_wait_expiration_suffices = suffices
+          Hutch::Config.mq_wait_expiration_suffices = suffices.split(',').map(&:to_s)
         end
 
         opts.on('-s', '--[no-]mq-api-ssl', 'Use SSL for the RabbitMQ API') do |api_ssl|

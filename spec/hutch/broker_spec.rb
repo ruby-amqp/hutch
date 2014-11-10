@@ -113,18 +113,31 @@ describe Hutch::Broker do
 
   describe '#set_up_wait_exchange', rabbitmq: true do
     before { config[:mq_wait_exchange] = 'wait-exchange' }
+    before { config[:mq_wait_queue] = 'wait-queue' }
+    before { config[:mq_wait_expiration_suffices] = %w(10000 30000) }
     before { broker.set_up_amqp_connection }
     before { broker.set_up_wait_exchange }
     after  { broker.disconnect }
 
-    describe '#wait_exchange' do
-      subject { super().wait_exchange }
+    describe '#default_wait_exchange' do
+      subject { super().default_wait_exchange }
       it { is_expected.to be_a Bunny::Exchange }
     end
 
     describe 'wait queue' do
-      subject { super().wait_queue }
-      it { is_expected.to be_a Bunny::Queue }
+      skip
+    end
+
+    describe 'suffixed wait exchanges' do
+      specify do
+        broker.wait_exchanges.each do |_name, wait_exchange|
+          expect(wait_exchange).to be_a Bunny::Exchange
+        end
+      end
+    end
+
+    describe 'suffixed wait queues' do
+      skip
     end
   end
 
@@ -304,63 +317,82 @@ describe Hutch::Broker do
   describe '#publish_wait' do
     context 'with a valid connection' do
       context 'with a wait exchange defined' do
+        let(:expiration_suffices) { %w(10000 30000) }
+
         before { config[:mq_wait_exchange] = 'wait-exchange' }
+        before { config[:mq_wait_queue] = 'wait-queue' }
+        before { config[:mq_wait_expiration_suffices] = expiration_suffices }
         before { broker.set_up_amqp_connection }
         after  { broker.disconnect }
 
-        it 'publishes to the exchange' do
-          expect(broker.wait_exchange).to receive(:publish).once
-          broker.publish_wait('test.key', 'message')
-        end
-
-        it 'sets default properties' do
-          expect(broker.wait_exchange).to receive(:publish).with(
-            JSON.dump('message'),
-            hash_including(
-              persistent: true,
-              routing_key: 'test.key',
-              content_type: 'application/json'
-            )
-          )
-
-          broker.publish_wait('test.key', 'message')
-        end
-
-        it 'allows passing message properties' do
-          expect(broker.wait_exchange).to receive(:publish).with(
-            JSON.dump('message'),
-            hash_including(
-              persistent: false,
-              expiration: '2000'
-            )
-          )
-
-          broker.publish_wait('test.key', 'message', expiration: '2000', persistent: false)
-        end
-
-        context 'when there are global properties' do
-          context 'as a hash' do
-            before do
-              allow(Hutch).to receive(:global_properties).and_return(app_id: 'app')
-            end
-
-            it 'merges the properties' do
-              expect(broker.wait_exchange)
-                .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
-              broker.publish_wait('test.key', 'message')
-            end
+        context 'with no expiration' do
+          it 'publishes to the exchange' do
+            expect(broker.default_wait_exchange).to receive(:publish).once
+            broker.publish_wait('test.key', 'message')
           end
 
-          context 'as a callable object' do
-            before do
-              allow(Hutch).to receive(:global_properties).and_return(proc { { app_id: 'app' } })
+          it 'sets default properties' do
+            expect(broker.default_wait_exchange).to receive(:publish).with(
+              JSON.dump('message'),
+              hash_including(
+                persistent: true,
+                routing_key: 'test.key',
+                content_type: 'application/json'
+              )
+            )
+
+            broker.publish_wait('test.key', 'message')
+          end
+
+          it 'allows passing message properties' do
+            expect(broker.default_wait_exchange).to receive(:publish).with(
+              JSON.dump('message'),
+              hash_including(persistent: false)
+            )
+
+            broker.publish_wait('test.key', 'message', persistent: false)
+          end
+
+          context 'when there are global properties' do
+            context 'as a hash' do
+              before do
+                allow(Hutch).to receive(:global_properties).and_return(app_id: 'app')
+              end
+
+              it 'merges the properties' do
+                expect(broker.default_wait_exchange)
+                  .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+                broker.publish_wait('test.key', 'message')
+              end
             end
 
-            it 'calls the proc and merges the properties' do
-              expect(broker.wait_exchange)
-                .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
-              broker.publish_wait('test.key', 'message')
+            context 'as a callable object' do
+              before do
+                allow(Hutch).to receive(:global_properties).and_return(proc { { app_id: 'app' } })
+              end
+
+              it 'calls the proc and merges the properties' do
+                expect(broker.default_wait_exchange)
+                  .to receive(:publish).with('"message"', hash_including(app_id: 'app'))
+                broker.publish_wait('test.key', 'message')
+              end
             end
+          end
+        end
+
+        context 'with message expiration set' do
+          let(:expiration) { expiration_suffices.first.to_i }
+          it 'publishes to the exchange' do
+            expect(broker.wait_exchanges[expiration]).to receive(:publish).once
+            broker.publish_wait('test.key', 'message')
+          end
+        end
+
+        context 'with message expiration not in configured suffices' do
+          let(:expiration) { expiration_suffices.last.to_i + 10_000 }
+          it 'publishes to the default exchange' do
+            expect(broker.default_wait_exchange).to receive(:publish).once
+            broker.publish_wait('test.key', 'message')
           end
         end
       end
