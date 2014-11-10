@@ -110,8 +110,11 @@ usage: hutch [options]
         --mq-password PASSWORD       Set the RabbitMQ password
         --mq-api-host HOST           Set the RabbitMQ API host
         --mq-api-port PORT           Set the RabbitMQ API port
-        --mq-wait-exchange EXCHANGE  Set the RabbitMQ wait exchange name
-        --mq-wait-queue QUEUE        Set the RabbitMQ wait queue name
+        --mq-wait-exchange EXCHANGE  Set the wait exchange name
+        --mq-wait-queue QUEUE        Set the wait queue name
+        --mq-wait-expiration-suffices SUFFICES
+                                     Set the wait queue expirations expected
+                                     (comma-separated integers)
     -s, --[no-]mq-api-ssl            Use SSL for the RabbitMQ API
         --config FILE                Load Hutch configuration from a file
         --require PATH               Require a Rails app or path
@@ -235,6 +238,17 @@ To set a wait before processing the message, set expiration and use `Hutch.publi
 Hutch.connect
 Hutch.publish_wait('routing.key', { key: 'value' }, expiration: 10_000)
 ```
+
+### Expiration suffices
+
+To avoid the issue of messages with shorter expiration times getting queued behind longer expiration times, we create a wait exchange/queue for each expiration length. The convention is simply:
+
+```ruby
+exchange_name = "#{mq_wait_exchange}_#{expiration}"
+queue_name = "#{mq_wait_queue}_#{expiration}"
+```
+
+Configure the suffices to be created at startup with `mq_wait_expiration_suffices`
 
 ## Supported RabbitMQ Versions
 
