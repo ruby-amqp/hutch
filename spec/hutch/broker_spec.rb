@@ -323,6 +323,7 @@ describe Hutch::Broker do
         before { config[:mq_wait_queue] = 'wait-queue' }
         before { config[:mq_wait_expiration_suffices] = expiration_suffices }
         before { broker.set_up_amqp_connection }
+        before { broker.set_up_wait_exchange }
         after  { broker.disconnect }
 
         context 'with no expiration' do
@@ -381,18 +382,30 @@ describe Hutch::Broker do
         end
 
         context 'with message expiration set' do
-          let(:expiration) { expiration_suffices.first.to_i }
+          let(:expiration) { expiration_suffices.first }
           it 'publishes to the exchange' do
-            expect(broker.wait_exchanges[expiration]).to receive(:publish).once
-            broker.publish_wait('test.key', 'message')
+            expect(broker.wait_exchanges[expiration.to_s]).to receive(:publish).once
+            broker.publish_wait('test.key', 'message', expiration: expiration)
+          end
+
+          it 'does not publish to default exchange' do
+            expect(broker.default_wait_exchange).not_to receive(:publish)
+            broker.publish_wait('test.key', 'message', expiration: expiration)
           end
         end
 
         context 'with message expiration not in configured suffices' do
-          let(:expiration) { expiration_suffices.last.to_i + 10_000 }
+          let(:expiration) { (expiration_suffices.map(&:to_i).max + 10_000).to_s }
           it 'publishes to the default exchange' do
             expect(broker.default_wait_exchange).to receive(:publish).once
-            broker.publish_wait('test.key', 'message')
+            broker.publish_wait('test.key', 'message', expiration: expiration)
+          end
+
+          it 'does not publish to suffixed exchanges' do
+            broker.wait_exchanges.each do |exchange|
+              expect(exchange).not_to receive(:publish)
+            end
+            broker.publish_wait('test.key', 'message', expiration: expiration)
           end
         end
       end
