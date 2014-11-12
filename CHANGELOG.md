@@ -1,5 +1,21 @@
 ## 0.11.0 — unreleased
 
+### Publisher Confirms Support
+
+`:force_publisher_confirms` is a new configuration option that forces `Hutch.publish` to wait
+for a confirm for every message published. Note that this **will cause a significant drop in throughput**.
+
+`Hutch::Broker#confirm_select` and `Hutch::Broker#wait_for_confirms` are new public API methods
+that delegate to their respective `Bunny::Channel` counterparts. `Hutch::Broker#confirm_select`
+can be used to handle confirms with a callback instead of waiting:
+
+``` ruby
+broker.confirm_select do |delivery_tag, multiple, nack|
+  # ...
+end
+```
+
+
 ### Bunny Update
 
 Bunny is updated to [1.6.0](http://blog.rubyrabbitmq.info/blog/2014/10/31/bunny-1-dot-6-0-is-released/).
