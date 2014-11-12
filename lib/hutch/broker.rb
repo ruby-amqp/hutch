@@ -199,6 +199,18 @@ module Hutch
       response
     end
 
+    def confirm_select(*args)
+      @channel.confirm_select(*args)
+    end
+
+    def wait_for_confirms
+      @channel.wait_for_confirms
+    end
+
+    def using_publisher_confirmations?
+      @channel.using_publisher_confirmations?
+    end
+
     private
 
     def raise_publish_error(reason, routing_key, message)
