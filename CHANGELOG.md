@@ -1,9 +1,13 @@
-## 0.11.0 — unreleased
+## 0.11.0 — Nov 14th, 2014
 
 ### Publisher Confirms Support
 
 `:force_publisher_confirms` is a new configuration option that forces `Hutch.publish` to wait
-for a confirm for every message published. Note that this **will cause a significant drop in throughput**.
+for a confirm for every message published. Note that this **will cause a significant drop in throughput**:
+
+``` ruby
+Hutch::Config.set(:force_publisher_confirms, true)
+```
 
 `Hutch::Broker#confirm_select` and `Hutch::Broker#wait_for_confirms` are new public API methods
 that delegate to their respective `Bunny::Channel` counterparts. `Hutch::Broker#confirm_select`
