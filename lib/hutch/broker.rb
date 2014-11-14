@@ -88,7 +88,10 @@ module Hutch
       logger.info 'opening rabbitmq channel'
       @channel = connection.create_channel.tap do |ch|
         ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
-        ch.confirm_select if @config[:publisher_confirms] || @config[:force_publisher_confirms]
+        if @config.publisher_confirms || @config.force_publisher_confirms
+          logger.info 'enabling publisher confirms'
+          ch.confirm_select
+        end
       end
     end
 
