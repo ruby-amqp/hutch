@@ -67,6 +67,10 @@ module Hutch
       @config
     end
 
+    def self.to_hash
+      self.user_config
+    end
+
     def self.load_from_file(file)
       YAML.load(file).each do |attr, value|
         Hutch::Config.send("#{attr}=", value)
