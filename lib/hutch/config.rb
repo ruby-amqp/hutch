@@ -32,6 +32,11 @@ module Hutch
         daemonise: false,
         pidfile: nil,
         channel_prefetch: 0,
+        # enables publisher confirms, leaves it up to the app
+        # how they are tracked
+        publisher_confirms: false
+        # like `publisher_confirms` above but also
+        # forces waiting for a confirm for every publish
         force_publisher_confirms: false
       }.merge(params)
     end

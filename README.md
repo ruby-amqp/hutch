@@ -237,6 +237,9 @@ Known configuration parameters are:
  * `daemonise`: should Hutch runner process daemonise?
  * `pidfile`: path to PID file the runner should use
  * `channel_prefetch`: basic.qos prefetch value to use (default: `0`, no limit). See Bunny and RabbitMQ documentation.
+ * `publisher_confirms`: enables publisher confirms. Leaves it up to the app how they are
+                         tracked (e.g. using `Hutch::Broker#confirm_select` callback or `Hutch::Broker#wait_for_confirms`)
+ * `force_publisher_confirms`: enables publisher confirms, forces `Hutch::Broker#wait_for_confirms` for every publish. **This is the safest option which also offers the lowest throughput**.
  * `log_level`: log level used by the standard Ruby logger (default: `Logger::INFO`)
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
 
