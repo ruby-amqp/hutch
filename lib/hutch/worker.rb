@@ -65,7 +65,7 @@ module Hutch
       queue = @broker.queue(consumer.get_queue_name)
       @broker.bind_queue(queue, consumer.routing_keys)
 
-      queue.subscribe(ack: true) do |delivery_info, properties, payload|
+      queue.subscribe(manual_ack: true) do |delivery_info, properties, payload|
         handle_message(consumer, delivery_info, properties, payload)
       end
     end
