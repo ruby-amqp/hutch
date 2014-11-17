@@ -3,7 +3,7 @@ require 'hutch/message'
 describe Hutch::Message do
   let(:delivery_info) { double('Delivery Info') }
   let(:props) { double('Properties') }
-  let(:body) {{ foo: 'bar' }}
+  let(:body) { { foo: 'bar' } }
   let(:json_body) { MultiJson.dump(body) }
   subject(:message) { Hutch::Message.new(delivery_info, props, json_body) }
 
@@ -35,4 +35,3 @@ describe Hutch::Message do
     end
   end
 end
-

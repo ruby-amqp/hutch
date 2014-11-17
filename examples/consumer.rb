@@ -6,8 +6,8 @@ class TestConsumer
 
   def process(message)
     puts "TestConsumer got a message: #{message}"
-    puts "Processing..."
+    puts 'Processing...'
     sleep(1)
-    puts "Done"
+    puts 'Done'
   end
 end

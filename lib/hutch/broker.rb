@@ -8,22 +8,24 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :api_client
+    attr_accessor :connection, :channel, :exchange, :api_client,
+                  :default_wait_exchange, :wait_exchanges
 
     def initialize(config = nil)
       @config = config || Hutch::Config
+      @wait_exchanges = {}
     end
 
     def connect(options = {})
       set_up_amqp_connection
+      set_up_wait_exchange unless @config[:mq_wait_exchange].nil?
       set_up_api_connection if options.fetch(:enable_http_api_use, true)
 
-      if block_given?
-        begin
-          yield
-        ensure
-          disconnect
-        end
+      return unless block_given?
+      begin
+        yield
+      ensure
+        disconnect
       end
     end
 
@@ -31,10 +33,11 @@ module Hutch
       @channel.close    if @channel
       @connection.close if @connection
       @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @default_wait_exchange, @wait_exchanges = nil, {}
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
-    # channel we use for talking to RabbitMQ. It also ensures the existance of
+    # channel we use for talking to RabbitMQ. It also ensures the existence of
     # the exchange we'll be using.
     def set_up_amqp_connection
       open_connection!
@@ -48,13 +51,37 @@ module Hutch
       end
     end
 
+    # Set up wait exchange as a fanout with queue
+    def set_up_wait_exchange
+      wait_exchange_name = @config[:mq_wait_exchange]
+      logger.info "using fanout wait exchange '#{wait_exchange_name}'"
+
+      @default_wait_exchange = declare_wait_exchange(wait_exchange_name)
+
+      wait_queue_name = @config[:mq_wait_queue]
+      logger.info "using wait queue '#{wait_queue_name}'"
+
+      declare_wait_queue(@default_wait_exchange, wait_queue_name)
+
+      expiration_suffices = (@config[:mq_wait_expiration_suffices] || []).map(&:to_s)
+
+      expiration_suffices.each do |suffix|
+        logger.info "using expiration suffix '_#{suffix}'"
+
+        suffix_exchange = declare_wait_exchange("#{wait_exchange_name}_#{suffix}")
+        @wait_exchanges[suffix] = suffix_exchange
+        declare_wait_queue(suffix_exchange, "#{wait_queue_name}_#{suffix}")
+      end
+    end
+
+    # rubocop:disable Metrics/AbcSize
     def open_connection!
       if @config[:uri] && !@config[:uri].empty?
         u = URI.parse(@config[:uri])
 
         @config[:mq_host]     = u.host
         @config[:mq_port]     = u.port
-        @config[:mq_vhost]    = u.path.sub(/^\//, "")
+        @config[:mq_vhost]    = u.path.sub(/^\//, '')
         @config[:mq_username] = u.user
         @config[:mq_password] = u.password
       end
@@ -67,7 +94,7 @@ module Hutch
       tls      = @config[:mq_tls]
       tls_key  = @config[:mq_tls_key]
       tls_cert = @config[:mq_tls_cert]
-      protocol = tls ? "amqps://" : "amqp://"
+      protocol = tls ? 'amqps://' : 'amqp://'
       sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
@@ -83,6 +110,7 @@ module Hutch
       logger.info "connected to RabbitMQ at #{host} as #{username}"
       @connection
     end
+    # rubocop:enable Metrics/AbcSize
 
     def open_channel!
       logger.info 'opening rabbitmq channel'
@@ -110,8 +138,8 @@ module Hutch
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
       with_bunny_precondition_handler('queue') do
-        namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        name = name.prepend(namespace + ":") unless namespace.empty?
+        namespace = @config[:namespace].to_s.downcase.gsub(/[^-:\.\w]/, '')
+        name = name.prepend(namespace + ':') unless namespace.empty?
         channel.queue(name, durable: true)
       end
     end
@@ -133,8 +161,8 @@ module Hutch
     # routing keys will be unbound.
     def bind_queue(queue, routing_keys)
       # Find the existing bindings, and unbind any redundant bindings
-      queue_bindings = bindings.select { |dest, keys| dest == queue.name }
-      queue_bindings.each do |dest, keys|
+      queue_bindings = bindings.select { |dest, _keys| dest == queue.name }
+      queue_bindings.each do |_dest, keys|
         keys.reject { |key| routing_keys.include?(key) }.each do |key|
           logger.debug "removing redundant binding #{queue.name} <--> #{key}"
           queue.unbind(@exchange, routing_key: key)
@@ -188,10 +216,33 @@ module Hutch
       properties[:message_id] ||= generate_id
 
       logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(JSON.dump(message), {persistent: true}.
-        merge(properties).
-        merge(global_properties).
-        merge(non_overridable_properties))
+      @exchange.publish(JSON.dump(message), { persistent: true }
+        .merge(properties)
+        .merge(global_properties)
+        .merge(non_overridable_properties))
+    end
+
+    def publish_wait(routing_key, message, properties = {})
+      ensure_connection!(routing_key, message)
+      if @config[:mq_wait_exchange].nil?
+        raise_publish_error('wait exchange not defined', routing_key, message)
+      end
+
+      non_overridable_properties = {
+        routing_key: routing_key,
+        content_type: 'application/json'
+      }
+      properties[:message_id] ||= generate_id
+      properties[:timestamp] ||= Time.now.to_i
+
+      message_properties = { persistent: true }
+                           .merge(properties)
+                           .merge(global_properties)
+                           .merge(non_overridable_properties)
+      exchange = @wait_exchanges.fetch(message_properties[:expiration].to_s, @default_wait_exchange)
+      logger.info("publishing message '#{message.inspect}' to '#{exchange.name}' with routing key '#{routing_key}'")
+
+      exchange.publish(JSON.dump(message), message_properties)
     end
 
     private
@@ -214,7 +265,7 @@ module Hutch
         config.username = @config[:mq_username]
         config.password = @config[:mq_password]
         config.ssl = @config[:mq_api_ssl]
-        config.protocol = config.ssl ? "https://" : "http://"
+        config.protocol = config.ssl ? 'https://' : 'http://'
         config.sanitized_uri = "#{config.protocol}#{config.username}@#{config.host}:#{config.port}/"
       end
     end
@@ -224,7 +275,7 @@ module Hutch
     rescue Net::HTTPServerException => ex
       logger.error "HTTP API connection error: #{ex.message.downcase}"
       if ex.response.code == '401'
-        raise AuthenticationError.new('invalid HTTP API credentials')
+        raise AuthenticationError, 'invalid HTTP API credentials'
       else
         raise
       end
@@ -234,23 +285,23 @@ module Hutch
       yield
     rescue Errno::ECONNREFUSED => ex
       logger.error "HTTP API connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.sanitized_uri}")
+      raise ConnectionError, "couldn't connect to HTTP API at #{api_config.sanitized_uri}"
     end
 
     def with_bunny_precondition_handler(item)
       yield
     rescue Bunny::PreconditionFailed => ex
       logger.error ex.message
-      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " +
-          "Perhaps it is being redeclared with non-matching attributes"
-      raise WorkerSetupError.new(s)
+      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " \
+          'Perhaps it is being redeclared with non-matching attributes'
+      raise WorkerSetupError, s
     end
 
     def with_bunny_connection_handler(uri)
       yield
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+      raise ConnectionError, "couldn't connect to rabbitmq at #{uri}"
     end
 
     def work_pool_threads
@@ -264,6 +315,22 @@ module Hutch
     def global_properties
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
+
+    def declare_wait_exchange(name)
+      with_bunny_precondition_handler('exchange') do
+        @channel.fanout(name, durable: true)
+      end
+    end
+
+    def declare_wait_queue(exchange, queue_name)
+      with_bunny_precondition_handler('queue') do
+        queue = @channel.queue(
+          queue_name,
+          durable: true,
+          arguments: { 'x-dead-letter-exchange' => @config[:mq_exchange] }
+        )
+        queue.bind(exchange)
+      end
+    end
   end
 end
-

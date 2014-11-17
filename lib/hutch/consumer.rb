@@ -38,7 +38,7 @@ module Hutch
       def get_queue_name
         return @queue_name unless @queue_name.nil?
         queue_name = self.name.gsub(/::/, ':')
-        queue_name.gsub!(/([^A-Z:])([A-Z])/) { "#{$1}_#{$2}" }
+        queue_name.gsub!(/([^A-Z:])([A-Z])/) { "#{Regexp.last_match[1]}_#{Regexp.last_match[2]}" }
         queue_name.downcase
       end
 
@@ -49,4 +49,3 @@ module Hutch
     end
   end
 end
-

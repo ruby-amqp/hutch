@@ -73,9 +73,9 @@ module Hutch
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, delivery_info, properties, payload)
-      logger.info("message(#{properties.message_id || '-'}): " +
-                  "routing key: #{delivery_info.routing_key}, " +
-                  "consumer: #{consumer}, " +
+      logger.info("message(#{properties.message_id || '-'}): " \
+                  "routing key: #{delivery_info.routing_key}, " \
+                  "consumer: #{consumer}, " \
                   "payload: #{payload}")
 
       broker = @broker

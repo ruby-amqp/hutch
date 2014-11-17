@@ -66,7 +66,7 @@ module Hutch
       if File.directory?(path)
         # Smells like a Rails app if it's got a config/environment.rb file
         rails_path = File.expand_path(File.join(path, 'config/environment.rb'))
-        if File.exists?(rails_path)
+        if File.exist?(rails_path)
           logger.info "found rails project (#{path}), booting app"
           ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
           require rails_path
@@ -89,6 +89,7 @@ module Hutch
       :error
     end
 
+    # rubocop:disable Metrics/AbcSize
     def parse_options(args = ARGV)
       OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
@@ -101,17 +102,17 @@ module Hutch
           Hutch::Config.mq_port = port
         end
 
-        opts.on("-t", "--[no-]mq-tls", 'Use TLS for the AMQP connection') do |tls|
+        opts.on('-t', '--[no-]mq-tls', 'Use TLS for the AMQP connection') do |tls|
           Hutch::Config.mq_tls = tls
         end
 
         opts.on('--mq-tls-cert FILE', 'Certificate  for TLS client verification') do |file|
-          abort "Certificate file '#{file}' not found" unless File.exists?(file)
+          abort "Certificate file '#{file}' not found" unless File.exist?(file)
           Hutch::Config.mq_tls_cert = file
         end
 
         opts.on('--mq-tls-key FILE', 'Private key for TLS client verification') do |file|
-          abort "Private key file '#{file}' not found" unless File.exists?(file)
+          abort "Private key file '#{file}' not found" unless File.exist?(file)
           Hutch::Config.mq_tls_key = file
         end
 
@@ -142,7 +143,19 @@ module Hutch
           Hutch::Config.mq_api_port = port
         end
 
-        opts.on("-s", "--[no-]mq-api-ssl", 'Use SSL for the RabbitMQ API') do |api_ssl|
+        opts.on('--mq-wait-exchange EXCHANGE', 'Set the RabbitMQ wait exchange name') do |exchange|
+          Hutch::Config.mq_wait_exchange = exchange
+        end
+
+        opts.on('--mq-wait-queue QUEUE', 'Set the RabbitMQ wait queue name') do |queue|
+          Hutch::Config.mq_wait_queue = queue
+        end
+
+        opts.on('--mq-wait-expiration-suffices SUFFICES', 'Set the wait queue expirations expected (comma-separated integers in milliseconds)') do |suffices|
+          Hutch::Config.mq_wait_expiration_suffices = suffices.split(',').map(&:to_s)
+        end
+
+        opts.on('-s', '--[no-]mq-api-ssl', 'Use SSL for the RabbitMQ API') do |api_ssl|
           Hutch::Config.mq_api_ssl = api_ssl
         end
 
@@ -193,12 +206,12 @@ module Hutch
         end
       end.parse!(args)
     end
+    # rubocop:enable Metrics/AbcSize
 
     def write_pid
       pidfile = File.expand_path(Hutch::Config.pidfile)
       Hutch.logger.info "writing pid in #{pidfile}"
       File.open(pidfile, 'w') { |f| f.puts ::Process.pid }
     end
-
   end
 end

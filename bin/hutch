@@ -5,4 +5,3 @@ require_relative '../lib/hutch/cli'
 
 cli = Hutch::CLI.new
 cli.run(ARGV)
-
