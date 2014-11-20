@@ -1,5 +1,6 @@
 require 'optparse'
 
+require 'hutch/version'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/config'
