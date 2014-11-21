@@ -1,6 +1,10 @@
 ## 0.12.0 — unreleased
 
-No changes yet.
+### Base Class for All Hutch Exceptions
+
+All Hutch exceptions now inherit from `Hutch::Exception`.
+
+Contributed by Pierre-Louis Gottfrois.
 
 
 ## 0.11.0 — Nov 14th, 2014
