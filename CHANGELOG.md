@@ -1,5 +1,16 @@
 ## 0.12.0 — unreleased
 
+### hutch --version No Longer Fails
+
+```
+hutch --version
+```
+
+no longer fails with an exception.
+
+Contributed by Olle Jonsson.
+
+
 ### Base Class for All Hutch Exceptions
 
 All Hutch exceptions now inherit from `Hutch::Exception`.
