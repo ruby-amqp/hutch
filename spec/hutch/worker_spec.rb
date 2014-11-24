@@ -35,7 +35,7 @@ describe Hutch::Worker do
     end
 
     it 'sets up a subscription' do
-      expect(queue).to receive(:subscribe).with(ack: true)
+      expect(queue).to receive(:subscribe).with(manual_ack: true)
       worker.setup_queue(consumer)
     end
   end
