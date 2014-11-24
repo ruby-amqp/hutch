@@ -1,13 +1,15 @@
+require 'hutch/consumer'
+require 'hutch/worker'
+require 'hutch/broker'
+require 'hutch/logging'
+require 'hutch/config'
+require 'hutch/message'
+require 'hutch/cli'
+require 'hutch/version'
+require 'hutch/error_handlers'
+require 'hutch/exceptions'
+
 module Hutch
-  autoload :Consumer,      'hutch/consumer'
-  autoload :Worker,        'hutch/worker'
-  autoload :Broker,        'hutch/broker'
-  autoload :Logging,       'hutch/logging'
-  autoload :Config,        'hutch/config'
-  autoload :Message,       'hutch/message'
-  autoload :CLI,           'hutch/cli'
-  autoload :Version,       'hutch/version'
-  autoload :ErrorHandlers, 'hutch/error_handlers'
 
   def self.register_consumer(consumer)
     self.consumers << consumer
