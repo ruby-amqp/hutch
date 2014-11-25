@@ -1,5 +1,13 @@
 ## 0.12.0 — unreleased
 
+### Explicit Requires
+
+Hutch no longer relies on `Kernel#autoload` to load its key
+modules and classes.
+
+Contributed by Pierre-Louis Gottfrois.
+
+
 ### hutch --version No Longer Fails
 
 ```
