@@ -1,4 +1,4 @@
-## 0.12.0 — unreleased
+## 0.12.0 — Nov 25th, 2014
 
 ### Explicit Requires
 
