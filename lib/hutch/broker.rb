@@ -59,22 +59,23 @@ module Hutch
         @config[:mq_password] = u.password
       end
 
-      host     = @config[:mq_host]
-      port     = @config[:mq_port]
-      vhost    = @config[:mq_vhost]
-      username = @config[:mq_username]
-      password = @config[:mq_password]
-      tls      = @config[:mq_tls]
-      tls_key  = @config[:mq_tls_key]
-      tls_cert = @config[:mq_tls_cert]
-      protocol = tls ? "amqps://" : "amqp://"
-      sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      host               = @config[:mq_host]
+      port               = @config[:mq_port]
+      vhost              = @config[:mq_vhost]
+      username           = @config[:mq_username]
+      password           = @config[:mq_password]
+      tls                = @config[:mq_tls]
+      tls_key            = @config[:mq_tls_key]
+      tls_cert           = @config[:mq_tls_cert]
+      connection_timeout = @config[:connection_timeout]
+      protocol           = tls ? "amqps://" : "amqp://"
+      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
                               heartbeat: 30, automatically_recover: true,
-                              network_recovery_interval: 1)
+                              network_recovery_interval: 1, connection_timeout: connection_timeout)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start

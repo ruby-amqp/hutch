@@ -38,6 +38,7 @@ module Hutch
         # like `publisher_confirms` above but also
         # forces waiting for a confirm for every publish
         force_publisher_confirms: false
+        connection_timeout: 5
       }.merge(params)
     end
 
