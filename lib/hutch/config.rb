@@ -37,7 +37,9 @@ module Hutch
         publisher_confirms: false,
         # like `publisher_confirms` above but also
         # forces waiting for a confirm for every publish
-        force_publisher_confirms: false
+        force_publisher_confirms: false,
+        # Heroku needs > 10. MK.
+        connection_timeout: 11
       }.merge(params)
     end
 
