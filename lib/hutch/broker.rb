@@ -15,8 +15,14 @@ module Hutch
     end
 
     def connect(options = {})
+      @options = options
       set_up_amqp_connection
-      set_up_api_connection if options.fetch(:enable_http_api_use, true)
+      if http_api_use_enabled?
+        logger.info "HTTP API use is enabled"
+        set_up_api_connection
+      else
+        logger.info "HTTP API use is disabled"
+      end
 
       if block_given?
         begin
@@ -61,7 +67,11 @@ module Hutch
 
       host               = @config[:mq_host]
       port               = @config[:mq_port]
-      vhost              = @config[:mq_vhost]
+      vhost              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
+                             @config[:mq_vhost]
+                           else
+                             Bunny::Session::DEFAULT_VHOST
+                           end
       username           = @config[:mq_username]
       password           = @config[:mq_password]
       tls                = @config[:mq_tls]
@@ -112,6 +122,17 @@ module Hutch
       end
     end
 
+    def http_api_use_enabled?
+      op = @options.fetch(:enable_http_api_use, true)
+      cf = if @config[:enable_http_api_use].nil?
+             true
+           else
+             @config[:enable_http_api_use]
+           end
+
+      op && cf
+    end
+
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name)
       with_bunny_precondition_handler('queue') do
@@ -137,12 +158,14 @@ module Hutch
     # existing bindings on the queue that aren't present in the array of
     # routing keys will be unbound.
     def bind_queue(queue, routing_keys)
-      # Find the existing bindings, and unbind any redundant bindings
-      queue_bindings = bindings.select { |dest, keys| dest == queue.name }
-      queue_bindings.each do |dest, keys|
-        keys.reject { |key| routing_keys.include?(key) }.each do |key|
-          logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-          queue.unbind(@exchange, routing_key: key)
+      if http_api_use_enabled?
+        # Find the existing bindings, and unbind any redundant bindings
+        queue_bindings = bindings.select { |dest, keys| dest == queue.name }
+        queue_bindings.each do |dest, keys|
+          keys.reject { |key| routing_keys.include?(key) }.each do |key|
+            logger.debug "removing redundant binding #{queue.name} <--> #{key}"
+            queue.unbind(@exchange, routing_key: key)
+          end
         end
       end
 
@@ -271,7 +294,7 @@ module Hutch
       yield
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}")
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}. Check your configuration, network connectivity and RabbitMQ logs.")
     end
 
     def work_pool_threads

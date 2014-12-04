@@ -39,7 +39,8 @@ module Hutch
         # forces waiting for a confirm for every publish
         force_publisher_confirms: false,
         # Heroku needs > 10. MK.
-        connection_timeout: 11
+        connection_timeout: 11,
+        enable_http_api_use: true
       }.merge(params)
     end
 
