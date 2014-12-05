@@ -1,6 +1,9 @@
-## 0.13.0 — (unreleased)
+## 0.13.0 — Dec 5th, 2014
 
-No changes yet.
+### HTTP API Can Be Disabled for Consumers
+
+HTTP API use can be disabled for consumers using the `:enable_http_api_use` config
+option (defaults to true).
 
 
 
