@@ -1,6 +1,11 @@
 ## 0.14.0 — (unreleased)
 
-No changes yet.
+### Hutch.connected? Now Returns Up-to-Date Value
+
+`Hutch.connect?` no longer relies on an ivar and always returns
+an up-to-date value.
+
+Contributed by Pierre-Louis Gottfrois.
 
 
 ## 0.13.0 — Dec 5th, 2014
