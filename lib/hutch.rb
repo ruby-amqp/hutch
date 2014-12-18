@@ -35,15 +35,11 @@ module Hutch
     unless connected?
       @broker = Hutch::Broker.new(config)
       @broker.connect(options)
-      @connected = true
     end
   end
 
   def self.disconnect
-    if @broker
-      @broker.disconnect
-      @connected = false
-    end
+    @broker.disconnect if @broker
   end
 
   def self.broker
@@ -51,7 +47,9 @@ module Hutch
   end
 
   def self.connected?
-    @connected
+    return false unless broker
+    return false unless broker.connection
+    broker.connection.open?
   end
 
   def self.publish(*args)

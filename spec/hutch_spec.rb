@@ -27,11 +27,6 @@ describe Hutch do
         action
       end
 
-      it 'sets @connect' do
-        action
-
-        expect(Hutch.connected?).to be_truthy
-      end
     end
 
     context 'connected' do
@@ -41,6 +36,39 @@ describe Hutch do
         expect(Hutch::Broker).not_to receive :new
         Hutch.connect
       end
+    end
+  end
+
+  describe '.connected?' do
+    subject(:connected?) { Hutch.connected? }
+
+    before { allow(Hutch).to receive(:broker).and_return(broker) }
+
+    context 'without a broker' do
+      let(:broker) { nil }
+
+      it { expect(connected?).to be_falsey }
+    end
+
+    context 'without a connection' do
+      let(:connection) { nil }
+      let(:broker) { double(:broker, connection: connection) }
+
+      it { expect(connected?).to be_falsey }
+    end
+
+    context 'with a closed connection' do
+      let(:connection) { double(:connection, open?: false) }
+      let(:broker) { double(:broker, connection: connection) }
+
+      it { expect(connected?).to be_falsey }
+    end
+
+    context 'with an opened connection' do
+      let(:connection) { double(:connection, open?: true) }
+      let(:broker) { double(:broker, connection: connection) }
+
+      it { expect(connected?).to be_truthy }
     end
   end
 
