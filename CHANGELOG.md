@@ -2,7 +2,7 @@
 
 ### Hutch.connected? Now Returns Up-to-Date Value
 
-`Hutch.connect?` no longer relies on an ivar and always returns
+`Hutch.connected?` no longer relies on an ivar and always returns
 an up-to-date value.
 
 Contributed by Pierre-Louis Gottfrois.
