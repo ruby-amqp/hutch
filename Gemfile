@@ -10,6 +10,7 @@ end
 
 group :development, :test do
   gem "sentry-raven"
+  gem "honeybadger"
   gem "coveralls", require: false
 end
 
