@@ -216,9 +216,9 @@ module Hutch
       }
       properties[:message_id] ||= generate_id
 
-      logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-
-      response = @exchange.publish(JSON.dump(message), {persistent: true}.
+      json = JSON.dump(message)
+      logger.info("publishing message '#{json}' to #{routing_key}")
+      response = @exchange.publish(json, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
@@ -242,7 +242,7 @@ module Hutch
     private
 
     def raise_publish_error(reason, routing_key, message)
-      msg = "Unable to publish - #{reason}. Message: #{message.inspect}, Routing key: #{routing_key}."
+      msg = "unable to publish - #{reason}. Message: #{JSON.dump(message)}, Routing key: #{routing_key}."
       logger.error(msg)
       raise PublishError, msg
     end
