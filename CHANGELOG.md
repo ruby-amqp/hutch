@@ -6,6 +6,13 @@
 
 Contributed by Andrew Morton.
 
+### Configurable Heartbeat
+
+Config now supports a new option: `:heartbeat`, which is passed
+on to Bunny.
+
+Contributed by Simon Taranto.
+
 ### Hutch.connected? Now Returns Up-to-Date Value
 
 `Hutch.connected?` no longer relies on an ivar and always returns
