@@ -1,5 +1,11 @@
 ## 0.14.0 — (unreleased)
 
+### Logged Messages as Serialised as JSON
+
+...as opposed to Ruby object printing.
+
+Contributed by Andrew Morton.
+
 ### Hutch.connected? Now Returns Up-to-Date Value
 
 `Hutch.connected?` no longer relies on an ivar and always returns
