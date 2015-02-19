@@ -41,6 +41,8 @@ module Hutch
         force_publisher_confirms: false,
         # Heroku needs > 10. MK.
         connection_timeout: 11,
+        read_timeout: 11,
+        write_timeout: 11,
         enable_http_api_use: true
       }.merge(params)
     end

@@ -77,8 +77,11 @@ module Hutch
       tls                = @config[:mq_tls]
       tls_key            = @config[:mq_tls_key]
       tls_cert           = @config[:mq_tls_cert]
-      connection_timeout = @config[:connection_timeout]
       heartbeat          = @config[:heartbeat]
+      connection_timeout = @config[:connection_timeout]
+      read_timeout       = @config[:read_timeout]
+      write_timeout      = @config[:write_timeout]
+
       protocol           = tls ? "amqps://" : "amqp://"
       sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
@@ -86,7 +89,10 @@ module Hutch
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
                               heartbeat: heartbeat, automatically_recover: true,
-                              network_recovery_interval: 1, connection_timeout: connection_timeout)
+                              network_recovery_interval: 1,
+                              connection_timeout: connection_timeout,
+                              read_timeout: read_timeout,
+                              write_timeout: write_timeout)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start
