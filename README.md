@@ -242,7 +242,7 @@ Known configuration parameters are:
  * `force_publisher_confirms`: enables publisher confirms, forces `Hutch::Broker#wait_for_confirms` for every publish. **This is the safest option which also offers the lowest throughput**.
  * `log_level`: log level used by the standard Ruby logger (default: `Logger::INFO`)
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
- * `heartbeat`: RabbitMQ heartbeat delay (default: `30`)
+ * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timemout`: Bunny's socket write timeout (default: `11`)
