@@ -250,8 +250,7 @@ Known configuration parameters are:
 
 ## Supported RabbitMQ Versions
 
-Hutch requires RabbitMQ 2.x or later. 3.x releases
-are recommended.
+Hutch requires RabbitMQ 3.3 or later.
 
 ---
 
