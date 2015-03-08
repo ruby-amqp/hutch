@@ -96,15 +96,5 @@ describe Hutch::Config do
         expect(Hutch::Config.mq_username).to eq username
       end
     end
-
-    context 'when using ERb' do
-      let(:config_data) { { mq_host: host, mq_username: '<%= "calvin" %>' } }
-
-      it 'loads in the config data' do
-        Hutch::Config.load_from_file(file)
-        expect(Hutch::Config.mq_host).to eq host
-        expect(Hutch::Config.mq_username).to eq username
-      end
-    end
   end
 end
