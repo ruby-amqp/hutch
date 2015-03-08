@@ -96,9 +96,25 @@ describe Hutch::Config do
         expect(Hutch::Config.mq_username).to eq username
       end
     end
+  end
+
+  describe '.load_from_file' do
+    let(:host) { 'localhost' }
+    let(:username) { 'calvin' }
+    let(:file) do
+      Tempfile.new('configs.yaml').tap do |t|
+        t.write(config_contents)
+        t.rewind
+      end
+    end
 
     context 'when using ERb' do
-      let(:config_data) { { mq_host: host, mq_username: '<%= "calvin" %>' } }
+      let(:config_contents) do
+        <<-YAML
+mq_host: 'localhost'
+mq_username: '<%= "calvin" %>'
+YAML
+      end
 
       it 'loads in the config data' do
         Hutch::Config.load_from_file(file)
