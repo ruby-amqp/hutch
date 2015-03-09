@@ -134,8 +134,6 @@ mq_host: broker.yourhost.com
 Passing a setting as a command-line option will overwrite what's specified
 in the config file, allowing for easy customization.
 
-
-
 ### Loading Consumers
 
 Using Hutch with a Rails app is simple. Either start Hutch in the working
@@ -152,6 +150,20 @@ a Rails app or a standard file, and take the appropriate behaviour:
 $ hutch --require path/to/rails-app  # loads a rails app
 $ hutch --require path/to/file.rb    # loads a ruby file
 ```
+
+### Stopping Hutch
+
+Hutch supports graceful stops. That means that if done correctly, Hutch will wait for your consumer to finish processing before exiting.
+
+To gracefully stop your workers, you may send the following signals to your Hutch processes: `INT`, `TERM`, or `QUIT`.
+
+```bash
+kill -SIGINT 123 # or kill -2 123
+kill -SIGTERM 456 # or kill -15 456
+kill -SIGQUIT 789 # or kill -3 789
+```
+
+![](http://g.recordit.co/wyCdzG9Kh3.gif)
 
 ## Producers
 
