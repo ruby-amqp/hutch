@@ -193,7 +193,9 @@ module Hutch
     end
 
     def stop
-      @channel.work_pool.kill
+      @channel.work_pool.shutdown # enqueues a failing job
+      @channel.work_pool.join(25)
+      @channel.work_pool.kill # kill is a job is running past the timeout
     end
 
     def requeue(delivery_tag)
