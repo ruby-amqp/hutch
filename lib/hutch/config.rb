@@ -43,7 +43,11 @@ module Hutch
         connection_timeout: 11,
         read_timeout: 11,
         write_timeout: 11,
-        enable_http_api_use: true
+        enable_http_api_use: true,
+        # Number of seconds that a running consumer is given
+        # to finish its job when gracefully exiting Hutch, before
+        # it's killed.
+        graceful_exit_timeout: 11,
       }.merge(params)
     end
 
