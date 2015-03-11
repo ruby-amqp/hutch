@@ -211,6 +211,25 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#stop' do
+    let(:thread_1) { double('Thread') }
+    let(:thread_2) { double('Thread') }
+    let(:work_pool) { double('Bunny::ConsumerWorkPool') }
+    let(:config) { { graceful_exit_timeout: 2 } }
+
+    before do
+      allow(broker).to receive(:channel_work_pool).and_return(work_pool)
+    end
+
+    it 'gracefully stops the work pool' do
+      expect(work_pool).to receive(:shutdown)
+      expect(work_pool).to receive(:join).with(2)
+      expect(work_pool).to receive(:kill)
+
+      broker.stop
+    end
+  end
+
   describe '#publish' do
     context 'with a valid connection' do
       before { broker.set_up_amqp_connection }

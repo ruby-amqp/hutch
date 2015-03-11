@@ -193,7 +193,12 @@ module Hutch
     end
 
     def stop
-      @channel.work_pool.kill
+      # Enqueue a failing job that kills the consumer loop
+      channel_work_pool.shutdown
+      # Give `timeout` seconds to jobs that are still being processed
+      channel_work_pool.join(@config[:graceful_exit_timeout])
+      # If after `timeout` they are still running, they are killed
+      channel_work_pool.kill
     end
 
     def requeue(delivery_tag)
@@ -305,7 +310,11 @@ module Hutch
     end
 
     def work_pool_threads
-      @channel.work_pool.threads || []
+      channel_work_pool.threads || []
+    end
+
+    def channel_work_pool
+      @channel.work_pool
     end
 
     def generate_id
