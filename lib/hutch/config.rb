@@ -1,4 +1,5 @@
 require 'hutch/error_handlers/logger'
+require 'erb'
 require 'logger'
 
 module Hutch
