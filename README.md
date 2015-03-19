@@ -169,6 +169,26 @@ Hutch.connect
 Hutch.publish('routing.key', subject: 'payment', action: 'received')
 ```
 
+### Producer Configuration
+
+Producers are not run with the 'hutch' command. You can specify configuration
+options as follows:
+
+```ruby
+Hutch::Config.set(:mq_exchange, 'name')
+```
+
+### Publisher Confirms
+
+For maximum message reliability when producing messages, you can force Hutch to use
+[Publisher Confirms](https://www.rabbitmq.com/confirms.html) and wait for a confirmation
+after every message published. This is the safest possible option for publishers
+but also results in a **significant throughput drop**.
+
+```ruby
+Hutch::Config.set(:force_publisher_confirms, true)
+```
+
 ### Writing Well-Behaved Publishers
 
 You may need to send messages to Hutch from languages other than Ruby. This
@@ -222,10 +242,17 @@ Known configuration parameters are:
  * `daemonise`: should Hutch runner process daemonise?
  * `pidfile`: path to PID file the runner should use
  * `channel_prefetch`: basic.qos prefetch value to use (default: `0`, no limit). See Bunny and RabbitMQ documentation.
+ * `publisher_confirms`: enables publisher confirms. Leaves it up to the app how they are
+                         tracked (e.g. using `Hutch::Broker#confirm_select` callback or `Hutch::Broker#wait_for_confirms`)
+ * `force_publisher_confirms`: enables publisher confirms, forces `Hutch::Broker#wait_for_confirms` for every publish. **This is the safest option which also offers the lowest throughput**.
  * `log_level`: log level used by the standard Ruby logger (default: `Logger::INFO`)
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
  * `mq_wait_exchange`: exchange to use for waiting. Leave unset to not use a wait exchange.
  * `mq_wait_queue`: queue to use for waiting (default: `wait-queue`)
+ * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
+ * `connection_timeout`: Bunny's socket open timeout (default: `11`)
+ * `read_timeout`: Bunny's socket read timeout (default: `11`)
+ * `write_timemout`: Bunny's socket write timeout (default: `11`)
 
 
 ## Wait exchange
@@ -252,8 +279,7 @@ Configure the suffices to be created at startup with `mq_wait_expiration_suffice
 
 ## Supported RabbitMQ Versions
 
-Hutch requires RabbitMQ 2.x or later. 3.x releases
-are recommended.
+Hutch requires RabbitMQ 3.3 or later.
 
 ---
 

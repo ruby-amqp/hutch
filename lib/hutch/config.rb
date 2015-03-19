@@ -24,6 +24,7 @@ module Hutch
         mq_wait_exchange: nil,
         mq_wait_queue: 'wait-queue',
         mq_wait_expiration_suffices: [],
+        heartbeat: 30,
         # placeholder, allows specifying connection parameters
         # as a URI.
         uri: nil,
@@ -34,7 +35,18 @@ module Hutch
         namespace: nil,
         daemonise: false,
         pidfile: nil,
-        channel_prefetch: 0
+        channel_prefetch: 0,
+        # enables publisher confirms, leaves it up to the app
+        # how they are tracked
+        publisher_confirms: false,
+        # like `publisher_confirms` above but also
+        # forces waiting for a confirm for every publish
+        force_publisher_confirms: false,
+        # Heroku needs > 10. MK.
+        connection_timeout: 11,
+        read_timeout: 11,
+        write_timeout: 11,
+        enable_http_api_use: true
       }.merge(params)
     end
 
@@ -62,6 +74,10 @@ module Hutch
     def self.user_config
       initialize unless @config
       @config
+    end
+
+    def self.to_hash
+      self.user_config
     end
 
     def self.load_from_file(file)

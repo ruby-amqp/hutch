@@ -17,9 +17,15 @@ module Hutch
     end
 
     def connect(options = {})
+      @options = options
       set_up_amqp_connection
       set_up_wait_exchange unless @config[:mq_wait_exchange].nil?
-      set_up_api_connection if options.fetch(:enable_http_api_use, true)
+      if http_api_use_enabled?
+        logger.info 'HTTP API use is enabled'
+        set_up_api_connection
+      else
+        logger.info 'HTTP API use is disabled'
+      end
 
       return unless block_given?
       begin
@@ -86,22 +92,34 @@ module Hutch
         @config[:mq_password] = u.password
       end
 
-      host     = @config[:mq_host]
-      port     = @config[:mq_port]
-      vhost    = @config[:mq_vhost]
-      username = @config[:mq_username]
-      password = @config[:mq_password]
-      tls      = @config[:mq_tls]
-      tls_key  = @config[:mq_tls_key]
-      tls_cert = @config[:mq_tls_cert]
-      protocol = tls ? 'amqps://' : 'amqp://'
-      sanitized_uri = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      host               = @config[:mq_host]
+      port               = @config[:mq_port]
+      vhost              = if @config[:mq_vhost] && '' != @config[:mq_vhost]
+                             @config[:mq_vhost]
+                           else
+                             Bunny::Session::DEFAULT_VHOST
+                           end
+      username           = @config[:mq_username]
+      password           = @config[:mq_password]
+      tls                = @config[:mq_tls]
+      tls_key            = @config[:mq_tls_key]
+      tls_cert           = @config[:mq_tls_cert]
+      heartbeat          = @config[:heartbeat]
+      connection_timeout = @config[:connection_timeout]
+      read_timeout       = @config[:read_timeout]
+      write_timeout      = @config[:write_timeout]
+
+      protocol           = tls ? 'amqps://' : 'amqp://'
+      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
                               username: username, password: password,
-                              heartbeat: 30, automatically_recover: true,
-                              network_recovery_interval: 1)
+                              heartbeat: heartbeat, automatically_recover: true,
+                              network_recovery_interval: 1,
+                              connection_timeout: connection_timeout,
+                              read_timeout: read_timeout,
+                              write_timeout: write_timeout)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start
@@ -116,6 +134,10 @@ module Hutch
       logger.info 'opening rabbitmq channel'
       @channel = connection.create_channel.tap do |ch|
         ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
+        if @config[:publisher_confirms] || @config[:force_publisher_confirms]
+          logger.info 'enabling publisher confirms'
+          ch.confirm_select
+        end
       end
     end
 
@@ -133,6 +155,17 @@ module Hutch
           @api_client.exchanges
         end
       end
+    end
+
+    def http_api_use_enabled?
+      op = @options.fetch(:enable_http_api_use, true)
+      cf = if @config[:enable_http_api_use].nil?
+             true
+           else
+             @config[:enable_http_api_use]
+           end
+
+      op && cf
     end
 
     # Create / get a durable queue and apply namespace if it exists.
@@ -160,12 +193,14 @@ module Hutch
     # existing bindings on the queue that aren't present in the array of
     # routing keys will be unbound.
     def bind_queue(queue, routing_keys)
-      # Find the existing bindings, and unbind any redundant bindings
-      queue_bindings = bindings.select { |dest, _keys| dest == queue.name }
-      queue_bindings.each do |_dest, keys|
-        keys.reject { |key| routing_keys.include?(key) }.each do |key|
-          logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-          queue.unbind(@exchange, routing_key: key)
+      if http_api_use_enabled?
+        # Find the existing bindings, and unbind any redundant bindings
+        queue_bindings = bindings.select { |dest, _keys| dest == queue.name }
+        queue_bindings.each do |_dest, keys|
+          keys.reject { |key| routing_keys.include?(key) }.each do |key|
+            logger.debug "removing redundant binding #{queue.name} <--> #{key}"
+            queue.unbind(@exchange, routing_key: key)
+          end
         end
       end
 
@@ -215,11 +250,15 @@ module Hutch
       }
       properties[:message_id] ||= generate_id
 
-      logger.info("publishing message '#{message.inspect}' to #{routing_key}")
-      @exchange.publish(JSON.dump(message), { persistent: true }
+      json = JSON.dump(message)
+      logger.info("publishing message '#{json}' to #{routing_key}")
+      response = @exchange.publish(json, { persistent: true }
         .merge(properties)
         .merge(global_properties)
         .merge(non_overridable_properties))
+
+      channel.wait_for_confirms if @config[:force_publisher_confirms]
+      response
     end
 
     def publish_wait(routing_key, message, properties = {})
@@ -240,15 +279,31 @@ module Hutch
                            .merge(global_properties)
                            .merge(non_overridable_properties)
       exchange = @wait_exchanges.fetch(message_properties[:expiration].to_s, @default_wait_exchange)
-      logger.info("publishing message '#{message.inspect}' to '#{exchange.name}' with routing key '#{routing_key}'")
+      json = JSON.dump(message)
+      logger.info("publishing message '#{json}' to '#{exchange.name}' with routing key '#{routing_key}'")
 
-      exchange.publish(JSON.dump(message), message_properties)
+      response = exchange.publish(json, message_properties)
+
+      channel.wait_for_confirms if @config[:force_publisher_confirms]
+      response
+    end
+
+    def confirm_select(*args)
+      @channel.confirm_select(*args)
+    end
+
+    def wait_for_confirms
+      @channel.wait_for_confirms
+    end
+
+    def using_publisher_confirmations?
+      @channel.using_publisher_confirmations?
     end
 
     private
 
     def raise_publish_error(reason, routing_key, message)
-      msg = "Unable to publish - #{reason}. Message: #{message.inspect}, Routing key: #{routing_key}."
+      msg = "unable to publish - #{reason}. Message: #{JSON.dump(message)}, Routing key: #{routing_key}."
       logger.error(msg)
       raise PublishError, msg
     end
@@ -301,7 +356,7 @@ module Hutch
       yield
     rescue Bunny::TCPConnectionFailed => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
-      raise ConnectionError, "couldn't connect to rabbitmq at #{uri}"
+      raise ConnectionError, "couldn't connect to rabbitmq at #{uri}. Check your configuration, network connectivity and RabbitMQ logs."
     end
 
     def work_pool_threads

@@ -1,4 +1,99 @@
-## 0.11.0 — unreleased
+## 0.14.0 — (unreleased)
+
+### Configurable Socket Timeouts
+
+Socket read and write timeouts are now configurable using
+the `read_timeout` and `write_timeout` options, respectively.
+
+Contributed by Chris Barton.
+
+
+### Logged Messages as Serialised as JSON
+
+...as opposed to Ruby object printing.
+
+Contributed by Andrew Morton.
+
+
+### Configurable Heartbeat
+
+Config now supports a new option: `:heartbeat`, which is passed
+on to Bunny.
+
+Contributed by Simon Taranto.
+
+
+### HoneyBadger Error Handler
+
+Contributed by Daniel Farrell.
+
+
+### Hutch.connected? Now Returns Up-to-Date Value
+
+`Hutch.connected?` no longer relies on an ivar and always returns
+an up-to-date value.
+
+Contributed by Pierre-Louis Gottfrois.
+
+
+## 0.13.0 — Dec 5th, 2014
+
+### HTTP API Can Be Disabled for Consumers
+
+HTTP API use can be disabled for consumers using the `:enable_http_api_use` config
+option (defaults to true).
+
+
+
+## 0.12.0 — Nov 25th, 2014
+
+### Explicit Requires
+
+Hutch no longer relies on `Kernel#autoload` to load its key
+modules and classes.
+
+Contributed by Pierre-Louis Gottfrois.
+
+
+### hutch --version No Longer Fails
+
+```
+hutch --version
+```
+
+no longer fails with an exception.
+
+Contributed by Olle Jonsson.
+
+
+### Base Class for All Hutch Exceptions
+
+All Hutch exceptions now inherit from `Hutch::Exception`.
+
+Contributed by Pierre-Louis Gottfrois.
+
+
+## 0.11.0 — Nov 14th, 2014
+
+### Publisher Confirms Support
+
+`:force_publisher_confirms` is a new configuration option that forces `Hutch.publish` to wait
+for a confirm for every message published. Note that this **will cause a significant drop in throughput**:
+
+``` ruby
+Hutch::Config.set(:force_publisher_confirms, true)
+```
+
+`Hutch::Broker#confirm_select` and `Hutch::Broker#wait_for_confirms` are new public API methods
+that delegate to their respective `Bunny::Channel` counterparts. `Hutch::Broker#confirm_select`
+can be used to handle confirms with a callback instead of waiting:
+
+``` ruby
+broker.confirm_select do |delivery_tag, multiple, nack|
+  # ...
+end
+```
+
 
 ### Bunny Update
 
