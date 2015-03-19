@@ -116,8 +116,8 @@ describe Hutch::Broker do
       after  { broker.disconnect }
 
       it 'waits for confirmation' do
-        expect_any_instance_of(Bunny::Channel).
-          to receive(:confirm_select)
+        expect_any_instance_of(Bunny::Channel)
+          .to receive(:confirm_select)
         broker.set_up_amqp_connection
       end
     end
@@ -209,7 +209,6 @@ describe Hutch::Broker do
   end
 
   describe '#bind_queue' do
-
     around { |example| broker.connect { example.run } }
 
     let(:routing_keys) { %w( a b c ) }
@@ -314,8 +313,8 @@ describe Hutch::Broker do
 
       context 'with force_publisher_confirms not set in the config' do
         it 'does not wait for confirms on the channel' do
-          expect_any_instance_of(Bunny::Channel).
-            to_not receive(:wait_for_confirms)
+          expect_any_instance_of(Bunny::Channel)
+            .to_not receive(:wait_for_confirms)
           broker.publish('test.key', 'message')
         end
       end
@@ -328,8 +327,8 @@ describe Hutch::Broker do
         end
 
         it 'waits for confirms on the channel' do
-          expect_any_instance_of(Bunny::Channel).
-            to receive(:wait_for_confirms)
+          expect_any_instance_of(Bunny::Channel)
+            .to receive(:wait_for_confirms)
           broker.publish('test.key', 'message')
         end
       end
@@ -440,6 +439,28 @@ describe Hutch::Broker do
               expect(exchange).not_to receive(:publish)
             end
             broker.publish_wait('test.key', 'message', expiration: expiration)
+          end
+        end
+
+        context 'with force_publisher_confirms not set in the config' do
+          it 'does not wait for confirms on the channel' do
+            expect_any_instance_of(Bunny::Channel)
+              .to_not receive(:wait_for_confirms)
+            broker.publish_wait('test.key', 'message')
+          end
+        end
+
+        context 'with force_publisher_confirms set in the config' do
+          let(:force_publisher_confirms_value) { true }
+
+          before do
+            config[:force_publisher_confirms] = force_publisher_confirms_value
+          end
+
+          it 'waits for confirms on the channel' do
+            expect_any_instance_of(Bunny::Channel)
+              .to receive(:wait_for_confirms)
+            broker.publish_wait('test.key', 'message')
           end
         end
       end
