@@ -1,6 +1,7 @@
 module Hutch
-  class ConnectionError < StandardError; end
-  class AuthenticationError < StandardError; end
-  class WorkerSetupError < StandardError; end
-  class PublishError < StandardError; end
+  class Exception < StandardError; end
+  class ConnectionError < Exception; end
+  class AuthenticationError < Exception; end
+  class WorkerSetupError < Exception; end
+  class PublishError < Exception; end
 end

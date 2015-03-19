@@ -10,6 +10,7 @@ end
 
 group :development, :test do
   gem "sentry-raven"
+  gem "honeybadger"
   gem "coveralls", require: false
   gem 'rb-inotify', '~> 0.9', require: false
 end
