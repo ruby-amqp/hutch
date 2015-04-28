@@ -8,8 +8,10 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :api_client,
+    attr_accessor :connection, :exchange, :api_client,
                   :default_wait_exchange, :wait_exchanges
+
+    CHANNEL_KEY = :hutch_broker_channel
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -36,9 +38,8 @@ module Hutch
     end
 
     def disconnect
-      @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @connection, @exchange, @api_client = nil, nil, nil
       @default_wait_exchange, @wait_exchanges = nil, {}
     end
 
@@ -47,13 +48,12 @@ module Hutch
     # the exchange we'll be using.
     def set_up_amqp_connection
       open_connection!
-      open_channel!
 
       exchange_name = @config[:mq_exchange]
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
-        @exchange = @channel.topic(exchange_name, durable: true)
+        @exchange = channel.topic(exchange_name, durable: true)
       end
     end
 
@@ -130,9 +130,16 @@ module Hutch
     end
     # rubocop:enable Metrics/AbcSize
 
+    def channel
+      if Thread.current[CHANNEL_KEY] && !Thread.current[CHANNEL_KEY].active
+        Thread.current[CHANNEL_KEY] = nil
+      end
+      Thread.current[CHANNEL_KEY] ||= open_channel!
+    end
+
     def open_channel!
       logger.info 'opening rabbitmq channel'
-      @channel = connection.create_channel.tap do |ch|
+      connection.create_channel.tap do |ch|
         ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
         if @config[:publisher_confirms] || @config[:force_publisher_confirms]
           logger.info 'enabling publisher confirms'
@@ -221,23 +228,23 @@ module Hutch
     end
 
     def stop
-      @channel.work_pool.kill
+      channel.work_pool.kill
     end
 
     def requeue(delivery_tag)
-      @channel.reject(delivery_tag, true)
+      channel.reject(delivery_tag, true)
     end
 
     def reject(delivery_tag, requeue=false)
-      @channel.reject(delivery_tag, requeue)
+      channel.reject(delivery_tag, requeue)
     end
 
     def ack(delivery_tag)
-      @channel.ack(delivery_tag, false)
+      channel.ack(delivery_tag, false)
     end
 
     def nack(delivery_tag)
-      @channel.nack(delivery_tag, false, false)
+      channel.nack(delivery_tag, false, false)
     end
 
     def publish(routing_key, message, properties = {})
@@ -289,15 +296,15 @@ module Hutch
     end
 
     def confirm_select(*args)
-      @channel.confirm_select(*args)
+      channel.confirm_select(*args)
     end
 
     def wait_for_confirms
-      @channel.wait_for_confirms
+      channel.wait_for_confirms
     end
 
     def using_publisher_confirmations?
-      @channel.using_publisher_confirmations?
+      channel.using_publisher_confirmations?
     end
 
     private
@@ -360,7 +367,7 @@ module Hutch
     end
 
     def work_pool_threads
-      @channel.work_pool.threads || []
+      channel.work_pool.threads || []
     end
 
     def generate_id
@@ -373,13 +380,13 @@ module Hutch
 
     def declare_wait_exchange(name)
       with_bunny_precondition_handler('exchange') do
-        @channel.fanout(name, durable: true)
+        channel.fanout(name, durable: true)
       end
     end
 
     def declare_wait_queue(exchange, queue_name)
       with_bunny_precondition_handler('queue') do
-        queue = @channel.queue(
+        queue = channel.queue(
           queue_name,
           durable: true,
           arguments: { 'x-dead-letter-exchange' => @config[:mq_exchange] }
