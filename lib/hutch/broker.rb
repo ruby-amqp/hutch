@@ -11,6 +11,8 @@ module Hutch
     attr_accessor :connection, :exchange, :api_client,
                   :default_wait_exchange, :wait_exchanges
 
+    CHANNEL_KEY = :hutch_broker_channel
+
     def initialize(config = nil)
       @config = config || Hutch::Config
       @wait_exchanges = {}
@@ -129,7 +131,10 @@ module Hutch
     # rubocop:enable Metrics/AbcSize
 
     def channel
-      Thread.current[:hutch_broker_channel] ||= open_channel!
+      if Thread.current[CHANNEL_KEY] && !Thread.current[CHANNEL_KEY].active
+        Thread.current[CHANNEL_KEY] = nil
+      end
+      Thread.current[CHANNEL_KEY] ||= open_channel!
     end
 
     def open_channel!
