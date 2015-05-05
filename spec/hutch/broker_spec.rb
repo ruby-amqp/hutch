@@ -128,14 +128,16 @@ describe Hutch::Broker do
 
   describe '#queue' do
     let(:channel) { double('Channel') }
+    let(:arguments) { { foo: :bar } }
     before { allow(broker).to receive(:channel) { channel } }
 
     it 'applies a global namespace' do
       config[:namespace] = 'mirror-all.service'
       expect(broker.channel).to receive(:queue) do |*args|
-        args.first == 'mirror-all.service:test'
+        args.first == ''
+        args.last == arguments
       end
-      broker.queue('test')
+      broker.queue('test', arguments)
     end
   end
 
