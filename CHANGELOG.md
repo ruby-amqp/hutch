@@ -1,8 +1,10 @@
 ## 0.15.0 — (unreleased)
 
-No changes yet.
+Allow to set custom arguments per consumers by using the `arguments` setter.
+Arguments are usually used by rabbitmq plugins or to set queue policies. You can
+find a list of supported arguments [here](https://www.rabbitmq.com/extensions.html).
 
-
+Contributed by Pierre-Louis Gottfrois.
 
 ## 0.14.0 — Feb 23rd, 2015
 
