@@ -1,4 +1,9 @@
-## 0.15.0 — (unreleased)
+## 0.16.0 — (unreleased)
+
+No changes yet.
+
+
+## 0.15.0 — May 5th, 2015
 
 Allow to set custom arguments per consumers by using the `arguments` setter.
 Arguments are usually used by rabbitmq plugins or to set queue policies. You can
