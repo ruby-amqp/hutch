@@ -80,6 +80,19 @@ class FailedPaymentConsumer
 end
 ```
 
+You can also set custom arguments per consumer. This example declares a consumer with
+a maximum length of 10 messages:
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  arguments 'x-max-length' => 10
+end
+```
+
+Custom queue arguments can be found on [this page](https://www.rabbitmq.com/extensions.html).
+
 If you are using Hutch with Rails and want to make Hutch log to the Rails
 logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 

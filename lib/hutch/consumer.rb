@@ -32,6 +32,11 @@ module Hutch
         @queue_name = name
       end
 
+      # Allow to specify custom arguments that will be passed when creating the queue.
+      def arguments(arguments = {})
+        @arguments = arguments
+      end
+
       # The RabbitMQ queue name for the consumer. This is derived from the
       # fully-qualified class name. Module separators are replaced with single
       # colons, camelcased class names are converted to snake case.
@@ -40,6 +45,11 @@ module Hutch
         queue_name = self.name.gsub(/::/, ':')
         queue_name.gsub!(/([^A-Z:])([A-Z])/) { "#{$1}_#{$2}" }
         queue_name.downcase
+      end
+
+      # Returns consumer custom arguments.
+      def get_arguments
+        @arguments || {}
       end
 
       # Accessor for the consumer's routing key.

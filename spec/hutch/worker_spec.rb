@@ -3,7 +3,7 @@ require 'hutch/worker'
 
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
-                          get_queue_name: 'consumer') }
+                          get_queue_name: 'consumer', get_arguments: {}) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }
@@ -23,7 +23,7 @@ describe Hutch::Worker do
     before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
-      expect(broker).to receive(:queue).with(consumer.get_queue_name).and_return(queue)
+      expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_arguments).and_return(queue)
       worker.setup_queue(consumer)
     end
 
