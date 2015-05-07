@@ -2,6 +2,7 @@ require 'hutch/message'
 require 'hutch/logging'
 require 'hutch/broker'
 require 'carrot-top'
+require 'thread'
 
 module Hutch
   class Worker
@@ -16,20 +17,25 @@ module Hutch
     # process the messages in their respective queues indefinitely. This method
     # never returns.
     def run
-      setup_queues
-
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
 
+      register_action_handlers
+
+      setup_queues
+
       # Take a break from Thread#join every 0.1 seconds to check if we've
-      # been sent any signals
-      handle_signals until @broker.wait_on_threads(0.1)
+      # been sent any actions or signals
+      until @broker.wait_on_threads(0.1)
+        handle_actions
+        handle_signals
+      end
     end
 
     # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
     # gracefully. Forceful shutdowns are very bad!
     def register_signal_handlers
-      Thread.main[:signal_queue] = []
+      Thread.main[:signal_queue] = Queue.new
       %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym).each do |sig|
         # This needs to be reentrant, so we queue up signals to be handled
         # in the run loop, rather than acting on signals here
@@ -41,10 +47,24 @@ module Hutch
 
     # Handle any pending signals
     def handle_signals
-      signal = Thread.main[:signal_queue].shift
-      if signal
-        logger.info "caught sig#{signal.downcase}, stopping hutch..."
-        stop
+      return if Thread.main[:signal_queue].empty?
+      signal = Thread.main[:signal_queue].pop(true)
+      logger.info "caught sig#{signal.downcase}, stopping hutch..."
+      stop
+    end
+
+    # Register action queue for acknowledging messages in main thread
+    # Messages consumed come from main thread so acks and nacks need to use the
+    # same channel
+    def register_action_handlers
+      Thread.main[:action_queue] = Queue.new
+    end
+
+    # Handle all pending message acknowledgement actions
+    def handle_actions
+      until Thread.main[:action_queue].empty?
+        action, delivery_tag = Thread.main[:action_queue].pop(true)
+        @broker.public_send(action, delivery_tag)
       end
     end
 
@@ -78,13 +98,15 @@ module Hutch
                   "consumer: #{consumer}, " \
                   "payload: #{payload}")
 
-      broker = @broker
       begin
         message = Message.new(delivery_info, properties, payload)
-        consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }.process(message)
-        broker.ack(delivery_info.delivery_tag)
+        instance = consumer.new
+        instance.broker = @broker
+        instance.delivery_info = delivery_info
+        instance.process(message)
+        Thread.main[:action_queue] << [:ack, delivery_info.delivery_tag]
       rescue StandardError => ex
-        broker.nack(delivery_info.delivery_tag)
+        Thread.main[:action_queue] << [:nack, delivery_info.delivery_tag]
         handle_error(properties.message_id, payload, consumer, ex)
       end
     end
