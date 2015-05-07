@@ -35,7 +35,7 @@ module Hutch
     # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
     # gracefully. Forceful shutdowns are very bad!
     def register_signal_handlers
-      Thread.main[:signal_queue] = Queue.new
+      Thread.main[:signal_queue] = []
       %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym).each do |sig|
         # This needs to be reentrant, so we queue up signals to be handled
         # in the run loop, rather than acting on signals here
@@ -47,10 +47,11 @@ module Hutch
 
     # Handle any pending signals
     def handle_signals
-      return if Thread.main[:signal_queue].empty?
-      signal = Thread.main[:signal_queue].pop(true)
-      logger.info "caught sig#{signal.downcase}, stopping hutch..."
-      stop
+      signal = Thread.main[:signal_queue].shift
+      if signal
+        logger.info "caught sig#{signal.downcase}, stopping hutch..."
+        stop
+      end
     end
 
     # Register action queue for acknowledging messages in main thread
@@ -63,7 +64,7 @@ module Hutch
     # Handle all pending message acknowledgement actions
     def handle_actions
       until Thread.main[:action_queue].empty?
-        action, delivery_tag = Thread.main[:action_queue].pop(true)
+        action, delivery_tag = Thread.main[:action_queue].pop
         @broker.public_send(action, delivery_tag)
       end
     end
