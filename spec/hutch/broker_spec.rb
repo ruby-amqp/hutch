@@ -119,7 +119,10 @@ describe Hutch::Broker do
     end
 
     describe 'wait queue' do
-      skip
+      before { broker.default_wait_exchange }
+      let(:queues) { broker.channel.queues }
+
+      specify { expect(queues.keys).to include('wait-queue') }
     end
 
     describe '#wait_exchanges' do
@@ -128,10 +131,15 @@ describe Hutch::Broker do
           expect(wait_exchange).to be_a Bunny::Exchange
         end
       end
+      specify { expect(broker.wait_exchanges.count).to eq(2) }
     end
 
     describe 'suffixed wait queues' do
-      skip
+      before { broker.wait_exchanges }
+      let(:queues) { broker.channel.queues }
+
+      specify { expect(queues.keys).to include('wait-queue_10000') }
+      specify { expect(queues.keys).to include('wait-queue_30000') }
     end
   end
 
