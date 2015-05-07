@@ -1,21 +1,27 @@
 require 'bunny'
 require 'carrot-top'
+require 'forwardable'
 require 'securerandom'
 require 'hutch/logging'
 require 'hutch/exceptions'
+require 'hutch/channel_broker'
 
 module Hutch
   class Broker
     include Logging
+    extend Forwardable
 
-    attr_accessor :connection, :exchange, :api_client,
-                  :default_wait_exchange, :wait_exchanges
+    attr_accessor :connection, :api_client
+    def_delegators :channel_broker,
+                   :channel, :channel=,
+                   :exchange, :exchange=,
+                   :default_wait_exchange, :default_wait_exchange=,
+                   :wait_exchanges, :wait_exchanges=
 
-    CHANNEL_KEY = :hutch_broker_channel
+    CHANNEL_BROKER_KEY = :hutch_channel_broker
 
     def initialize(config = nil)
       @config = config || Hutch::Config
-      @wait_exchanges = {}
     end
 
     def connect(options = {})
@@ -38,9 +44,10 @@ module Hutch
     end
 
     def disconnect
+      channel_broker.disconnect if channel_broker_active?
       @connection.close if @connection
-      @connection, @exchange, @api_client = nil, nil, nil
-      @default_wait_exchange, @wait_exchanges = nil, {}
+      @connection = nil
+      @api_client = nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -53,7 +60,7 @@ module Hutch
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
-        @exchange = channel.topic(exchange_name, durable: true)
+        channel_broker.exchange = channel.topic(exchange_name, durable: true)
       end
     end
 
@@ -62,12 +69,12 @@ module Hutch
       wait_exchange_name = @config[:mq_wait_exchange]
       logger.info "using fanout wait exchange '#{wait_exchange_name}'"
 
-      @default_wait_exchange = declare_wait_exchange(wait_exchange_name)
+      self.default_wait_exchange = declare_wait_exchange(wait_exchange_name)
 
       wait_queue_name = @config[:mq_wait_queue]
       logger.info "using wait queue '#{wait_queue_name}'"
 
-      declare_wait_queue(@default_wait_exchange, wait_queue_name)
+      declare_wait_queue(default_wait_exchange, wait_queue_name)
 
       expiration_suffices = (@config[:mq_wait_expiration_suffices] || []).map(&:to_s)
 
@@ -75,7 +82,7 @@ module Hutch
         logger.info "using expiration suffix '_#{suffix}'"
 
         suffix_exchange = declare_wait_exchange("#{wait_exchange_name}_#{suffix}")
-        @wait_exchanges[suffix] = suffix_exchange
+        wait_exchanges[suffix] = suffix_exchange
         declare_wait_queue(suffix_exchange, "#{wait_queue_name}_#{suffix}")
       end
     end
@@ -87,7 +94,7 @@ module Hutch
 
         @config[:mq_host]     = u.host
         @config[:mq_port]     = u.port
-        @config[:mq_vhost]    = u.path.sub(/^\//, '')
+        @config[:mq_vhost]    = u.path.sub(%r{^/}, '')
         @config[:mq_username] = u.user
         @config[:mq_password] = u.password
       end
@@ -110,7 +117,7 @@ module Hutch
       write_timeout      = @config[:write_timeout]
 
       protocol           = tls ? 'amqps://' : 'amqp://'
-      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(%r{^/}, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
@@ -129,13 +136,6 @@ module Hutch
       @connection
     end
     # rubocop:enable Metrics/AbcSize
-
-    def channel
-      if Thread.current[CHANNEL_KEY] && !Thread.current[CHANNEL_KEY].active
-        Thread.current[CHANNEL_KEY] = nil
-      end
-      Thread.current[CHANNEL_KEY] ||= open_channel!
-    end
 
     def open_channel!
       logger.info 'opening rabbitmq channel'
@@ -206,7 +206,7 @@ module Hutch
         queue_bindings.each do |_dest, keys|
           keys.reject { |key| routing_keys.include?(key) }.each do |key|
             logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(@exchange, routing_key: key)
+            queue.unbind(exchange, routing_key: key)
           end
         end
       end
@@ -214,7 +214,7 @@ module Hutch
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
         logger.debug "creating binding #{queue.name} <--> #{routing_key}"
-        queue.bind(@exchange, routing_key: routing_key)
+        queue.bind(exchange, routing_key: routing_key)
       end
     end
 
@@ -259,7 +259,7 @@ module Hutch
 
       json = JSON.dump(message)
       logger.info("publishing message '#{json}' to #{routing_key}")
-      response = @exchange.publish(json, { persistent: true }
+      response = exchange.publish(json, { persistent: true }
         .merge(properties)
         .merge(global_properties)
         .merge(non_overridable_properties))
@@ -285,7 +285,7 @@ module Hutch
                            .merge(properties)
                            .merge(global_properties)
                            .merge(non_overridable_properties)
-      exchange = @wait_exchanges.fetch(message_properties[:expiration].to_s, @default_wait_exchange)
+      exchange = wait_exchanges.fetch(message_properties[:expiration].to_s, default_wait_exchange)
       json = JSON.dump(message)
       logger.info("publishing message '#{json}' to '#{exchange.name}' with routing key '#{routing_key}'")
 
@@ -318,6 +318,17 @@ module Hutch
     def ensure_connection!(routing_key, message)
       raise_publish_error('no connection to broker', routing_key, message) unless @connection
       raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
+    end
+
+    def channel_broker
+      if Thread.current[CHANNEL_BROKER_KEY] && !Thread.current[CHANNEL_BROKER_KEY].active
+        Thread.current[CHANNEL_BROKER_KEY].reconnect(open_channel!)
+      end
+      Thread.current[CHANNEL_BROKER_KEY] ||= ChannelBroker.new(open_channel!)
+    end
+
+    def channel_broker_active?
+      Thread.current[CHANNEL_BROKER_KEY] && Thread.current[CHANNEL_BROKER_KEY].active
     end
 
     def api_config
