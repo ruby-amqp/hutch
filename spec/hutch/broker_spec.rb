@@ -5,8 +5,6 @@ describe Hutch::Broker do
   let(:config) { deep_copy(Hutch::Config.user_config) }
   subject(:broker) { Hutch::Broker.new(config) }
 
-  after { Thread.current[Hutch::Broker::CHANNEL_BROKER_KEY] = nil }
-
   describe '#connect' do
     before { allow(broker).to receive(:set_up_amqp_connection) }
     before { allow(broker).to receive(:set_up_wait_exchange) }

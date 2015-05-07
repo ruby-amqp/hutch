@@ -45,6 +45,7 @@ module Hutch
 
     def disconnect
       channel_broker.disconnect if channel_broker_active?
+      Thread.current[CHANNEL_BROKER_KEY] = nil
       @connection.close if @connection
       @connection = nil
       @api_client = nil
