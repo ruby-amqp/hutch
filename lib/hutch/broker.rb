@@ -60,7 +60,7 @@ module Hutch
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
-        channel_broker.exchange = channel.topic(exchange_name, durable: true)
+        self.exchange = channel.topic(exchange_name, durable: true)
       end
     end
 
