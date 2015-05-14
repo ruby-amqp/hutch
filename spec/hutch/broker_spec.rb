@@ -7,29 +7,12 @@ describe Hutch::Broker do
 
   describe '#connect' do
     before { allow(broker).to receive(:set_up_amqp_connection) }
-    before { allow(broker).to receive(:set_up_wait_exchange) }
     before { allow(broker).to receive(:set_up_api_connection) }
     before { allow(broker).to receive(:disconnect) }
 
     it 'sets up the amqp connection' do
       expect(broker).to receive(:set_up_amqp_connection)
       broker.connect
-    end
-
-    context 'when wait exchange enabled' do
-      before { config[:mq_wait_exchange] = 'wait-exchange' }
-      it 'sets up the wait exchange' do
-        expect(broker).to receive(:set_up_wait_exchange)
-        broker.connect
-      end
-    end
-
-    context 'when wait exchange not enabled' do
-      before { config[:mq_wait_exchange] = nil }
-      it 'does not set up the wait exchange' do
-        expect(broker).not_to receive(:set_up_wait_exchange)
-        broker.connect
-      end
     end
 
     it 'sets up the api connection' do
@@ -123,12 +106,11 @@ describe Hutch::Broker do
     end
   end
 
-  describe '#set_up_wait_exchange', rabbitmq: true do
+  describe 'wait exchange', rabbitmq: true do
     before { config[:mq_wait_exchange] = 'wait-exchange' }
     before { config[:mq_wait_queue] = 'wait-queue' }
     before { config[:mq_wait_expiration_suffices] = %w(10000 30000) }
     before { broker.set_up_amqp_connection }
-    before { broker.set_up_wait_exchange }
     after  { broker.disconnect }
 
     describe '#default_wait_exchange' do
@@ -137,19 +119,27 @@ describe Hutch::Broker do
     end
 
     describe 'wait queue' do
-      skip
+      before { broker.default_wait_exchange }
+      let(:queues) { broker.channel.queues }
+
+      specify { expect(queues.keys).to include('wait-queue') }
     end
 
-    describe 'suffixed wait exchanges' do
+    describe '#wait_exchanges' do
       specify do
         broker.wait_exchanges.each do |_name, wait_exchange|
           expect(wait_exchange).to be_a Bunny::Exchange
         end
       end
+      specify { expect(broker.wait_exchanges.count).to eq(2) }
     end
 
     describe 'suffixed wait queues' do
-      skip
+      before { broker.wait_exchanges }
+      let(:queues) { broker.channel.queues }
+
+      specify { expect(queues.keys).to include('wait-queue_10000') }
+      specify { expect(queues.keys).to include('wait-queue_30000') }
     end
   end
 
@@ -356,7 +346,6 @@ describe Hutch::Broker do
         before { config[:mq_wait_queue] = 'wait-queue' }
         before { config[:mq_wait_expiration_suffices] = expiration_suffices }
         before { broker.set_up_amqp_connection }
-        before { broker.set_up_wait_exchange }
         after  { broker.disconnect }
 
         context 'with no expiration' do
