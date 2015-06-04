@@ -30,6 +30,7 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
+        tracer: nil,
         namespace: nil,
         daemonise: false,
         pidfile: nil,
