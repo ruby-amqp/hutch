@@ -105,15 +105,11 @@ to learn more.
 
 ### Message Processing Tracers
 
-Tracers allow you to track message processing. You can set them using `tracer` method.
+Tracers allow you to track message processing.
 
 #### NewRelic
 ```ruby
-class FailedPaymentConsumer
-  include Hutch::Consumer
-  consume 'gc.ps.payment.failed'
-  tracer 'NewRelic'
-end
+Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
 ```
 This will enable NewRelic custom instrumentation. Batteries included! Screenshoots available [here](https://monosnap.com/list/557020a000779174f23467e3).
 
