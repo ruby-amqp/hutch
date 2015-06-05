@@ -1,5 +1,10 @@
 ## 0.15.0 — (unreleased)
 
+### Ruby 1.9 Support Dropped
+
+Ruby 1.9 is no longer supported by Hutch (and soon Bunny 2.0).
+1.9 is also no longer maintained by the Ruby core team.
+
 ### Custom Arguments per Consumers
 
 Allow to set custom arguments per consumers by using the `arguments` setter.
@@ -10,8 +15,12 @@ Contributed by Pierre-Louis Gottfrois.
 
 ### Message Processing Tracers
 
-Allow to track message processing by using the `:tracer` config option.
-NewRelic custom instrumentation is included.
+Allow to track message processing by using the `:tracer` config option,
+the value should be a class (or fully-qualified string name of a class) that
+implements the tracing interface.
+
+A tracer that performs NewRelic instrumentation ships with Hutch
+and requires New Relic gem to be loaded.
 
 Contributed by Mirosław Nagaś.
 
