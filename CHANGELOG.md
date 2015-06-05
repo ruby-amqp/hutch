@@ -1,10 +1,19 @@
 ## 0.15.0 — (unreleased)
 
+### Custom Arguments per Consumers
+
 Allow to set custom arguments per consumers by using the `arguments` setter.
 Arguments are usually used by rabbitmq plugins or to set queue policies. You can
 find a list of supported arguments [here](https://www.rabbitmq.com/extensions.html).
 
 Contributed by Pierre-Louis Gottfrois.
+
+### Message Processing Tracers
+
+Allow to track message processing by using the `:tracer` config option.
+NewRelic custom instrumentation is included.
+
+Contributed by Mirosław Nagaś.
 
 ## 0.14.0 — Feb 23rd, 2015
 

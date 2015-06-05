@@ -8,6 +8,7 @@ require 'hutch/cli'
 require 'hutch/version'
 require 'hutch/error_handlers'
 require 'hutch/exceptions'
+require 'hutch/tracers'
 
 module Hutch
 

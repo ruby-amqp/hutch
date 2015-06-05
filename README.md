@@ -103,6 +103,15 @@ Hutch::Logging.logger = Rails.logger
 See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
 to learn more.
 
+### Message Processing Tracers
+
+Tracers allow you to track message processing.
+
+#### NewRelic
+```ruby
+Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
+```
+This will enable NewRelic custom instrumentation. Batteries included! Screenshoots available [here](https://monosnap.com/list/557020a000779174f23467e3).
 
 ## Running Hutch
 
@@ -271,6 +280,7 @@ Known configuration parameters are:
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timemout`: Bunny's socket write timeout (default: `11`)
+ * `tracer`: tracer to use to track message processing
 
 
 ## Supported RabbitMQ Versions
