@@ -30,7 +30,7 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
-        tracer: nil,
+        tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         daemonise: false,
         pidfile: nil,
@@ -85,7 +85,16 @@ module Hutch
 
     def self.load_from_file(file)
       YAML.load(ERB.new(File.read(file)).result).each do |attr, value|
-        Hutch::Config.send("#{attr}=", value)
+        Hutch::Config.send("#{attr}=", convert_value(attr, value))
+      end
+    end
+
+    def self.convert_value(attr, value)
+      case attr
+      when "tracer"
+        Kernel.const_get(value)
+      else
+        value
       end
     end
 

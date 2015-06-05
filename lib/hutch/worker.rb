@@ -91,11 +91,7 @@ module Hutch
     end
 
     def with_tracing(klass)
-      Hutch::Tracers[tracer_name].new(klass)
-    end
-
-    def tracer_name
-      Hutch::Config[:tracer]
+      Hutch::Config[:tracer].new(klass)
     end
 
     def handle_error(message_id, payload, consumer, ex)
