@@ -24,6 +24,12 @@ and requires New Relic gem to be loaded.
 
 Contributed by Mirosław Nagaś.
 
+### Added Logger Method to Consumer Module
+
+Consumers can now call a logger method to write to Hutch's log.
+
+Contributed by Matty Courtney
+
 ## 0.14.0 — Feb 23rd, 2015
 
 ### Configurable Socket Timeouts

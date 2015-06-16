@@ -93,6 +93,21 @@ end
 
 Custom queue arguments can be found on [this page](https://www.rabbitmq.com/extensions.html).
 
+Consumers can write to Hutch's log by calling the logger method. The logger method returns
+a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.html).
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  
+  def process(message)
+    logger.info "Marking payment #{message[:id]} as failed"
+    mark_payment_as_failed(message[:id])
+  end
+end
+```
+
 If you are using Hutch with Rails and want to make Hutch log to the Rails
 logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 
