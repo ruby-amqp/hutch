@@ -1,5 +1,9 @@
 ## 0.15.0 — (unreleased)
 
+### Airbrake Error Handler
+
+Contributed by Nate Salisbury.
+
 ### Ruby 1.9 Support Dropped
 
 Ruby 1.9 is no longer supported by Hutch (and soon Bunny 2.0).
