@@ -69,10 +69,12 @@ module Hutch
         @config[:mq_vhost]    = u.path.sub(/^\//, "")
         @config[:mq_username] = u.user
         @config[:mq_password] = u.password
+        @config[:mq_tls]      = u.scheme == "amqps"
       end
 
+      tls                = @config[:mq_tls]
       host               = @config[:mq_host]
-      port               = @config[:mq_port]
+      port               = @config[:mq_port] || tls ? 5671 : 5672
       vhost              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
                              @config[:mq_vhost]
                            else
@@ -80,7 +82,6 @@ module Hutch
                            end
       username           = @config[:mq_username]
       password           = @config[:mq_password]
-      tls                = @config[:mq_tls]
       tls_key            = @config[:mq_tls_key]
       tls_cert           = @config[:mq_tls_cert]
       heartbeat          = @config[:heartbeat]
