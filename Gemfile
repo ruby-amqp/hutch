@@ -12,6 +12,8 @@ group :development, :test do
   gem "sentry-raven"
   gem "honeybadger"
   gem "coveralls", require: false
+  gem "newrelic_rpm"
+  gem "airbrake"
 end
 
 group :development, :darwin do

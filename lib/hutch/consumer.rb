@@ -19,6 +19,10 @@ module Hutch
     def requeue!
       broker.requeue(delivery_info.delivery_tag)
     end
+    
+    def logger
+      Hutch::Logging.logger
+    end
 
     module ClassMethods
       # Add one or more routing keys to the set of routing keys the consumer

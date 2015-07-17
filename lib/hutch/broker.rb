@@ -24,6 +24,12 @@ module Hutch
         logger.info "HTTP API use is disabled"
       end
 
+      if tracing_enabled?
+        logger.info "tracing is enabled using #{@config[:tracer]}"
+      else
+        logger.info "tracing is disabled"
+      end
+
       if block_given?
         begin
           yield
@@ -138,6 +144,10 @@ module Hutch
            end
 
       op && cf
+    end
+
+    def tracing_enabled?
+      @config[:tracer] && @config[:tracer] != Hutch::Tracers::NullTracer
     end
 
     # Create / get a durable queue and apply namespace if it exists.
