@@ -74,7 +74,7 @@ module Hutch
 
       tls                = @config[:mq_tls]
       host               = @config[:mq_host]
-      port               = @config[:mq_port] || tls ? 5671 : 5672
+      port               = @config.fetch(:mq_port, (tls ? 5671 : 5672))
       vhost              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
                              @config[:mq_vhost]
                            else
@@ -89,8 +89,8 @@ module Hutch
       read_timeout       = @config[:read_timeout]
       write_timeout      = @config[:write_timeout]
 
-      protocol           = tls ? "amqps://" : "amqp://"
-      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+      scheme             = tls ? "amqps" : "amqp"
+      sanitized_uri      = "#{scheme}://#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
       @connection = Bunny.new(host: host, port: port, vhost: vhost,
                               tls: tls, tls_key: tls_key, tls_cert: tls_cert,
