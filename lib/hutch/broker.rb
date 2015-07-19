@@ -74,7 +74,7 @@ module Hutch
 
       tls                = @config[:mq_tls]
       host               = @config[:mq_host]
-      port               = @config.fetch(:mq_port, (tls ? 5671 : 5672))
+      port               = @config.to_hash.fetch(:mq_port, (tls ? 5671 : 5672))
       vhost              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
                              @config[:mq_vhost]
                            else
