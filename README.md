@@ -16,7 +16,8 @@ $ gem install hutch
 
 ## Project Maturity
 
-Hutch is a relatively young project that was extracted from production systems.
+Hutch is a moderately mature project (started in early 2013)
+that was extracted from production systems.
 
 
 ## Overview
