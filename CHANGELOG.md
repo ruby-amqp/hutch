@@ -1,6 +1,11 @@
-## 0.17.0 — (unreleased)
+## 0.18.0 — (unreleased)
 
 No changes yet.
+
+
+## 0.17.0 — July 19th, 2015
+
+Fixes an issue with `NoMethodError` in `Hutch::Config`.
 
 
 ## 0.16.0 — July 19th, 2015
