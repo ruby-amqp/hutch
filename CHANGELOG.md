@@ -1,6 +1,19 @@
-## 0.16.0 — (unreleased)
+## 0.16.0 — July 19th, 2015
 
-No changes yet.
+### Support amqps URIs
+
+Hutch now automatically enables TLS and changes default port
+when URI scheme is `amqps`.
+
+Contributed by Carl Hörberg.
+
+### Hash With Indifferent Access
+
+Hutch now uses `HashWithIndifferentAccess` internally
+to reduce use of symbols (which are not garbage collected
+by widely used Ruby versions).
+
+Contributed by Teodor Pripoae.
 
 
 ## 0.15.0 — May 5th, 2015
