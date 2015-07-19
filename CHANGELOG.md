@@ -1,3 +1,8 @@
+## 0.17.0 — (unreleased)
+
+No changes yet.
+
+
 ## 0.16.0 — July 19th, 2015
 
 ### Support amqps URIs
