@@ -91,15 +91,30 @@ module Hutch
 
       scheme             = tls ? "amqps" : "amqp"
       sanitized_uri      = "#{scheme}://#{username}@#{host}:#{port}/#{vhost.sub(/^\//, '')}"
+
+      bunny_logger       = @config[:bunny_logger]
+
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
-      @connection = Bunny.new(host: host, port: port, vhost: vhost,
-                              tls: tls, tls_key: tls_key, tls_cert: tls_cert,
-                              username: username, password: password,
-                              heartbeat: heartbeat, automatically_recover: true,
-                              network_recovery_interval: 1,
-                              connection_timeout: connection_timeout,
-                              read_timeout: read_timeout,
-                              write_timeout: write_timeout)
+
+      bunny_params = {
+        host: host,
+        port: port,
+        vhost: vhost,
+        tls: tls,
+        tls_key: tls_key,
+        tls_cert: tls_cert,
+        username: username,
+        password: password,
+        heartbeat: heartbeat,
+        automatically_recover: true,
+        network_recovery_interval: 1,
+        connection_timeout: connection_timeout,
+        read_timeout: read_timeout,
+        write_timeout: write_timeout,
+      }
+      bunny_params.merge!(logger: bunny_logger) if bunny_logger
+
+      @connection = Bunny.new(bunny_params)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start
