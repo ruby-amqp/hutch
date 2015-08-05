@@ -1,6 +1,12 @@
 ## 0.18.0 — (unreleased)
 
-No changes yet.
+### Bunny Logger Option
+
+`:client_logger` is a new option that allows
+for configuring loggerd used by Bunny, the underlying
+RabbitMQ client library.
+
+Contributed by Nate Salisbury.
 
 
 ## 0.17.0 — July 19th, 2015
