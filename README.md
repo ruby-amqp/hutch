@@ -116,6 +116,13 @@ logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 Hutch::Logging.logger = Rails.logger
 ```
 
+A logger can be set for the client by adding this config before calling `Hutch.connect`
+
+```ruby
+client_logger = Logger.new("/path/to/bunny.log")
+Hutch::Config.set(:client_logger, client_logger)
+```
+
 See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
 to learn more.
 

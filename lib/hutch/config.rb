@@ -50,6 +50,7 @@ module Hutch
         # to finish its job when gracefully exiting Hutch, before
         # it's killed.
         graceful_exit_timeout: 11,
+        client_logger: nil,
       }.merge(params)
     end
 
