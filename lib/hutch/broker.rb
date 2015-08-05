@@ -275,7 +275,7 @@ module Hutch
         params[:automatically_recover] = true
         params[:network_recovery_interval] = 1
 
-        params[:bunny_logger] = @config[:bunny_logger] if @config[:bunny_logger]
+        params[:client_logger] = @config[:client_logger] if @config[:client_logger]
       end
     end
 
