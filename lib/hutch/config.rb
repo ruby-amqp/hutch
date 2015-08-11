@@ -51,6 +51,8 @@ module Hutch
         # it's killed.
         graceful_exit_timeout: 11,
         client_logger: nil,
+
+        worker_pool_size: 1,
       }.merge(params)
     end
 
