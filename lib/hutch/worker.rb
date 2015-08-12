@@ -21,9 +21,20 @@ module Hutch
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
 
-      # Take a break from Thread#join every 0.1 seconds to check if we've
-      # been sent any signals
-      handle_signals until @broker.wait_on_threads(0.1)
+      main_loop
+    end
+
+    def main_loop
+      if defined?(JRUBY_VERSION)
+        # Binds shutdown listener to notify main thread if channel was closed
+        bind_shutdown_handler
+
+        handle_signals until shutdown_not_called?(0.1)
+      else
+        # Take a break from Thread#join every 0.1 seconds to check if we've
+        # been sent any signals
+        handle_signals until @broker.wait_on_threads(0.1)
+      end
     end
 
     # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
@@ -51,6 +62,23 @@ module Hutch
     # Stop a running worker by killing all subscriber threads.
     def stop
       @broker.stop
+    end
+
+    # Binds shutdown handler, called if channel is closed or network Failed
+    def bind_shutdown_handler
+      @broker.channel.on_shutdown do
+        Thread.main[:shutdown_received] = true
+      end
+    end
+
+    # Checks if shutdown handler was called, then sleeps for interval
+    def shutdown_not_called?(interval)
+      if Thread.main[:shutdown_received]
+        true
+      else
+        sleep(interval)
+        false
+      end
     end
 
     # Set up the queues for each of the worker's consumers.

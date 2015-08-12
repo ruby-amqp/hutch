@@ -167,12 +167,16 @@ module Hutch
     end
 
     def stop
-      # Enqueue a failing job that kills the consumer loop
-      channel_work_pool.shutdown
-      # Give `timeout` seconds to jobs that are still being processed
-      channel_work_pool.join(@config[:graceful_exit_timeout])
-      # If after `timeout` they are still running, they are killed
-      channel_work_pool.kill
+      if defined?(JRUBY_VERSION)
+        @channel.close
+      else
+        # Enqueue a failing job that kills the consumer loop
+        channel_work_pool.shutdown
+        # Give `timeout` seconds to jobs that are still being processed
+        channel_work_pool.join(@config[:graceful_exit_timeout])
+        # If after `timeout` they are still running, they are killed
+        channel_work_pool.kill
+      end
     end
 
     def requeue(delivery_tag)
