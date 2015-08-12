@@ -1,5 +1,12 @@
 ## 0.18.0 — (unreleased)
 
+### Configurable Consumer Thread Pool Size
+
+`:consumer_pool_size` is a new option (defaults to `1`) which defines
+Bunny consumer work pool size.
+
+Contributed by Derek Kastner.
+
 ### Bunny Logger Option
 
 `:client_logger` is a new option that allows
