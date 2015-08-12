@@ -17,6 +17,10 @@ module Hutch
         @connection = Bunny.new(opts)
       end
 
+      def self.decode_message(delivery_info, properties, payload)
+        [delivery_info, properties, payload]
+      end
+
       def prefetch_channel(ch, prefetch)
         ch.prefetch(prefetch) if prefetch
       end
