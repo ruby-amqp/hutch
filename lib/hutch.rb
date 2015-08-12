@@ -1,3 +1,4 @@
+require 'hutch/adapter'
 require 'hutch/consumer'
 require 'hutch/worker'
 require 'hutch/broker'
@@ -57,4 +58,3 @@ module Hutch
     broker.publish(*args)
   end
 end
-

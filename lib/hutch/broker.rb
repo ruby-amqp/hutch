@@ -1,4 +1,3 @@
-require 'bunny'
 require 'carrot-top'
 require 'securerandom'
 require 'hutch/logging'
@@ -76,7 +75,7 @@ module Hutch
     def open_channel!
       logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}"
       @channel = connection.create_channel(nil, consumer_pool_size).tap do |ch|
-        ch.prefetch(@config[:channel_prefetch]) if @config[:channel_prefetch]
+        Hutch::Adapter.prefetch_channel(ch, @config[:channel_prefetch])
         if @config[:publisher_confirms] || @config[:force_publisher_confirms]
           logger.info 'enabling publisher confirms'
           ch.confirm_select
@@ -259,7 +258,7 @@ module Hutch
         params[:vhost]              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
                                         @config[:mq_vhost]
                                       else
-                                        Bunny::Session::DEFAULT_VHOST
+                                        Hutch::Adapter::DEFAULT_VHOST
                                       end
         params[:username]           = @config[:mq_username]
         params[:password]           = @config[:mq_password]
@@ -353,4 +352,3 @@ module Hutch
     end
   end
 end
-
