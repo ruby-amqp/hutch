@@ -1,5 +1,14 @@
 ## 0.18.0 — (unreleased)
 
+### JRuby Support (Using March Hare)
+
+Hutch will now use March Hare when running on JRuby.
+This will yield significant throughput and core utilisation
+improvements for workloads with many and/or busy consumers.
+
+Contributed by Teodor Pripoae.
+
+
 ### Configurable Consumer Thread Pool Size
 
 `:consumer_pool_size` is a new option (defaults to `1`) which defines
