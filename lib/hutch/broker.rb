@@ -168,7 +168,7 @@ module Hutch
 
     def stop
       if defined?(JRUBY_VERSION)
-        @channel.close
+        channel.close
       else
         # Enqueue a failing job that kills the consumer loop
         channel_work_pool.shutdown

@@ -240,7 +240,7 @@ describe Hutch::Broker do
     end
   end
 
-  describe '#stop' do
+  describe '#stop', adapter: :bunny do
     let(:thread_1) { double('Thread') }
     let(:thread_2) { double('Thread') }
     let(:work_pool) { double('Bunny::ConsumerWorkPool') }
@@ -254,6 +254,20 @@ describe Hutch::Broker do
       expect(work_pool).to receive(:shutdown)
       expect(work_pool).to receive(:join).with(2)
       expect(work_pool).to receive(:kill)
+
+      broker.stop
+    end
+  end
+
+  describe '#stop', adapter: :march_hare do
+    let(:channel) { double('MarchHare::Channel')}
+
+    before do
+      allow(broker).to receive(:channel).and_return(channel)
+    end
+
+    it 'gracefully stops the channel' do
+      expect(channel).to receive(:close)
 
       broker.stop
     end
