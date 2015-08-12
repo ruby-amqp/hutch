@@ -62,7 +62,7 @@ module Hutch
     def open_connection!
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
 
-      @connection = Bunny.new(connection_params)
+      @connection = Hutch::Adapter.new(connection_params)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start
@@ -74,8 +74,8 @@ module Hutch
 
     def open_channel!
       logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}"
-      @channel = connection.create_channel(nil, consumer_pool_size).tap do |ch|
-        Hutch::Adapter.prefetch_channel(ch, @config[:channel_prefetch])
+      @channel = @connection.create_channel(nil, consumer_pool_size).tap do |ch|
+        @connection.prefetch_channel(ch, @config[:channel_prefetch])
         if @config[:publisher_confirms] || @config[:force_publisher_confirms]
           logger.info 'enabling publisher confirms'
           ch.confirm_select
@@ -196,7 +196,7 @@ module Hutch
 
       non_overridable_properties = {
         routing_key: routing_key,
-        timestamp: Time.now.to_i,
+        timestamp: @connection.current_timestamp,
         content_type: 'application/json'
       }
       properties[:message_id] ||= generate_id

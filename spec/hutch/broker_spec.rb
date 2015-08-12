@@ -58,19 +58,34 @@ describe Hutch::Broker do
       before { broker.set_up_amqp_connection }
       after  { broker.disconnect }
 
-      describe '#connection' do
+      describe '#connection', adapter: :bunny do
         subject { super().connection }
-        it { is_expected.to be_a Bunny::Session }
+        it { is_expected.to be_a Hutch::Adapters::BunnyAdapter }
       end
 
-      describe '#channel' do
+      describe '#connection', adapter: :march_hare do
+        subject { super().connection }
+        it { is_expected.to be_a Hutch::Adapters::MarchHareAdapter }
+      end
+
+      describe '#channel', adapter: :bunny do
         subject { super().channel }
         it { is_expected.to be_a Bunny::Channel }
       end
 
-      describe '#exchange' do
+      describe '#channel', adapter: :march_hare do
+        subject { super().channel }
+        it { is_expected.to be_a MarchHare::Channel }
+      end
+
+      describe '#exchange', adapter: :bunny do
         subject { super().exchange }
         it { is_expected.to be_a Bunny::Exchange }
+      end
+
+      describe '#exchange', adapter: :march_hare do
+        subject { super().exchange }
+        it { is_expected.to be_a MarchHare::Exchange }
       end
     end
 
@@ -86,9 +101,15 @@ describe Hutch::Broker do
       before { config[:channel_prefetch] = prefetch_value }
       after  { broker.disconnect }
 
-      it "set's channel's prefetch" do
+      it "set's channel's prefetch", adapter: :bunny do
         expect_any_instance_of(Bunny::Channel).
           to receive(:prefetch).with(prefetch_value)
+        broker.set_up_amqp_connection
+      end
+
+      it "set's channel's prefetch", adapter: :march_hare do
+        expect_any_instance_of(MarchHare::Channel).
+          to receive(:prefetch=).with(prefetch_value)
         broker.set_up_amqp_connection
       end
     end
@@ -98,8 +119,14 @@ describe Hutch::Broker do
       before { config[:force_publisher_confirms] = force_publisher_confirms_value }
       after  { broker.disconnect }
 
-      it 'waits for confirmation' do
+      it 'waits for confirmation', adapter: :bunny do
         expect_any_instance_of(Bunny::Channel).
+          to receive(:confirm_select)
+        broker.set_up_amqp_connection
+      end
+
+      it 'waits for confirmation', adapter: :march_hare do
+        expect_any_instance_of(MarchHare::Channel).
           to receive(:confirm_select)
         broker.set_up_amqp_connection
       end
@@ -287,8 +314,14 @@ describe Hutch::Broker do
       end
 
       context 'with force_publisher_confirms not set in the config' do
-        it 'does not wait for confirms on the channel' do
+        it 'does not wait for confirms on the channel', adapter: :bunny do
           expect_any_instance_of(Bunny::Channel).
+            to_not receive(:wait_for_confirms)
+          broker.publish('test.key', 'message')
+        end
+
+        it 'does not wait for confirms on the channel', adapter: :march_hare do
+          expect_any_instance_of(MarchHare::Channel).
             to_not receive(:wait_for_confirms)
           broker.publish('test.key', 'message')
         end
@@ -301,8 +334,14 @@ describe Hutch::Broker do
           config[:force_publisher_confirms] = force_publisher_confirms_value
         end
 
-        it 'waits for confirms on the channel' do
+        it 'waits for confirms on the channel', adapter: :bunny do
           expect_any_instance_of(Bunny::Channel).
+            to receive(:wait_for_confirms)
+          broker.publish('test.key', 'message')
+        end
+
+        it 'waits for confirms on the channel', adapter: :march_hare do
+          expect_any_instance_of(MarchHare::Channel).
             to receive(:wait_for_confirms)
           broker.publish('test.key', 'message')
         end
@@ -322,4 +361,3 @@ describe Hutch::Broker do
     end
   end
 end
-
