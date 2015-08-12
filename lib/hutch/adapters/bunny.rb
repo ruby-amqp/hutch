@@ -8,6 +8,9 @@ module Hutch
 
       DEFAULT_VHOST = Bunny::Session::DEFAULT_VHOST
 
+      ConnectionRefused = Bunny::TCPConnectionFailed
+      PreconditionFailed = Bunny::PreconditionFailed
+
       def_delegators :@connection, :start, :disconnect, :close, :create_channel, :open?
 
       def initialize(opts={})

@@ -8,6 +8,9 @@ module Hutch
 
       DEFAULT_VHOST = "/"
 
+      ConnectionRefused = MarchHare::ConnectionRefused
+      PreconditionFailed = MarchHare::PreconditionFailed
+
       def_delegators :@connection, :start, :disconnect, :close, :open?
 
       def initialize(opts = {})

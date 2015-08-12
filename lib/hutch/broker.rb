@@ -317,7 +317,7 @@ module Hutch
 
     def with_bunny_precondition_handler(item)
       yield
-    rescue Bunny::PreconditionFailed => ex
+    rescue Hutch::Adapter::PreconditionFailed => ex
       logger.error ex.message
       s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " +
           "Perhaps it is being redeclared with non-matching attributes"
@@ -326,7 +326,7 @@ module Hutch
 
     def with_bunny_connection_handler(uri)
       yield
-    rescue Bunny::TCPConnectionFailed => ex
+    rescue Hutch::Adapter::ConnectionRefused => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
       raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}. Check your configuration, network connectivity and RabbitMQ logs.")
     end
