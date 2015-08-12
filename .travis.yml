@@ -3,5 +3,9 @@ rvm:
   - "2.2"
   - "2.1"
   - "2.0"
+  - "jruby-9.0.0.0"
 services:
   - rabbitmq
+matrix:
+  allow_failures:
+    - rvm: jruby-9.0.0.0
