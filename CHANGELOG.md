@@ -1,4 +1,15 @@
-## 0.18.0 — (unreleased)
+## 0.19.0 — (unreleased)
+
+### multi_json Update
+
+Hutch now depends on multi_json `1.11.x`.
+
+### Bunny Update
+
+Bunny is updated to [2.1.0](http://blog.rubyrabbitmq.info/blog/2015/08/16/bunny-2-dot-1-0-is-released/).
+
+
+## 0.18.0 — August 16th, 2015
 
 ### JRuby Support (Using March Hare)
 
