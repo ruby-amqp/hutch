@@ -62,6 +62,24 @@ describe Hutch::Worker do
       worker.handle_message(consumer, delivery_info, properties, payload)
     end
 
+    context 'when the consumer requeues a message' do
+      class Rejecter
+        include Hutch::Consumer
+
+        def process(message)
+          requeue!
+        end
+      end
+
+      it 'requeues the message', :focus do
+        expect(broker).to_not receive(:ack)
+        expect(broker).to_not receive(:nack)
+        expect(broker).to receive(:requeue)
+
+        worker.handle_message(Rejecter, delivery_info, properties, payload)
+      end
+    end
+
     context 'when the consumer raises an exception' do
       before { allow(consumer_instance).to receive(:process).and_raise('a consumer error') }
 
