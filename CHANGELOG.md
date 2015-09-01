@@ -8,6 +8,11 @@ Hutch now depends on multi_json `1.11.x`.
 
 Bunny is updated to [2.1.0](http://blog.rubyrabbitmq.info/blog/2015/08/16/bunny-2-dot-1-0-is-released/).
 
+### More Bunny SSL Options
+
+`:mq_tls_ca_certificates` and `:mq_verify_peer` options will now be passed on to Bunny as `:tls_ca_certificates` and `:verify_peer` respectively.
+
+Contributed by Kennon Ballou.
 
 ## 0.18.0 — August 16th, 2015
 
