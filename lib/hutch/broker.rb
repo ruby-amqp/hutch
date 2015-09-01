@@ -269,6 +269,10 @@ module Hutch
         params[:tls]                = @config[:mq_tls]
         params[:tls_key]            = @config[:mq_tls_key]
         params[:tls_cert]           = @config[:mq_tls_cert]
+        params[:verify_peer]        = @config[:mq_verify_peer]
+        if @config[:mq_tls_ca_certificates]
+          params[:tls_ca_certificates] = @config[:mq_tls_ca_certificates]
+        end
         params[:heartbeat]          = @config[:heartbeat]
         params[:connection_timeout] = @config[:connection_timeout]
         params[:read_timeout]       = @config[:read_timeout]
