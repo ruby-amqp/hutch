@@ -17,6 +17,8 @@ module Hutch
         mq_tls: false,
         mq_tls_cert: nil,
         mq_tls_key: nil,
+        mq_tls_ca_certificates: nil,
+        mq_verify_peer: nil,
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: 'localhost',
