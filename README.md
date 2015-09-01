@@ -289,6 +289,8 @@ Known configuration parameters are:
  * `mq_tls`: should TLS be used? (default: `false`)
  * `mq_tls_cert`: path to client TLS certificate (public key)
  * `mq_tls_key`: path to client TLS private key
+ * `mq_tls_ca_certificates`: array of paths to CA keys (if not specified to Hutch, will default to Bunny defaults which are system-dependent)
+ * `mq_verify_peer`: should SSL certificate be verified? (default: `true`)
  * `require_paths`: array of paths to require
  * `autoload_rails`: should Hutch command line runner try to automatically load Rails environment files?
  * `daemonise`: should Hutch runner process daemonise?
