@@ -49,6 +49,7 @@ describe Hutch::Worker do
     before { allow(broker).to receive(:nack) }
     before { allow(consumer_instance).to receive(:broker=) }
     before { allow(consumer_instance).to receive(:delivery_info=) }
+    before { allow(consumer_instance).to receive(:already_responded?).and_return(false) }
 
     it 'passes the message to the consumer' do
       expect(consumer_instance).to receive(:process).
@@ -60,6 +61,43 @@ describe Hutch::Worker do
       allow(consumer_instance).to receive(:process)
       expect(broker).to receive(:ack).with(delivery_info.delivery_tag)
       worker.handle_message(consumer, delivery_info, properties, payload)
+    end
+
+    context 'when the consumer requeues a message' do
+      class Rejecter
+        include Hutch::Consumer
+
+        def process(message)
+          requeue!
+        end
+      end
+
+      it 'requeues the message' do
+        expect(broker).to_not receive(:ack)
+        expect(broker).to_not receive(:nack)
+        expect(broker).to receive(:requeue)
+
+        worker.handle_message(Rejecter, delivery_info, properties, payload)
+      end
+    end
+
+    context 'when the consumer requeues a message and then crashes' do
+      class RejecterCrash
+        include Hutch::Consumer
+
+        def process(message)
+          requeue!
+          raise "a consumer error"
+        end
+      end
+
+      it 'requeues the message' do
+        expect(broker).to_not receive(:ack)
+        expect(broker).to_not receive(:nack)
+        expect(broker).to receive(:requeue)
+
+        worker.handle_message(RejecterCrash, delivery_info, properties, payload)
+      end
     end
 
     context 'when the consumer raises an exception' do

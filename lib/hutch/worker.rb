@@ -112,9 +112,9 @@ module Hutch
         message = Message.new(delivery_info, properties, payload)
         consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
         with_tracing(consumer_instance).handle(message)
-        broker.ack(delivery_info.delivery_tag)
+        broker.ack(delivery_info.delivery_tag) unless consumer_instance.already_responded?
       rescue StandardError => ex
-        broker.nack(delivery_info.delivery_tag)
+        broker.nack(delivery_info.delivery_tag) unless consumer_instance && consumer_instance.already_responded?
         handle_error(properties.message_id, payload, consumer, ex)
       end
     end

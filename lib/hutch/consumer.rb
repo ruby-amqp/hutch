@@ -14,12 +14,18 @@ module Hutch
 
     def reject!
       broker.reject(delivery_info.delivery_tag)
+      @delivery_rejected = true
     end
 
     def requeue!
       broker.requeue(delivery_info.delivery_tag)
+      @delivery_requeued = true
     end
-    
+
+    def already_responded?
+      @delivery_rejected || @delivery_requeued
+    end
+
     def logger
       Hutch::Logging.logger
     end
