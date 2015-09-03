@@ -52,8 +52,7 @@ module Hutch
       open_channel!
 
       exchange_name = @config[:mq_exchange]
-      default_options = { durable: true }
-      exchange_options = default_options.merge @config[:mq_exchange_options]
+      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
