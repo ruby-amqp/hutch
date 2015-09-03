@@ -12,7 +12,8 @@ module Hutch
 
       def self.binary? ; false ; end
 
-      Hutch::Serializers.register(nil, self)
+      def self.content_type ; nil ; end
+
     end
   end
 end

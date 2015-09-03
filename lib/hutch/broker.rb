@@ -195,22 +195,22 @@ module Hutch
       @channel.nack(delivery_tag, false, false)
     end
 
-    def publish(routing_key, message, properties = {})
+    def publish(routing_key, message, properties = {}, serializer = nil)
       ensure_connection!(routing_key, message)
 
-      content_type  = @config[:content_type]
+      serializer ||= @config[:serializer]
 
       non_overridable_properties = {
-        routing_key: routing_key,
-        timestamp: @connection.current_timestamp,
+        routing_key:  routing_key,
+        timestamp:    @connection.current_timestamp,
+        content_type: serializer.content_type,
       }
       properties[:message_id]   ||= generate_id
-      properties[:content_type] ||= content_type
 
-      payload = serializer(content_type).encode(message)
+      payload = serializer.encode(message)
       logger.info {
         spec =
-          if serializer(content_type).binary?
+          if serializer.binary?
             "#{payload.bytesize} bytes message"
           else
             "message '#{payload}'"

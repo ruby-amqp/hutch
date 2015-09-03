@@ -56,7 +56,7 @@ module Hutch
 
         consumer_pool_size: 1,
 
-        content_type: "application/json",
+        serializer: Hutch::Serializers::JSON,
       }.merge(params)
     end
 

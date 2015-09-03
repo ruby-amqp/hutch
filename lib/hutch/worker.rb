@@ -104,16 +104,16 @@ module Hutch
     def handle_message(consumer, delivery_info, properties, payload)
       broker = @broker
       begin
+        serializer = consumer.get_serializer || Hutch::Config[:serializer]
         logger.info {
-          is_bin = Hutch::Serializers.find(properties.content_type).binary?
-          spec   = is_bin ? "#{payload.bytesize} bytes" : "#{payload}"
+          spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
           "message(#{properties.message_id || '-'}): " +
           "routing key: #{delivery_info.routing_key}, " +
           "consumer: #{consumer}, " +
           "payload: #{spec}"
         }
 
-        message = Message.new(delivery_info, properties, payload)
+        message = Message.new(delivery_info, properties, payload, serializer)
         consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
         with_tracing(consumer_instance).handle(message)
         broker.ack(delivery_info.delivery_tag)

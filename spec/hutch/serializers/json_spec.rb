@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Hutch::Serializers::JSON do
-  let(:subject) { Hutch::Serializers.find("application/json") }
+  let(:subject) { described_class }
 
   it "encode/decode" do
     payload = { a: 1, b: 2 }

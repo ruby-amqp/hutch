@@ -3,7 +3,8 @@ require 'hutch/worker'
 
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
-                          get_queue_name: 'consumer', get_arguments: {}) }
+                          get_queue_name: 'consumer', get_arguments: {},
+                          get_serializer: nil) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }

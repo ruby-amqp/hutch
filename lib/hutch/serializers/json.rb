@@ -15,7 +15,7 @@ module Hutch
 
       def self.binary? ; false ; end
 
-      Hutch::Serializers.register('application/json', self)
+      def self.content_type ; 'application/json' ; end
 
     end
   end
