@@ -3,7 +3,8 @@ require 'hutch/worker'
 
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
-                          get_queue_name: 'consumer', get_arguments: {}) }
+                          get_queue_name: 'consumer', get_arguments: {},
+                          get_serializer: nil) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }
@@ -43,7 +44,7 @@ describe Hutch::Worker do
     let(:consumer_instance) { double('Consumer instance') }
     let(:delivery_info) { double('Delivery Info', routing_key: '',
                                  delivery_tag: 'dt') }
-    let(:properties) { double('Properties', message_id: nil) }
+    let(:properties) { double('Properties', message_id: nil, content_type: "application/json") }
     before { allow(consumer).to receive_messages(new: consumer_instance) }
     before { allow(broker).to receive(:ack) }
     before { allow(broker).to receive(:nack) }

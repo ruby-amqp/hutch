@@ -1,6 +1,4 @@
-require 'multi_json'
 require 'forwardable'
-require 'active_support/core_ext/hash/indifferent_access'
 
 module Hutch
   class Message
@@ -8,11 +6,11 @@ module Hutch
 
     attr_reader :delivery_info, :properties, :payload
 
-    def initialize(delivery_info, properties, payload)
+    def initialize(delivery_info, properties, payload, serializer)
       @delivery_info = delivery_info
       @properties    = properties
       @payload       = payload
-      @body          = MultiJson.load(payload).with_indifferent_access
+      @body          = serializer.decode(payload)
     end
 
     def_delegator :@body, :[]

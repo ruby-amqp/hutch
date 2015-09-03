@@ -195,19 +195,30 @@ module Hutch
       @channel.nack(delivery_tag, false, false)
     end
 
-    def publish(routing_key, message, properties = {})
+    def publish(routing_key, message, properties = {}, options = {})
       ensure_connection!(routing_key, message)
 
-      non_overridable_properties = {
-        routing_key: routing_key,
-        timestamp: @connection.current_timestamp,
-        content_type: 'application/json'
-      }
-      properties[:message_id] ||= generate_id
+      serializer = options[:serializer] || @config[:serializer]
 
-      json = JSON.dump(message)
-      logger.info("publishing message '#{json}' to #{routing_key}")
-      response = @exchange.publish(json, {persistent: true}.
+      non_overridable_properties = {
+        routing_key:  routing_key,
+        timestamp:    @connection.current_timestamp,
+        content_type: serializer.content_type,
+      }
+      properties[:message_id]   ||= generate_id
+
+      payload = serializer.encode(message)
+      logger.info {
+        spec =
+          if serializer.binary?
+            "#{payload.bytesize} bytes message"
+          else
+            "message '#{payload}'"
+          end
+        "publishing #{spec} to #{routing_key}"
+      }
+
+      response = @exchange.publish(payload, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
@@ -358,5 +369,6 @@ module Hutch
     def global_properties
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
+
   end
 end
