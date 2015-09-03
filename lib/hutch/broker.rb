@@ -195,10 +195,10 @@ module Hutch
       @channel.nack(delivery_tag, false, false)
     end
 
-    def publish(routing_key, message, properties = {}, serializer = nil)
+    def publish(routing_key, message, properties = {}, options = {})
       ensure_connection!(routing_key, message)
 
-      serializer ||= @config[:serializer]
+      serializer = options[:serializer] || @config[:serializer]
 
       non_overridable_properties = {
         routing_key:  routing_key,
