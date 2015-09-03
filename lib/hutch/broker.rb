@@ -370,8 +370,5 @@ module Hutch
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
 
-    def serializer(content_type)
-      Hutch::Serializers.find(content_type)
-    end
   end
 end
