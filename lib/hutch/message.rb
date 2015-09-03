@@ -1,6 +1,4 @@
-require 'multi_json'
 require 'forwardable'
-require 'active_support/core_ext/hash/indifferent_access'
 
 module Hutch
   class Message
@@ -12,7 +10,7 @@ module Hutch
       @delivery_info = delivery_info
       @properties    = properties
       @payload       = payload
-      @body          = MultiJson.load(payload).with_indifferent_access
+      @body          = Hutch::Serializers.find(properties.content_type).decode(payload)
     end
 
     def_delegator :@body, :[]

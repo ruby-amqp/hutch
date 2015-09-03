@@ -198,16 +198,27 @@ module Hutch
     def publish(routing_key, message, properties = {})
       ensure_connection!(routing_key, message)
 
+      content_type  = @config[:content_type]
+
       non_overridable_properties = {
         routing_key: routing_key,
         timestamp: @connection.current_timestamp,
-        content_type: 'application/json'
       }
-      properties[:message_id] ||= generate_id
+      properties[:message_id]   ||= generate_id
+      properties[:content_type] ||= content_type
 
-      json = JSON.dump(message)
-      logger.info("publishing message '#{json}' to #{routing_key}")
-      response = @exchange.publish(json, {persistent: true}.
+      payload = serializer(content_type).encode(message)
+      logger.info {
+        spec =
+          if serializer(content_type).binary?
+            "#{payload.bytesize} bytes message"
+          else
+            "message '#{payload}'"
+          end
+        "publishing #{spec} to #{routing_key}"
+      }
+
+      response = @exchange.publish(payload, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
@@ -357,6 +368,10 @@ module Hutch
 
     def global_properties
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
+    end
+
+    def serializer(content_type)
+      Hutch::Serializers.find(content_type)
     end
   end
 end

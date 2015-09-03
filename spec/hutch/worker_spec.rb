@@ -43,7 +43,7 @@ describe Hutch::Worker do
     let(:consumer_instance) { double('Consumer instance') }
     let(:delivery_info) { double('Delivery Info', routing_key: '',
                                  delivery_tag: 'dt') }
-    let(:properties) { double('Properties', message_id: nil) }
+    let(:properties) { double('Properties', message_id: nil, content_type: "application/json") }
     before { allow(consumer).to receive_messages(new: consumer_instance) }
     before { allow(broker).to receive(:ack) }
     before { allow(broker).to receive(:nack) }

@@ -10,6 +10,7 @@ require 'hutch/version'
 require 'hutch/error_handlers'
 require 'hutch/exceptions'
 require 'hutch/tracers'
+require 'hutch/serializers'
 
 module Hutch
 
