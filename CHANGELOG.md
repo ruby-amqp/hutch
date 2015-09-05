@@ -1,12 +1,21 @@
 ## 0.19.0 — (unreleased)
 
+### Pluggable Serialisers
+
+Hutch now supports pluggable serialisers: see `Hutch::Serializer::JSON` for
+an example. Serialiser is configured via Hutch config as a Ruby
+class.
+
+Contributed by Dmitry Galinsky.
+
+
 ### multi_json Update
 
 Hutch now depends on multi_json `1.11.x`.
 
 ### Bunny Update
 
-Bunny is updated to [2.1.0](http://blog.rubyrabbitmq.info/blog/2015/08/16/bunny-2-dot-1-0-is-released/).
+Bunny is updated to [2.2.0](http://blog.rubyrabbitmq.info/blog/2015/09/06/bunny-2-dot-2-0-is-released/).
 
 ### More Bunny SSL Options
 
