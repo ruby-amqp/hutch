@@ -1,4 +1,9 @@
-## 0.19.0 — (unreleased)
+## 0.20.0 — (unreleased)
+
+No changes yet.
+
+
+## 0.19.0 — September 7th, 2015
 
 ### Pluggable Serialisers
 
