@@ -155,6 +155,11 @@ usage: hutch [options]
         --mq-password PASSWORD       Set the RabbitMQ password
         --mq-api-host HOST           Set the RabbitMQ API host
         --mq-api-port PORT           Set the RabbitMQ API port
+        --mq-wait-exchange EXCHANGE  Set the wait exchange name
+        --mq-wait-queue QUEUE        Set the wait queue name
+        --mq-wait-expiration-suffices SUFFICES
+                                     Set the wait queue expirations expected
+                                     (comma-separated integers)
     -s, --[no-]mq-api-ssl            Use SSL for the RabbitMQ API
         --config FILE                Load Hutch configuration from a file
         --require PATH               Require a Rails app or path
@@ -301,12 +306,36 @@ Known configuration parameters are:
  * `force_publisher_confirms`: enables publisher confirms, forces `Hutch::Broker#wait_for_confirms` for every publish. **This is the safest option which also offers the lowest throughput**.
  * `log_level`: log level used by the standard Ruby logger (default: `Logger::INFO`)
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
+ * `mq_wait_exchange`: exchange to use for waiting. Leave unset to not use a wait exchange.
+ * `mq_wait_queue`: queue to use for waiting (default: `wait-queue`)
  * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timemout`: Bunny's socket write timeout (default: `11`)
  * `tracer`: tracer to use to track message processing
 
+
+## Wait exchange
+
+Hutch uses a wait exchange with a [dead-letter-exchange](https://www.rabbitmq.com/dlx.html) to wait before processing a message. See this [guide on back off and retry](http://globaldev.co.uk/2014/07/back-off-and-retry-with-rabbitmq/).
+
+To set a wait before processing the message, set expiration and use `Hutch.publish_wait`. For example:
+
+```ruby
+Hutch.connect
+Hutch.publish_wait('routing.key', { key: 'value' }, expiration: 10_000)
+```
+
+### Expiration suffices
+
+To avoid the issue of messages with shorter expiration times getting queued behind longer expiration times, we create a wait exchange/queue for each expiration length. The convention is simply:
+
+```ruby
+exchange_name = "#{mq_wait_exchange}_#{expiration}"
+queue_name = "#{mq_wait_queue}_#{expiration}"
+```
+
+Configure the suffices to be created at startup with `mq_wait_expiration_suffices`
 
 ## Supported RabbitMQ Versions
 

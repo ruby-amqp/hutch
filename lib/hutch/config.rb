@@ -24,6 +24,9 @@ module Hutch
         mq_api_host: 'localhost',
         mq_api_port: 15672,
         mq_api_ssl: false,
+        mq_wait_exchange: nil,
+        mq_wait_queue: 'wait-queue',
+        mq_wait_expiration_suffices: [],
         heartbeat: 30,
         # placeholder, allows specifying connection parameters
         # as a URI.

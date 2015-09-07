@@ -2,6 +2,7 @@ require 'hutch/message'
 require 'hutch/logging'
 require 'hutch/broker'
 require 'carrot-top'
+require 'thread'
 
 module Hutch
   class Worker
@@ -16,12 +17,20 @@ module Hutch
     # process the messages in their respective queues indefinitely. This method
     # never returns.
     def run
-      setup_queues
-
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
 
-      main_loop
+      register_action_handlers
+
+      setup_queues
+
+      # Take a break from Thread#join every 0.1 seconds to check if we've
+      # been sent any actions or signals
+      until @broker.wait_on_threads(0.1)
+        handle_actions
+        handle_signals
+        main_loop
+      end
     end
 
     def main_loop
@@ -56,6 +65,21 @@ module Hutch
       if signal
         logger.info "caught sig#{signal.downcase}, stopping hutch..."
         stop
+      end
+    end
+
+    # Register action queue for acknowledging messages in main thread
+    # Messages consumed come from main thread so acks and nacks need to use the
+    # same channel
+    def register_action_handlers
+      Thread.main[:action_queue] = Queue.new
+    end
+
+    # Handle all pending message acknowledgement actions
+    def handle_actions
+      until Thread.main[:action_queue].empty?
+        action, delivery_tag = Thread.main[:action_queue].pop
+        @broker.public_send(action, delivery_tag)
       end
     end
 
@@ -118,7 +142,7 @@ module Hutch
         with_tracing(consumer_instance).handle(message)
         broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
-        broker.nack(delivery_info.delivery_tag)
+        Thread.main[:action_queue] << [:nack, delivery_info.delivery_tag]
         handle_error(properties.message_id, payload, consumer, ex)
       end
     end

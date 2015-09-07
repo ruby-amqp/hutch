@@ -1,13 +1,25 @@
 require 'carrot-top'
+require 'forwardable'
 require 'securerandom'
 require 'hutch/logging'
 require 'hutch/exceptions'
+require 'hutch/broker_handlers'
+require 'hutch/channel_broker'
 
 module Hutch
   class Broker
     include Logging
+    extend Forwardable
+    include BrokerHandlers
 
-    attr_accessor :connection, :channel, :exchange, :api_client
+    attr_accessor :connection, :api_client
+    def_delegators :channel_broker,
+                   :channel,
+                   :exchange,
+                   :default_wait_exchange,
+                   :wait_exchanges
+
+    CHANNEL_BROKER_KEY = :hutch_channel_broker
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -17,10 +29,28 @@ module Hutch
       @options = options
       set_up_amqp_connection
       if http_api_use_enabled?
-        logger.info "HTTP API use is enabled"
+        logger.info 'HTTP API use is enabled'
         set_up_api_connection
       else
-        logger.info "HTTP API use is disabled"
+        logger.info 'HTTP API use is disabled'
+      end
+
+      return unless block_given?
+      begin
+        yield
+      ensure
+        disconnect
+      end
+    end
+
+    def connect(options = {})
+      @options = options
+      set_up_amqp_connection
+      if http_api_use_enabled?
+        logger.info 'HTTP API use is enabled'
+        set_up_api_connection
+      else
+        logger.info 'HTTP API use is disabled'
       end
 
       if tracing_enabled?
@@ -29,37 +59,62 @@ module Hutch
         logger.info "tracing is disabled"
       end
 
-      if block_given?
-        begin
-          yield
-        ensure
-          disconnect
-        end
+      return unless block_given?
+
+      begin
+        yield
+      ensure
+        disconnect
       end
     end
 
     def disconnect
-      @channel.close    if @channel
+      channel_broker.disconnect unless Thread.current[CHANNEL_BROKER_KEY].nil?
+      Thread.current[CHANNEL_BROKER_KEY] = nil
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @connection = nil
+      @api_client = nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
-    # channel we use for talking to RabbitMQ. It also ensures the existance of
+    # channel we use for talking to RabbitMQ. It also ensures the existence of
     # the exchange we'll be using.
     def set_up_amqp_connection
       open_connection!
       open_channel!
-
-      exchange_name = @config[:mq_exchange]
-      logger.info "using topic exchange '#{exchange_name}'"
-
-      with_bunny_precondition_handler('exchange') do
-        @exchange = @channel.topic(exchange_name, durable: true)
-      end
     end
 
+    # rubocop:disable Metrics/AbcSize
     def open_connection!
+      if @config[:uri] && !@config[:uri].empty?
+        u = URI.parse(@config[:uri])
+
+        @config[:mq_host]     = u.host
+        @config[:mq_port]     = u.port
+        @config[:mq_vhost]    = u.path.sub(%r{^/}, '')
+        @config[:mq_username] = u.user
+        @config[:mq_password] = u.password
+      end
+
+      host               = @config[:mq_host]
+      port               = @config[:mq_port]
+      vhost              = if @config[:mq_vhost] && '' != @config[:mq_vhost]
+                             @config[:mq_vhost]
+                           else
+                             Bunny::Session::DEFAULT_VHOST
+                           end
+      username           = @config[:mq_username]
+      password           = @config[:mq_password]
+      tls                = @config[:mq_tls]
+      tls_key            = @config[:mq_tls_key]
+      tls_cert           = @config[:mq_tls_cert]
+      heartbeat          = @config[:heartbeat]
+      connection_timeout = @config[:connection_timeout]
+      read_timeout       = @config[:read_timeout]
+      write_timeout      = @config[:write_timeout]
+
+      protocol           = tls ? 'amqps://' : 'amqp://'
+      sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(%r{^/}, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
 
       @connection = Hutch::Adapter.new(connection_params)
@@ -71,8 +126,10 @@ module Hutch
       logger.info "connected to RabbitMQ at #{connection_params[:host]} as #{connection_params[:username]}"
       @connection
     end
+    # rubocop:enable Metrics/AbcSize
 
     def open_channel!
+      channel_broker.open_channel!
       logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}"
       @channel = @connection.create_channel(nil, consumer_pool_size).tap do |ch|
         @connection.prefetch_channel(ch, @config[:channel_prefetch])
@@ -117,8 +174,8 @@ module Hutch
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name, arguments = {})
       with_bunny_precondition_handler('queue') do
-        namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        name = name.prepend(namespace + ":") unless namespace.empty?
+        namespace = @config[:namespace].to_s.downcase.gsub(/[^-:\.\w]/, '')
+        name = name.prepend(namespace + ':') unless namespace.empty?
         channel.queue(name, durable: true, arguments: arguments)
       end
     end
@@ -141,11 +198,11 @@ module Hutch
     def bind_queue(queue, routing_keys)
       if http_api_use_enabled?
         # Find the existing bindings, and unbind any redundant bindings
-        queue_bindings = bindings.select { |dest, keys| dest == queue.name }
-        queue_bindings.each do |dest, keys|
+        queue_bindings = bindings.select { |dest, _keys| dest == queue.name }
+        queue_bindings.each do |_dest, keys|
           keys.reject { |key| routing_keys.include?(key) }.each do |key|
             logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(@exchange, routing_key: key)
+            queue.unbind(exchange, routing_key: key)
           end
         end
       end
@@ -153,7 +210,7 @@ module Hutch
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
         logger.debug "creating binding #{queue.name} <--> #{routing_key}"
-        queue.bind(@exchange, routing_key: routing_key)
+        queue.bind(exchange, routing_key: routing_key)
       end
     end
 
@@ -167,6 +224,7 @@ module Hutch
     end
 
     def stop
+      channel.work_pool.kill
       if defined?(JRUBY_VERSION)
         channel.close
       else
@@ -180,19 +238,19 @@ module Hutch
     end
 
     def requeue(delivery_tag)
-      @channel.reject(delivery_tag, true)
+      channel.reject(delivery_tag, true)
     end
 
     def reject(delivery_tag, requeue=false)
-      @channel.reject(delivery_tag, requeue)
+      channel.reject(delivery_tag, requeue)
     end
 
     def ack(delivery_tag)
-      @channel.ack(delivery_tag, false)
+      channel.ack(delivery_tag, false)
     end
 
     def nack(delivery_tag)
-      @channel.nack(delivery_tag, false, false)
+      channel.nack(delivery_tag, false, false)
     end
 
     def publish(routing_key, message, properties = {}, options = {})
@@ -218,25 +276,54 @@ module Hutch
         "publishing #{spec} to #{routing_key}"
       }
 
-      response = @exchange.publish(payload, {persistent: true}.
-        merge(properties).
-        merge(global_properties).
-        merge(non_overridable_properties))
+      json = JSON.dump(message)
+      logger.info("publishing message '#{json}' to #{routing_key}")
+      response = exchange.publish(json, { persistent: true }
+        .merge(properties)
+        .merge(global_properties)
+        .merge(non_overridable_properties))
+
+      channel.wait_for_confirms if @config[:force_publisher_confirms]
+      response
+    end
+
+    def publish_wait(routing_key, message, properties = {})
+      ensure_connection!(routing_key, message)
+      if @config[:mq_wait_exchange].nil?
+        raise_publish_error('wait exchange not defined', routing_key, message)
+      end
+
+      non_overridable_properties = {
+        routing_key: routing_key,
+        content_type: 'application/json'
+      }
+      properties[:message_id] ||= generate_id
+      properties[:timestamp] ||= Time.now.to_i
+
+      message_properties = { persistent: true }
+                           .merge(properties)
+                           .merge(global_properties)
+                           .merge(non_overridable_properties)
+      exchange = wait_exchanges.fetch(message_properties[:expiration].to_s, default_wait_exchange)
+      json = JSON.dump(message)
+      logger.info("publishing message '#{json}' to '#{exchange.name}' with routing key '#{routing_key}'")
+
+      response = exchange.publish(json, message_properties)
 
       channel.wait_for_confirms if @config[:force_publisher_confirms]
       response
     end
 
     def confirm_select(*args)
-      @channel.confirm_select(*args)
+      channel.confirm_select(*args)
     end
 
     def wait_for_confirms
-      @channel.wait_for_confirms
+      channel.wait_for_confirms
     end
 
     def using_publisher_confirmations?
-      @channel.using_publisher_confirmations?
+      channel.using_publisher_confirmations?
     end
 
     private
@@ -252,6 +339,10 @@ module Hutch
       raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
     end
 
+    def channel_broker
+      Thread.current[CHANNEL_BROKER_KEY] ||= ChannelBroker.new(@connection, @config)
+    end
+
     def api_config
       @api_config ||= OpenStruct.new.tap do |config|
         config.host = @config[:mq_api_host]
@@ -259,7 +350,7 @@ module Hutch
         config.username = @config[:mq_username]
         config.password = @config[:mq_password]
         config.ssl = @config[:mq_api_ssl]
-        config.protocol = config.ssl ? "https://" : "http://"
+        config.protocol = config.ssl ? 'https://' : 'http://'
         config.sanitized_uri = "#{config.protocol}#{config.username}@#{config.host}:#{config.port}/"
       end
     end
@@ -369,6 +460,5 @@ module Hutch
     def global_properties
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
-
   end
 end

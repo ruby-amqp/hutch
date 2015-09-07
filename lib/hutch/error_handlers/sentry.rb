@@ -8,13 +8,13 @@ module Hutch
 
       def initialize
         unless Raven.respond_to?(:capture_exception)
-          raise "The Hutch Sentry error handler requires Raven >= 0.4.0"
+          raise 'The Hutch Sentry error handler requires Raven >= 0.4.0'
         end
       end
 
-      def handle(message_id, payload, consumer, ex)
+      def handle(message_id, _payload, _consumer, ex)
         prefix = "message(#{message_id || '-'}): "
-        logger.error prefix + "Logging event to Sentry"
+        logger.error prefix + 'Logging event to Sentry'
         logger.error prefix + "#{ex.class} - #{ex.message}"
         Raven.capture_exception(ex)
       end

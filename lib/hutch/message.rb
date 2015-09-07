@@ -22,10 +22,9 @@ module Hutch
     def to_s
       attrs = { :@body => body.to_s, message_id: message_id,
                 timestamp: timestamp, routing_key: routing_key }
-      "#<Message #{attrs.map { |k,v| "#{k}=#{v.inspect}" }.join(', ')}>"
+      "#<Message #{attrs.map { |k, v| "#{k}=#{v.inspect}" }.join(', ')}>"
     end
 
     alias_method :inspect, :to_s
   end
 end
-

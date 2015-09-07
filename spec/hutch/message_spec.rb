@@ -35,4 +35,3 @@ describe Hutch::Message do
     end
   end
 end
-

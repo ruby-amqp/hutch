@@ -4,7 +4,7 @@ require 'time'
 module Hutch
   module Logging
     class HutchFormatter < Logger::Formatter
-      def call(severity, time, program_name, message)
+      def call(severity, time, _program_name, message)
         "#{time.utc.iso8601} #{Process.pid} #{severity} -- #{message}\n"
       end
     end
@@ -21,8 +21,8 @@ module Hutch
       @logger || setup_logger
     end
 
-    def self.logger=(logger)
-      @logger = logger
+    class << self
+      attr_writer :logger
     end
 
     def logger

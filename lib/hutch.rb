@@ -14,7 +14,6 @@ require 'hutch/exceptions'
 require 'hutch/tracers'
 
 module Hutch
-
   def self.register_consumer(consumer)
     self.consumers << consumer
   end
@@ -27,8 +26,8 @@ module Hutch
     Hutch::Logging.logger
   end
 
-  def self.global_properties=(properties)
-    @global_properties = properties
+  class << self
+    attr_writer :global_properties
   end
 
   def self.global_properties
@@ -46,8 +45,8 @@ module Hutch
     @broker.disconnect if @broker
   end
 
-  def self.broker
-    @broker
+  class << self
+    attr_reader :broker
   end
 
   def self.connected?
@@ -58,5 +57,9 @@ module Hutch
 
   def self.publish(*args)
     broker.publish(*args)
+  end
+
+  def self.publish_wait(*args)
+    broker.publish_wait(*args)
   end
 end

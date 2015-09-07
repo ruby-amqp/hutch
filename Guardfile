@@ -1,5 +1,6 @@
-guard 'rspec', :version => 2, :cli => '--color --format doc' do
+guard :rspec, :cmd => 'bundle exec rspec --color --format doc' do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.+)\.rb$}) { |m| "spec/#{m[1]}_spec.rb" }
-  watch('spec/spec_helper.rb') { "spec" }
+  watch('lib/hutch/channel_broker.rb') { 'spec/hutch/broker.rb' }
+  watch('spec/spec_helper.rb') { 'spec' }
 end

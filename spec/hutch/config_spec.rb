@@ -19,7 +19,7 @@ describe Hutch::Config do
     end
 
     context 'for invalid attributes' do
-      let(:invalid_get) { ->{ Hutch::Config.get(:invalid_attr) } }
+      let(:invalid_get) { -> { Hutch::Config.get(:invalid_attr) } }
       specify { expect(invalid_get).to raise_error Hutch::UnknownAttributeError }
     end
   end
@@ -35,7 +35,7 @@ describe Hutch::Config do
     end
 
     context 'for invalid attributes' do
-      let(:invalid_set) { ->{ Hutch::Config.set(:invalid_attr, new_value) } }
+      let(:invalid_set) { -> { Hutch::Config.set(:invalid_attr, new_value) } }
       specify { expect(invalid_set).to raise_error Hutch::UnknownAttributeError }
     end
   end
@@ -49,7 +49,7 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_getter) { ->{ Hutch::Config.invalid_attr } }
+      let(:invalid_getter) { -> { Hutch::Config.invalid_attr } }
       specify { expect(invalid_getter).to raise_error NoMethodError }
     end
   end
@@ -63,7 +63,7 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_setter) { ->{ Hutch::Config.invalid_attr = new_value } }
+      let(:invalid_setter) { -> { Hutch::Config.invalid_attr = new_value } }
       specify { expect(invalid_setter).to raise_error NoMethodError }
     end
   end
@@ -81,9 +81,8 @@ describe Hutch::Config do
     context 'when an attribute is invalid' do
       let(:config_data) { { random_attribute: 'socks' } }
       it 'raises an error' do
-        expect {
-          Hutch::Config.load_from_file(file)
-        }.to raise_error(NoMethodError)
+        expect { Hutch::Config.load_from_file(file) }
+          .to raise_error(NoMethodError)
       end
     end
 

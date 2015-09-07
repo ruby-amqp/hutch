@@ -38,7 +38,6 @@ describe Hutch::Consumer do
     end
   end
 
-
   describe '.consume' do
     it 'saves the routing key to the consumer' do
       expect(simple_consumer.routing_keys).to include 'hutch.test1'
@@ -57,7 +56,7 @@ describe Hutch::Consumer do
 
       describe '#length' do
         subject { super().length }
-        it { is_expected.to eq(1)}
+        it { is_expected.to eq(1) }
       end
     end
   end
@@ -99,10 +98,10 @@ describe Hutch::Consumer do
       it 'returns the give queue name' do
         class Foo
           include Hutch::Consumer
-          queue_name "bar"
+          queue_name 'bar'
         end
 
-        expect(Foo.get_queue_name).to eq("bar")
+        expect(Foo.get_queue_name).to eq('bar')
       end
     end
 
@@ -127,4 +126,3 @@ describe Hutch::Consumer do
     end
   end
 end
-
