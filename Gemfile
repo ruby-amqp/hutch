@@ -13,6 +13,8 @@ group :development, :test do
   gem "honeybadger"
   gem "coveralls", require: false
   gem 'rb-inotify', '~> 0.9', require: false
+  gem "newrelic_rpm"
+  gem "airbrake"
 end
 
 group :development, :darwin do

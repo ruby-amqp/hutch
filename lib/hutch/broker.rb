@@ -1,4 +1,3 @@
-require 'bunny'
 require 'carrot-top'
 require 'forwardable'
 require 'securerandom'
@@ -37,6 +36,31 @@ module Hutch
       end
 
       return unless block_given?
+      begin
+        yield
+      ensure
+        disconnect
+      end
+    end
+
+    def connect(options = {})
+      @options = options
+      set_up_amqp_connection
+      if http_api_use_enabled?
+        logger.info 'HTTP API use is enabled'
+        set_up_api_connection
+      else
+        logger.info 'HTTP API use is disabled'
+      end
+
+      if tracing_enabled?
+        logger.info "tracing is enabled using #{@config[:tracer]}"
+      else
+        logger.info "tracing is disabled"
+      end
+
+      return unless block_given?
+
       begin
         yield
       ensure
@@ -92,26 +116,28 @@ module Hutch
       protocol           = tls ? 'amqps://' : 'amqp://'
       sanitized_uri      = "#{protocol}#{username}@#{host}:#{port}/#{vhost.sub(%r{^/}, '')}"
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
-      @connection = Bunny.new(host: host, port: port, vhost: vhost,
-                              tls: tls, tls_key: tls_key, tls_cert: tls_cert,
-                              username: username, password: password,
-                              heartbeat: heartbeat, automatically_recover: true,
-                              network_recovery_interval: 1,
-                              connection_timeout: connection_timeout,
-                              read_timeout: read_timeout,
-                              write_timeout: write_timeout)
+
+      @connection = Hutch::Adapter.new(connection_params)
 
       with_bunny_connection_handler(sanitized_uri) do
         @connection.start
       end
 
-      logger.info "connected to RabbitMQ at #{host} as #{username}"
+      logger.info "connected to RabbitMQ at #{connection_params[:host]} as #{connection_params[:username]}"
       @connection
     end
     # rubocop:enable Metrics/AbcSize
 
     def open_channel!
       channel_broker.open_channel!
+      logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}"
+      @channel = @connection.create_channel(nil, consumer_pool_size).tap do |ch|
+        @connection.prefetch_channel(ch, @config[:channel_prefetch])
+        if @config[:publisher_confirms] || @config[:force_publisher_confirms]
+          logger.info 'enabling publisher confirms'
+          ch.confirm_select
+        end
+      end
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
@@ -141,12 +167,16 @@ module Hutch
       op && cf
     end
 
+    def tracing_enabled?
+      @config[:tracer] && @config[:tracer] != Hutch::Tracers::NullTracer
+    end
+
     # Create / get a durable queue and apply namespace if it exists.
-    def queue(name)
+    def queue(name, arguments = {})
       with_bunny_precondition_handler('queue') do
         namespace = @config[:namespace].to_s.downcase.gsub(/[^-:\.\w]/, '')
         name = name.prepend(namespace + ':') unless namespace.empty?
-        channel.queue(name, durable: true)
+        channel.queue(name, durable: true, arguments: arguments)
       end
     end
 
@@ -195,6 +225,16 @@ module Hutch
 
     def stop
       channel.work_pool.kill
+      if defined?(JRUBY_VERSION)
+        channel.close
+      else
+        # Enqueue a failing job that kills the consumer loop
+        channel_work_pool.shutdown
+        # Give `timeout` seconds to jobs that are still being processed
+        channel_work_pool.join(@config[:graceful_exit_timeout])
+        # If after `timeout` they are still running, they are killed
+        channel_work_pool.kill
+      end
     end
 
     def requeue(delivery_tag)
@@ -213,15 +253,28 @@ module Hutch
       channel.nack(delivery_tag, false, false)
     end
 
-    def publish(routing_key, message, properties = {})
+    def publish(routing_key, message, properties = {}, options = {})
       ensure_connection!(routing_key, message)
 
+      serializer = options[:serializer] || @config[:serializer]
+
       non_overridable_properties = {
-        routing_key: routing_key,
-        timestamp: Time.now.to_i,
-        content_type: 'application/json'
+        routing_key:  routing_key,
+        timestamp:    @connection.current_timestamp,
+        content_type: serializer.content_type,
       }
-      properties[:message_id] ||= generate_id
+      properties[:message_id]   ||= generate_id
+
+      payload = serializer.encode(message)
+      logger.info {
+        spec =
+          if serializer.binary?
+            "#{payload.bytesize} bytes message"
+          else
+            "message '#{payload}'"
+          end
+        "publishing #{spec} to #{routing_key}"
+      }
 
       json = JSON.dump(message)
       logger.info("publishing message '#{json}' to #{routing_key}")
@@ -302,8 +355,102 @@ module Hutch
       end
     end
 
+    def connection_params
+      parse_uri
+
+      {}.tap do |params|
+        params[:host]               = @config[:mq_host]
+        params[:port]               = @config[:mq_port]
+        params[:vhost]              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
+                                        @config[:mq_vhost]
+                                      else
+                                        Hutch::Adapter::DEFAULT_VHOST
+                                      end
+        params[:username]           = @config[:mq_username]
+        params[:password]           = @config[:mq_password]
+        params[:tls]                = @config[:mq_tls]
+        params[:tls_key]            = @config[:mq_tls_key]
+        params[:tls_cert]           = @config[:mq_tls_cert]
+        params[:verify_peer]        = @config[:mq_verify_peer]
+        if @config[:mq_tls_ca_certificates]
+          params[:tls_ca_certificates] = @config[:mq_tls_ca_certificates]
+        end
+        params[:heartbeat]          = @config[:heartbeat]
+        params[:connection_timeout] = @config[:connection_timeout]
+        params[:read_timeout]       = @config[:read_timeout]
+        params[:write_timeout]      = @config[:write_timeout]
+
+
+        params[:automatically_recover] = true
+        params[:network_recovery_interval] = 1
+
+        params[:client_logger] = @config[:client_logger] if @config[:client_logger]
+      end
+    end
+
+    def parse_uri
+      return unless @config[:uri] && !@config[:uri].empty?
+
+      u = URI.parse(@config[:uri])
+
+      @config[:mq_host]     = u.host
+      @config[:mq_port]     = u.port
+      @config[:mq_vhost]    = u.path.sub(/^\//, "")
+      @config[:mq_username] = u.user
+      @config[:mq_password] = u.password
+    end
+
+    def sanitized_uri
+      p = connection_params
+      scheme = p[:tls] ? "amqps" : "amqp"
+
+      "#{scheme}://#{p[:username]}@#{p[:host]}:#{p[:port]}/#{p[:vhost].sub(/^\//, '')}"
+    end
+
+    def with_authentication_error_handler
+      yield
+    rescue Net::HTTPServerException => ex
+      logger.error "HTTP API connection error: #{ex.message.downcase}"
+      if ex.response.code == '401'
+        raise AuthenticationError.new('invalid HTTP API credentials')
+      else
+        raise
+      end
+    end
+
+    def with_connection_error_handler
+      yield
+    rescue Errno::ECONNREFUSED => ex
+      logger.error "HTTP API connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to HTTP API at #{api_config.sanitized_uri}")
+    end
+
+    def with_bunny_precondition_handler(item)
+      yield
+    rescue Hutch::Adapter::PreconditionFailed => ex
+      logger.error ex.message
+      s = "RabbitMQ responded with 406 Precondition Failed when creating this #{item}. " +
+          "Perhaps it is being redeclared with non-matching attributes"
+      raise WorkerSetupError.new(s)
+    end
+
+    def with_bunny_connection_handler(uri)
+      yield
+    rescue Hutch::Adapter::ConnectionRefused => ex
+      logger.error "amqp connection error: #{ex.message.downcase}"
+      raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}. Check your configuration, network connectivity and RabbitMQ logs.")
+    end
+
     def work_pool_threads
-      channel.work_pool.threads || []
+      channel_work_pool.threads || []
+    end
+
+    def channel_work_pool
+      @channel.work_pool
+    end
+
+    def consumer_pool_size
+      @config[:consumer_pool_size]
     end
 
     def generate_id

@@ -20,6 +20,10 @@ module Hutch
       broker.requeue(delivery_info.delivery_tag)
     end
 
+    def logger
+      Hutch::Logging.logger
+    end
+
     module ClassMethods
       # Add one or more routing keys to the set of routing keys the consumer
       # wants to subscribe to.
@@ -32,6 +36,16 @@ module Hutch
         @queue_name = name
       end
 
+      # Allow to specify custom arguments that will be passed when creating the queue.
+      def arguments(arguments = {})
+        @arguments = arguments
+      end
+
+      # Set custom serializer class, override global value
+      def serializer(name)
+        @serializer = name
+      end
+
       # The RabbitMQ queue name for the consumer. This is derived from the
       # fully-qualified class name. Module separators are replaced with single
       # colons, camelcased class names are converted to snake case.
@@ -42,9 +56,18 @@ module Hutch
         queue_name.downcase
       end
 
+      # Returns consumer custom arguments.
+      def get_arguments
+        @arguments || {}
+      end
+
       # Accessor for the consumer's routing key.
       def routing_keys
         @routing_keys ||= Set.new
+      end
+
+      def get_serializer
+        @serializer
       end
     end
   end

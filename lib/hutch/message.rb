@@ -1,4 +1,3 @@
-require 'multi_json'
 require 'forwardable'
 
 module Hutch
@@ -7,11 +6,11 @@ module Hutch
 
     attr_reader :delivery_info, :properties, :payload
 
-    def initialize(delivery_info, properties, payload)
+    def initialize(delivery_info, properties, payload, serializer)
       @delivery_info = delivery_info
       @properties    = properties
       @payload       = payload
-      @body          = MultiJson.load(payload, symbolize_keys: true)
+      @body          = serializer.decode(payload)
     end
 
     def_delegator :@body, :[]

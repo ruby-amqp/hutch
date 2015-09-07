@@ -1,7 +1,11 @@
 language: ruby
 rvm:
-  - 2.1.0
-  - 2.0.0
-  - 1.9.3
+  - "2.2"
+  - "2.1"
+  - "2.0"
+  - "jruby-9.0.0.0"
 services:
   - rabbitmq
+matrix:
+  allow_failures:
+    - rvm: jruby-9.0.0.0

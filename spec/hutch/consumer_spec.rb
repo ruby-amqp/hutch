@@ -22,6 +22,7 @@ describe Hutch::Consumer do
       class ComplexConsumer
         include Hutch::Consumer
         consume 'hutch.test1', 'hutch.test2'
+        arguments foo: :bar
       end
     end
     ComplexConsumer
@@ -61,9 +62,34 @@ describe Hutch::Consumer do
   end
 
   describe '.queue_name' do
-    it 'overrides the queue name' do
+    let(:queue_name) { 'foo' }
 
+    it 'overrides the queue name' do
+      simple_consumer.queue_name(queue_name)
+      expect(simple_consumer.get_queue_name).to eq(queue_name)
     end
+  end
+
+  describe '.arguments' do
+    let(:args) { { foo: :bar} }
+
+    it 'overrides the arguments' do
+      simple_consumer.arguments(args)
+      expect(simple_consumer.get_arguments).to eq(args)
+    end
+
+  end
+
+  describe '.get_arguments' do
+
+    context 'when defined' do
+      it { expect(complex_consumer.get_arguments).to eq(foo: :bar) }
+    end
+
+    context 'when not defined' do
+      it { expect(simple_consumer.get_arguments).to eq({}) }
+    end
+
   end
 
   describe '.get_queue_name' do

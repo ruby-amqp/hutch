@@ -1,4 +1,5 @@
 require 'hutch/error_handlers/logger'
+require 'erb'
 require 'logger'
 
 module Hutch
@@ -16,6 +17,8 @@ module Hutch
         mq_tls: false,
         mq_tls_cert: nil,
         mq_tls_key: nil,
+        mq_tls_ca_certificates: nil,
+        mq_verify_peer: true,
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: 'localhost',
@@ -32,6 +35,7 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
+        tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         daemonise: false,
         pidfile: nil,
@@ -46,7 +50,16 @@ module Hutch
         connection_timeout: 11,
         read_timeout: 11,
         write_timeout: 11,
-        enable_http_api_use: true
+        enable_http_api_use: true,
+        # Number of seconds that a running consumer is given
+        # to finish its job when gracefully exiting Hutch, before
+        # it's killed.
+        graceful_exit_timeout: 11,
+        client_logger: nil,
+
+        consumer_pool_size: 1,
+
+        serializer: Hutch::Serializers::JSON,
       }.merge(params)
     end
 
@@ -81,8 +94,17 @@ module Hutch
     end
 
     def self.load_from_file(file)
-      YAML.load(file).each do |attr, value|
-        Hutch::Config.send("#{attr}=", value)
+      YAML.load(ERB.new(File.read(file)).result).each do |attr, value|
+        Hutch::Config.send("#{attr}=", convert_value(attr, value))
+      end
+    end
+
+    def self.convert_value(attr, value)
+      case attr
+      when "tracer"
+        Kernel.const_get(value)
+      else
+        value
       end
     end
 

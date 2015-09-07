@@ -16,6 +16,12 @@ require 'logger'
 RSpec.configure do |config|
   config.before(:all) { Hutch::Config.log_level = Logger::FATAL }
   config.raise_errors_for_deprecations!
+
+  if defined?(JRUBY_VERSION)
+    config.filter_run_excluding adapter: :bunny
+  else
+    config.filter_run_excluding adapter: :march_hare
+  end
 end
 
 # Constants (classes, etc) defined within a block passed to this method

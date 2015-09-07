@@ -2,10 +2,9 @@ require 'spec_helper'
 require 'hutch/worker'
 
 describe Hutch::Worker do
-  let(:consumer) do
-    double('Consumer', routing_keys: %w( a b c ),
-                       get_queue_name: 'consumer')
-  end
+  let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
+                          get_queue_name: 'consumer', get_arguments: {},
+                          get_serializer: nil) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   subject(:worker) { Hutch::Worker.new(broker, consumers) }
@@ -25,7 +24,7 @@ describe Hutch::Worker do
     before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
-      expect(broker).to receive(:queue).with(consumer.get_queue_name).and_return(queue)
+      expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_arguments).and_return(queue)
       worker.setup_queue(consumer)
     end
 
@@ -47,7 +46,7 @@ describe Hutch::Worker do
       double('Delivery Info', routing_key: '',
                               delivery_tag: 'dt')
     end
-    let(:properties) { double('Properties', message_id: nil) }
+    let(:properties) { double('Properties', message_id: nil, content_type: "application/json") }
     let(:handle_message) do
       Thread.new do
         worker.handle_message(consumer, delivery_info, properties, payload)

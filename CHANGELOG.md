@@ -1,4 +1,120 @@
-## 0.14.0 — (unreleased)
+## 0.20.0 — (unreleased)
+
+No changes yet.
+
+
+## 0.19.0 — September 7th, 2015
+
+### Pluggable Serialisers
+
+Hutch now supports pluggable serialisers: see `Hutch::Serializer::JSON` for
+an example. Serialiser is configured via Hutch config as a Ruby
+class.
+
+Contributed by Dmitry Galinsky.
+
+
+### multi_json Update
+
+Hutch now depends on multi_json `1.11.x`.
+
+### Bunny Update
+
+Bunny is updated to [2.2.0](http://blog.rubyrabbitmq.info/blog/2015/09/06/bunny-2-dot-2-0-is-released/).
+
+### More Bunny SSL Options
+
+`:mq_tls_ca_certificates` and `:mq_verify_peer` options will now be passed on to Bunny as `:tls_ca_certificates` and `:verify_peer` respectively.
+
+Contributed by Kennon Ballou.
+
+## 0.18.0 — August 16th, 2015
+
+### JRuby Support (Using March Hare)
+
+Hutch will now use March Hare when running on JRuby.
+This will yield significant throughput and core utilisation
+improvements for workloads with many and/or busy consumers.
+
+Contributed by Teodor Pripoae.
+
+
+### Configurable Consumer Thread Pool Size
+
+`:consumer_pool_size` is a new option (defaults to `1`) which defines
+Bunny consumer work pool size.
+
+Contributed by Derek Kastner.
+
+### Bunny Logger Option
+
+`:client_logger` is a new option that allows
+for configuring loggerd used by Bunny, the underlying
+RabbitMQ client library.
+
+Contributed by Nate Salisbury.
+
+
+## 0.17.0 — July 19th, 2015
+
+Fixes an issue with `NoMethodError` in `Hutch::Config`.
+
+
+## 0.16.0 — July 19th, 2015
+
+### Support amqps URIs
+
+Hutch now automatically enables TLS and changes default port
+when URI scheme is `amqps`.
+
+Contributed by Carl Hörberg.
+
+### Hash With Indifferent Access
+
+Hutch now uses `HashWithIndifferentAccess` internally
+to reduce use of symbols (which are not garbage collected
+by widely used Ruby versions).
+
+Contributed by Teodor Pripoae.
+
+
+## 0.15.0 — May 5th, 2015
+
+### Airbrake Error Handler
+
+Contributed by Nate Salisbury.
+
+### Ruby 1.9 Support Dropped
+
+Ruby 1.9 is no longer supported by Hutch (and soon Bunny 2.0).
+1.9 is also no longer maintained by the Ruby core team.
+
+### Custom Arguments per Consumers
+
+Allow to set custom arguments per consumers by using the `arguments` setter.
+Arguments are usually used by rabbitmq plugins or to set queue policies. You can
+find a list of supported arguments [here](https://www.rabbitmq.com/extensions.html).
+
+Contributed by Pierre-Louis Gottfrois.
+
+### Message Processing Tracers
+
+Allow to track message processing by using the `:tracer` config option,
+the value should be a class (or fully-qualified string name of a class) that
+implements the tracing interface.
+
+A tracer that performs NewRelic instrumentation ships with Hutch
+and requires New Relic gem to be loaded.
+
+Contributed by Mirosław Nagaś.
+
+### Added Logger Method to Consumer Module
+
+Consumers can now call a logger method to write to Hutch's log.
+
+Contributed by Matty Courtney
+
+## 0.14.0 — Feb 23rd, 2015
 
 ### Configurable Socket Timeouts
 

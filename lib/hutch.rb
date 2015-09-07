@@ -1,13 +1,17 @@
+require 'hutch/adapter'
 require 'hutch/consumer'
 require 'hutch/worker'
 require 'hutch/broker'
 require 'hutch/logging'
+require 'hutch/serializers/identity'
+require 'hutch/serializers/json'
 require 'hutch/config'
 require 'hutch/message'
 require 'hutch/cli'
 require 'hutch/version'
 require 'hutch/error_handlers'
 require 'hutch/exceptions'
+require 'hutch/tracers'
 
 module Hutch
   def self.register_consumer(consumer)

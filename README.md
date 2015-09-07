@@ -16,7 +16,8 @@ $ gem install hutch
 
 ## Project Maturity
 
-Hutch is a relatively young project that was extracted from production systems.
+Hutch is a moderately mature project (started in early 2013)
+that was extracted from production systems.
 
 
 ## Overview
@@ -80,6 +81,34 @@ class FailedPaymentConsumer
 end
 ```
 
+You can also set custom arguments per consumer. This example declares a consumer with
+a maximum length of 10 messages:
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  arguments 'x-max-length' => 10
+end
+```
+
+Custom queue arguments can be found on [this page](https://www.rabbitmq.com/extensions.html).
+
+Consumers can write to Hutch's log by calling the logger method. The logger method returns
+a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.html).
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  
+  def process(message)
+    logger.info "Marking payment #{message[:id]} as failed"
+    mark_payment_as_failed(message[:id])
+  end
+end
+```
+
 If you are using Hutch with Rails and want to make Hutch log to the Rails
 logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 
@@ -87,9 +116,25 @@ logger rather than `stdout`, add this to `config/initializers/hutch.rb`
 Hutch::Logging.logger = Rails.logger
 ```
 
+A logger can be set for the client by adding this config before calling `Hutch.connect`
+
+```ruby
+client_logger = Logger.new("/path/to/bunny.log")
+Hutch::Config.set(:client_logger, client_logger)
+```
+
 See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
 to learn more.
 
+### Message Processing Tracers
+
+Tracers allow you to track message processing.
+
+#### NewRelic
+```ruby
+Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
+```
+This will enable NewRelic custom instrumentation. Batteries included! Screenshoots available [here](https://monosnap.com/list/557020a000779174f23467e3).
 
 ## Running Hutch
 
@@ -139,8 +184,6 @@ mq_host: broker.yourhost.com
 Passing a setting as a command-line option will overwrite what's specified
 in the config file, allowing for easy customization.
 
-
-
 ### Loading Consumers
 
 Using Hutch with a Rails app is simple. Either start Hutch in the working
@@ -157,6 +200,20 @@ a Rails app or a standard file, and take the appropriate behaviour:
 $ hutch --require path/to/rails-app  # loads a rails app
 $ hutch --require path/to/file.rb    # loads a ruby file
 ```
+
+### Stopping Hutch
+
+Hutch supports graceful stops. That means that if done correctly, Hutch will wait for your consumer to finish processing before exiting.
+
+To gracefully stop your workers, you may send the following signals to your Hutch processes: `INT`, `TERM`, or `QUIT`.
+
+```bash
+kill -SIGINT 123 # or kill -2 123
+kill -SIGTERM 456 # or kill -15 456
+kill -SIGQUIT 789 # or kill -3 789
+```
+
+![](http://g.recordit.co/wyCdzG9Kh3.gif)
 
 ## Producers
 
@@ -237,6 +294,8 @@ Known configuration parameters are:
  * `mq_tls`: should TLS be used? (default: `false`)
  * `mq_tls_cert`: path to client TLS certificate (public key)
  * `mq_tls_key`: path to client TLS private key
+ * `mq_tls_ca_certificates`: array of paths to CA keys (if not specified to Hutch, will default to Bunny defaults which are system-dependent)
+ * `mq_verify_peer`: should SSL certificate be verified? (default: `true`)
  * `require_paths`: array of paths to require
  * `autoload_rails`: should Hutch command line runner try to automatically load Rails environment files?
  * `daemonise`: should Hutch runner process daemonise?
@@ -253,6 +312,7 @@ Known configuration parameters are:
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timemout`: Bunny's socket write timeout (default: `11`)
+ * `tracer`: tracer to use to track message processing
 
 
 ## Wait exchange
