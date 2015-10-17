@@ -20,6 +20,11 @@ Hutch is a moderately mature project (started in early 2013)
 that was extracted from production systems.
 
 
+## Supported Ruby Versions
+
+Hutch requires CRuby 2.0+ or JRuby 9K.
+
+
 ## Overview
 
 Hutch is a conventions-based framework for writing services that communicate
@@ -31,7 +36,8 @@ With Hutch, consumers are stored in separate files and include the `Hutch::Consu
 They are then loaded by a command line runner which connects to RabbitMQ, sets up queues and bindings,
 and so on. Publishers connect to RabbitMQ via `Hutch.connect` and publish using `Hutch.publish`.
 
-Hutch uses [Bunny](http://rubybunny.info) under the hood.
+Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.info)
+(on JRuby) under the hood.
 
 
 ## Defining Consumers
