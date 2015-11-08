@@ -33,6 +33,8 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
+        # note that this is not a list, it is a chain of responsibility
+        # that will fall back to "nack unconditionally"
         error_acknowledgements: [],
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
