@@ -306,6 +306,10 @@ Known configuration parameters are:
                          tracked (e.g. using `Hutch::Broker#confirm_select` callback or `Hutch::Broker#wait_for_confirms`)
  * `force_publisher_confirms`: enables publisher confirms, forces `Hutch::Broker#wait_for_confirms` for every publish. **This is the safest option which also offers the lowest throughput**.
  * `log_level`: log level used by the standard Ruby logger (default: `Logger::INFO`)
+ * `error_handlers`: a list of error handler objects, see classes in `Hutch::ErrorHandlers`. All configured
+   handlers will be invoked unconditionally in the order listed.
+ * `error_acknowledgements`: a chain of responsibility of objects that acknowledge/reject/requeue messages when an
+    exception happens, see classes in `Hutch::Acknowledgements`.
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
  * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
