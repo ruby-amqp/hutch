@@ -1,6 +1,54 @@
 ## 0.20.0 — (unreleased)
 
-No changes yet.
+### Hutch::Exception includes Bunny::Exception
+
+`Hutch::Exception` now inherits from `Bunny::Exception` which
+inherits from `StandardError`.
+
+GH issue: [#137](https://github.com/gocardless/hutch/issues/137).
+
+
+### Pluggable (Negative) Acknowledge Handlers
+
+Hutch now can be configured to use a user-provided
+object(s) to perform acknowledgement on consumer exceptions.
+
+For example, this is what the default handler looks like:
+
+``` ruby
+require 'hutch/logging'
+require 'hutch/acknowledgements/base'
+
+module Hutch
+  module Acknowledgements
+    class NackOnAllFailures < Base
+      include Logging
+
+      def handle(delivery_info, properties, broker, ex)
+        prefix = "message(#{properties.message_id || '-'}): "
+        logger.debug "#{prefix} nacking message"
+
+        broker.nack(delivery_info.delivery_tag)
+
+        # terminates further chain processing
+        true
+      end
+    end
+  end
+end
+```
+
+Handlers are configured similarly to exception notification handlers,
+via `:error_acknowledgements` in Hutch config.
+
+Contributed by Derek Kastner.
+
+GH issue: [#177](https://github.com/gocardless/hutch/pull/177).
+
+
+### Bunny Update
+
+Bunny is updated to 2.2.1.
 
 
 ## 0.19.0 — September 7th, 2015
