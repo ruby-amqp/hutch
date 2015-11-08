@@ -10,7 +10,7 @@ module Hutch
         prefix = "message(#{properties.message_id || '-'}): "
         logger.debug "#{prefix} nacking message"
 
-        broker.nack delivery_info.delivery_tag
+        broker.nack(delivery_info.delivery_tag)
 
         true
       end
