@@ -8,7 +8,7 @@ module Hutch
   module Config
     require 'yaml'
 
-    def self.initialize(params={})
+    def self.initialize(params = {})
       @config = {
         mq_host: 'localhost',
         mq_port: 5672,
