@@ -1,8 +1,9 @@
 require 'hutch/logging'
+require 'hutch/acknowledgements/base'
 
 module Hutch
   module Acknowledgements
-    class NackOnAllFailures
+    class NackOnAllFailures < Base
       include Logging
 
       def handle(delivery_info, properties, broker, ex)
