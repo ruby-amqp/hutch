@@ -1,6 +1,7 @@
 require 'hutch/message'
 require 'hutch/logging'
 require 'hutch/broker'
+require 'hutch/acknowledgements/nack_on_all_failures'
 require 'carrot-top'
 
 module Hutch
@@ -118,7 +119,7 @@ module Hutch
         with_tracing(consumer_instance).handle(message)
         broker.ack(delivery_info.delivery_tag)
       rescue StandardError => ex
-        broker.nack(delivery_info.delivery_tag)
+        acknowledge_error(delivery_info, properties, broker, ex)
         handle_error(properties.message_id, payload, consumer, ex)
       end
     end
@@ -133,11 +134,23 @@ module Hutch
       end
     end
 
+    def acknowledge_error(delivery_info, properties, broker, ex)
+      acks = error_acknowledgements +
+        [Hutch::Acknowledgements::NackOnAllFailures.new]
+      acks.find do |backend|
+        backend.handle(delivery_info, properties, broker, ex)
+      end
+    end
+
     def consumers=(val)
       if val.empty?
         logger.warn "no consumer loaded, ensure there's no configuration issue"
       end
       @consumers = val
+    end
+
+    def error_acknowledgements
+      Hutch::Config[:error_acknowledgements]
     end
   end
 end

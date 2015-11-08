@@ -33,6 +33,7 @@ module Hutch
         require_paths: [],
         autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
+        error_acknowledgements: [],
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         daemonise: false,
