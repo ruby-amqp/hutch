@@ -1,3 +1,8 @@
+## 0.21.0 — (unreleased)
+
+No changes yet.
+
+
 ## 0.20.0 — November 16th, 2015
 
 ### Hutch::Exception includes Bunny::Exception
