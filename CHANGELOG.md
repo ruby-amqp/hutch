@@ -50,7 +50,8 @@ GH issue: [#177](https://github.com/gocardless/hutch/pull/177).
 
 `:mq_exchange_options` is a new config option that can be used
 to provide a hash of exchange attributes (durable, auto-delete).
-The options will be passed directly to Bunny.
+The options will be passed directly to Bunny (or March Hare, when
+running on JRuby).
 
 Contributed by Derek Kastner.
 
