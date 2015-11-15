@@ -46,6 +46,17 @@ Contributed by Derek Kastner.
 GH issue: [#177](https://github.com/gocardless/hutch/pull/177).
 
 
+### Configurable Exchange Properties
+
+`:mq_exchange_options` is a new config option that can be used
+to provide a hash of exchange attributes (durable, auto-delete).
+The options will be passed directly to Bunny.
+
+Contributed by Derek Kastner.
+
+GH issue: [#170](https://github.com/gocardless/hutch/pull/170).
+
+
 ### Bunny Update
 
 Bunny is updated to 2.2.1.
