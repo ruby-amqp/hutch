@@ -294,7 +294,7 @@ module Hutch
         params[:automatically_recover] = true
         params[:network_recovery_interval] = 1
 
-        params[:client_logger] = @config[:client_logger] if @config[:client_logger]
+        params[:logger] = @config[:client_logger] if @config[:client_logger]
       end
     end
 
