@@ -65,9 +65,13 @@ module Hutch
     def load_rails_app(path)
       # path should point to the app's top level directory
       if File.directory?(path)
-        # Smells like a Rails app if it's got a config/environment.rb file
+        # Smells like a Rails app if it's got a script/rails or bin/rails file
+        is_rails_app = false
+        ['script/rails', 'bin/rails'].each do |file|
+          is_rails_app = true if File.exist?(File.expand_path(File.join(path, file)))
+        end
         rails_path = File.expand_path(File.join(path, 'config/environment.rb'))
-        if File.exists?(rails_path)
+        if is_rails_app && File.exist?(rails_path)
           logger.info "found rails project (#{path}), booting app"
           ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
           require rails_path
