@@ -1,6 +1,16 @@
 ## 0.21.0 — (unreleased)
 
-No changes yet.
+### More Reliable Rails app Detection
+
+Rails application detection now won't produce false positives
+for applications that include `config/environment.rb`. Instead,
+`bin/rails` and `script/rails` are used.
+
+Contributed by @bisusubedi.
+
+### Refactoring
+
+Contributed by Jesper Josefsson and Olle Jonsson.
 
 
 ## 0.20.0 — November 16th, 2015
