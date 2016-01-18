@@ -314,7 +314,7 @@ Known configuration parameters are:
  * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
- * `write_timemout`: Bunny's socket write timeout (default: `11`)
+ * `write_timeout`: Bunny's socket write timeout (default: `11`)
  * `tracer`: tracer to use to track message processing
 
 
