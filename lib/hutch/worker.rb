@@ -103,25 +103,22 @@ module Hutch
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, delivery_info, properties, payload)
-      broker = @broker
-      begin
-        serializer = consumer.get_serializer || Hutch::Config[:serializer]
-        logger.info {
-          spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
-          "message(#{properties.message_id || '-'}): " +
-          "routing key: #{delivery_info.routing_key}, " +
-          "consumer: #{consumer}, " +
-          "payload: #{spec}"
-        }
+      serializer = consumer.get_serializer || Hutch::Config[:serializer]
+      logger.info {
+        spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
+        "message(#{properties.message_id || '-'}): " +
+        "routing key: #{delivery_info.routing_key}, " +
+        "consumer: #{consumer}, " +
+        "payload: #{spec}"
+      }
 
-        message = Message.new(delivery_info, properties, payload, serializer)
-        consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
-        with_tracing(consumer_instance).handle(message)
-        broker.ack(delivery_info.delivery_tag)
-      rescue StandardError => ex
-        acknowledge_error(delivery_info, properties, broker, ex)
-        handle_error(properties.message_id, payload, consumer, ex)
-      end
+      message = Message.new(delivery_info, properties, payload, serializer)
+      consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
+      with_tracing(consumer_instance).handle(message)
+      @broker.ack(delivery_info.delivery_tag)
+    rescue => ex
+      acknowledge_error(delivery_info, properties, @broker, ex)
+      handle_error(properties.message_id, payload, consumer, ex)
     end
 
     def with_tracing(klass)
