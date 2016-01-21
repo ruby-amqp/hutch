@@ -42,8 +42,8 @@ module Hutch
           # Need to add '.' to load path for relative requires
           $LOAD_PATH << '.'
           require path
-        rescue LoadError
-          logger.fatal "could not load file '#{path}'"
+        rescue LoadError => e
+          logger.fatal "could not load file '#{path}': #{e}"
           return false
         ensure
           # Clean up load path
