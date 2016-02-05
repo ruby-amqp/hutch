@@ -8,6 +8,8 @@ module Hutch
   class Worker
     include Logging
 
+    SHUTDOWN_SIGNALS = %w(QUIT TERM INT).freeze
+
     def initialize(broker, consumers)
       @broker        = broker
       self.consumers = consumers
@@ -42,7 +44,7 @@ module Hutch
     # gracefully. Forceful shutdowns are very bad!
     def register_signal_handlers
       Thread.main[:signal_queue] = []
-      %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym).each do |sig|
+      supported_shutdown_signals.each do |sig|
         # This needs to be reentrant, so we queue up signals to be handled
         # in the run loop, rather than acting on signals here
         trap(sig) do
@@ -148,6 +150,12 @@ module Hutch
 
     def error_acknowledgements
       Hutch::Config[:error_acknowledgements]
+    end
+
+    private
+
+    def supported_shutdown_signals
+      SHUTDOWN_SIGNALS.keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym)
     end
   end
 end
