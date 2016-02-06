@@ -1,5 +1,9 @@
 ## 0.21.0 — (unreleased)
 
+### JRuby Compatibility Restored
+
+Contributed by Jesper Josefsson.
+
 ### More Reliable Rails app Detection
 
 Rails application detection now won't produce false positives
