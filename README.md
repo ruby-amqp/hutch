@@ -11,7 +11,7 @@ in a service-oriented architecture, using RabbitMQ.
 To install with RubyGems:
 
 ```
-$ gem install hutch
+gem install hutch
 ```
 
 ## Project Maturity
