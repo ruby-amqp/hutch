@@ -53,6 +53,41 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#disconnect' do
+    it 'calls close to all channels and then to the connection' do
+      broker.set_up_amqp_connection
+
+      Thread.new { @thread_channel = broker.publish_channel; sleep 5 }
+
+      5.times { break if @thread_channel; sleep 0.1 }
+
+      expect(@thread_channel).to receive(:close).ordered.and_call_original
+      expect(broker.channel).to receive(:close).ordered.and_call_original
+
+      expect(broker.connection).to receive(:close).ordered.and_call_original
+
+      broker.disconnect
+    end
+
+    it 'resets connections/channels/exchanges/api_client to nil' do
+      broker.set_up_amqp_connection
+
+      t = Thread.new { @thread_channel = broker.publish_channel; sleep 5 }
+
+      5.times { break if @thread_channel; sleep 0.1 }
+
+      broker.disconnect
+
+      expect(broker.connection).to be_nil
+      expect(broker.channel).to be_nil
+      expect(broker.exchange).to be_nil
+      expect(broker.publish_channel).to be_nil
+      expect(broker.publish_exchange).to be_nil
+      expect(broker.api_client).to be_nil
+      expect(t["hutch_broker_#{broker.object_id}"]).to be_nil # XXX hack: the key is private
+    end
+  end
+
   describe '#set_up_amqp_connection', rabbitmq: true do
     context 'with valid details' do
       before { broker.set_up_amqp_connection }
@@ -86,6 +121,16 @@ describe Hutch::Broker do
       describe '#exchange', adapter: :march_hare do
         subject { super().exchange }
         it { is_expected.to be_a MarchHare::Exchange }
+      end
+
+      describe '#publish_channel' do
+        subject { super().publish_channel }
+        it { is_expected.to eq(broker.channel) }
+      end
+
+      describe '#publish_exchange', adapter: :march_hare do
+        subject { super().publish_exchange }
+        it { is_expected.to eq(broker.exchange) }
       end
     end
 
@@ -129,6 +174,55 @@ describe Hutch::Broker do
         expect_any_instance_of(MarchHare::Channel).
           to receive(:confirm_select)
         broker.set_up_amqp_connection
+      end
+    end
+  end
+
+  describe '#publish_channel', rabbitmq: true do
+    context 'without a valid connection' do
+      it 'returns nil' do
+        expect(broker.publish_channel).to be_nil
+      end
+    end
+
+    context 'with a valid connection' do
+      before { broker.set_up_amqp_connection }
+      after  { broker.disconnect }
+
+      context 'with force_publisher_confirms set' do
+        let(:force_publisher_confirms_value) { true }
+        before { config[:force_publisher_confirms] = force_publisher_confirms_value }
+
+        it 'waits for confirmation', adapter: :bunny do
+          expect_any_instance_of(Bunny::Channel).to receive(:confirm_select)
+
+          Thread.new { broker.publish_channel }.join
+        end
+
+        it 'waits for confirmation', adapter: :march_hare do
+          expect_any_instance_of(MarchHare::Channel).to receive(:confirm_select)
+
+          Thread.new { broker.publish_channel }.join
+        end
+      end
+    end
+  end
+
+  describe '#publish_exchange' do
+    context 'without a valid connection' do
+      it 'returns nil' do
+        expect(broker.publish_channel).to be_nil
+      end
+    end
+
+    context 'with a valid connection' do
+      it 'is declared through the publish_channel' do
+        ch = double('Publish Channel')
+
+        expect(broker).to receive(:publish_channel).and_return(ch)
+        expect(ch).to receive(:topic)
+
+        broker.publish_exchange
       end
     end
   end
@@ -358,6 +452,26 @@ describe Hutch::Broker do
           expect_any_instance_of(MarchHare::Channel).
             to receive(:wait_for_confirms)
           broker.publish('test.key', 'message')
+        end
+      end
+
+      context 'with multiple threads' do
+        it 'uses different channels per thread' do
+          main_publish_channel  = broker.publish_channel
+          main_publish_exchange = broker.publish_exchange
+
+          expect(main_publish_exchange).to receive(:publish)
+
+          broker.publish('test.key', 'message')
+
+          Thread.new do
+            expect(broker.publish_channel).not_to  eq(main_publish_channel)
+            expect(broker.publish_exchange).not_to eq(main_publish_exchange)
+            expect(broker.publish_exchange.channel).not_to eq(main_publish_exchange.channel)
+
+            expect(broker.publish_exchange).to receive(:publish)
+            broker.publish('test.key', 'message')
+          end.join
         end
       end
     end
