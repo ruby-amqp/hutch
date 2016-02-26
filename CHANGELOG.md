@@ -7,6 +7,7 @@
 consumer work pool threads should abort on exception.
 The option is ignored on JRuby.
 
+Contributed by Seamus Abshere.
 
 ## 0.21.0 — February 7th, 2016
 
