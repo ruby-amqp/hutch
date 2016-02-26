@@ -5,7 +5,7 @@
 `:consumer_pool_abort_on_exception` is a new option
 (defaults to `false`) which defines whether Bunny's
 consumer work pool threads should abort on exception.
-Option is ignored for march_hare / JRuby.
+The option is ignored on JRuby.
 
 
 ## 0.21.0 — February 7th, 2016
