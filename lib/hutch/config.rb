@@ -59,6 +59,7 @@ module Hutch
         client_logger: nil,
 
         consumer_pool_size: 1,
+        consumer_pool_abort_on_exception: false,
 
         serializer: Hutch::Serializers::JSON,
       }.merge(params)
