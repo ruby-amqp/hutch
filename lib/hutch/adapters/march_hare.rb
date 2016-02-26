@@ -25,7 +25,6 @@ module Hutch
         ch.prefetch = prefetch if prefetch
       end
 
-      # FIXME note consumer pool size and abort-on-exception are ignored
       def create_channel(n = nil, consumer_pool_size = 1, consumer_pool_abort_on_exception = false)
         @connection.create_channel(n)
       end
