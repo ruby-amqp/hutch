@@ -82,7 +82,6 @@ describe Hutch::Broker do
       expect(broker.channel).to be_nil
       expect(broker.exchange).to be_nil
       expect(broker.publish_channel).to be_nil
-      expect(broker.publish_exchange).to be_nil
       expect(broker.api_client).to be_nil
       expect(t["hutch_broker_#{broker.object_id}"]).to be_nil # XXX hack: the key is private
     end
@@ -126,11 +125,6 @@ describe Hutch::Broker do
       describe '#publish_channel' do
         subject { super().publish_channel }
         it { is_expected.to eq(broker.channel) }
-      end
-
-      describe '#publish_exchange', adapter: :march_hare do
-        subject { super().publish_exchange }
-        it { is_expected.to eq(broker.exchange) }
       end
     end
 
@@ -208,10 +202,10 @@ describe Hutch::Broker do
     end
   end
 
-  describe '#publish_exchange' do
+  describe '#exchange' do
     context 'without a valid connection' do
       it 'returns nil' do
-        expect(broker.publish_channel).to be_nil
+        expect(broker.exchange).to be_nil
       end
     end
 
@@ -222,7 +216,7 @@ describe Hutch::Broker do
         expect(broker).to receive(:publish_channel).and_return(ch)
         expect(ch).to receive(:topic)
 
-        broker.publish_exchange
+        broker.exchange
       end
     end
   end
@@ -458,18 +452,18 @@ describe Hutch::Broker do
       context 'with multiple threads' do
         it 'uses different channels per thread' do
           main_publish_channel  = broker.publish_channel
-          main_publish_exchange = broker.publish_exchange
+          main_exchange = broker.exchange
 
-          expect(main_publish_exchange).to receive(:publish)
+          expect(main_exchange).to receive(:publish)
 
           broker.publish('test.key', 'message')
 
           Thread.new do
             expect(broker.publish_channel).not_to  eq(main_publish_channel)
-            expect(broker.publish_exchange).not_to eq(main_publish_exchange)
-            expect(broker.publish_exchange.channel).not_to eq(main_publish_exchange.channel)
+            expect(broker.exchange).not_to eq(main_exchange)
+            expect(broker.exchange.channel).not_to eq(main_exchange.channel)
 
-            expect(broker.publish_exchange).to receive(:publish)
+            expect(broker.exchange).to receive(:publish)
             broker.publish('test.key', 'message')
           end.join
         end

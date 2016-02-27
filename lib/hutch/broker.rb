@@ -7,7 +7,7 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :api_client
+    attr_accessor :connection, :channel, :api_client
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -42,7 +42,7 @@ module Hutch
       clear_thread_store
       @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @channel, @connection, @api_client = nil, nil, nil, nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -52,11 +52,9 @@ module Hutch
       open_connection!
       open_channel!
 
-      @exchange = set_up_exchange(@channel)
-
-      if !thread_store[:publish_channel] and !thread_store[:publish_exchange]
+      if !thread_store[:publish_channel]
         thread_store[:publish_channel] ||= @channel
-        thread_store[:publish_exchange] ||= @exchange
+        exchange # declare the exchange
       end
     end
 
@@ -64,8 +62,12 @@ module Hutch
       thread_store[:publish_channel] ||= set_up_publish_channel
     end
 
-    def publish_exchange
-      thread_store[:publish_exchange] ||= set_up_exchange(publish_channel)
+    def exchange
+      thread_store[:exchange] ||= set_up_exchange(publish_channel)
+    end
+
+    def exchange=(ex)
+      thread_store[:exchange] = ex
     end
 
     def open_connection!
@@ -147,7 +149,7 @@ module Hutch
         queue_bindings.each do |dest, keys|
           keys.reject { |key| routing_keys.include?(key) }.each do |key|
             logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(@exchange, routing_key: key)
+            queue.unbind(exchange, routing_key: key)
           end
         end
       end
@@ -155,7 +157,7 @@ module Hutch
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
         logger.debug "creating binding #{queue.name} <--> #{routing_key}"
-        queue.bind(@exchange, routing_key: routing_key)
+        queue.bind(exchange, routing_key: routing_key)
       end
     end
 
@@ -220,7 +222,7 @@ module Hutch
         "publishing #{spec} to #{routing_key}"
       }
 
-      response = publish_exchange.publish(payload, {persistent: true}.
+      response = exchange.publish(payload, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
