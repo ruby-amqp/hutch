@@ -106,7 +106,7 @@ module Hutch
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, delivery_info, properties, payload)
       serializer = consumer.get_serializer || Hutch::Config[:serializer]
-      logger.info {
+      logger.debug {
         spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
         "message(#{properties.message_id || '-'}): " +
         "routing key: #{delivery_info.routing_key}, " +
