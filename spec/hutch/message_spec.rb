@@ -1,10 +1,11 @@
+require 'json'
 require 'hutch/message'
 
 describe Hutch::Message do
   let(:delivery_info) { double('Delivery Info') }
   let(:props) { double('Properties', content_type: "application/json") }
   let(:body) {{ foo: 'bar' }.with_indifferent_access}
-  let(:json_body) { MultiJson.dump(body) }
+  let(:json_body) { JSON.dump(body) }
   subject(:message) { Hutch::Message.new(delivery_info, props, json_body, Hutch::Config[:serializer]) }
 
   describe '#body' do
