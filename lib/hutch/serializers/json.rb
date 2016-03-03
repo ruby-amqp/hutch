@@ -1,4 +1,4 @@
-require 'multi_json'
+require 'json'
 require 'active_support/core_ext/hash/indifferent_access'
 
 module Hutch
@@ -10,7 +10,7 @@ module Hutch
       end
 
       def self.decode(payload)
-        ::MultiJson.load(payload).with_indifferent_access
+        ::JSON.load(payload).with_indifferent_access
       end
 
       def self.binary? ; false ; end
