@@ -93,7 +93,7 @@ describe Hutch::Broker do
       before { config[:mq_host] = 'notarealhost' }
       let(:set_up_amqp_connection) { ->{ broker.set_up_amqp_connection } }
 
-      specify { expect(set_up_amqp_connection).to raise_error }
+      specify { expect(set_up_amqp_connection).to raise_error(StandardError) }
     end
 
     context 'with channel_prefetch set' do
@@ -149,7 +149,7 @@ describe Hutch::Broker do
       after  { broker.disconnect }
       let(:set_up_api_connection) { ->{ broker.set_up_api_connection } }
 
-      specify { expect(set_up_api_connection).to raise_error }
+      specify { expect(set_up_api_connection).to raise_error(StandardError) }
     end
   end
 
