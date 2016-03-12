@@ -53,83 +53,85 @@ describe Hutch::Broker do
     end
   end
 
-  describe '#set_up_amqp_connection', rabbitmq: true do
-    context 'with valid details' do
-      before { broker.set_up_amqp_connection }
-      after  { broker.disconnect }
+  describe '#set_up_amqp_connection' do
+    it 'opens a connection, channel and declares an exchange' do
+      expect(broker).to receive(:open_connection!).ordered
+      expect(broker).to receive(:open_channel!).ordered
+      expect(broker).to receive(:declare_exchange!).ordered
 
-      describe '#connection', adapter: :bunny do
-        subject { super().connection }
-        it { is_expected.to be_a Hutch::Adapters::BunnyAdapter }
-      end
+      broker.set_up_amqp_connection
+    end
+  end
 
-      describe '#connection', adapter: :march_hare do
-        subject { super().connection }
-        it { is_expected.to be_a Hutch::Adapters::MarchHareAdapter }
-      end
+  describe '#open_connection', rabbitmq: true do
+    describe 'return value' do
+      subject { broker.open_connection }
+      after { subject.close }
 
-      describe '#channel', adapter: :bunny do
-        subject { super().channel }
-        it { is_expected.to be_a Bunny::Channel }
-      end
-
-      describe '#channel', adapter: :march_hare do
-        subject { super().channel }
-        it { is_expected.to be_a MarchHare::Channel }
-      end
-
-      describe '#exchange', adapter: :bunny do
-        subject { super().exchange }
-        it { is_expected.to be_a Bunny::Exchange }
-      end
-
-      describe '#exchange', adapter: :march_hare do
-        subject { super().exchange }
-        it { is_expected.to be_a MarchHare::Exchange }
-      end
+      it(nil, adapter: :bunny)      { is_expected.to be_a Hutch::Adapters::BunnyAdapter }
+      it(nil, adapter: :march_hare) { is_expected.to be_a Hutch::Adapters::MarchHareAdapter }
     end
 
     context 'when given invalid details' do
       before { config[:mq_host] = 'notarealhost' }
-      let(:set_up_amqp_connection) { ->{ broker.set_up_amqp_connection } }
+      it { expect { broker.open_connection }.to raise_error(StandardError) }
+    end
+  end
 
-      specify { expect(set_up_amqp_connection).to raise_error(StandardError) }
+  describe '#open_channel', rabbitmq: true do
+    before { broker.open_connection! }
+    after { broker.disconnect }
+
+    describe 'return value' do
+      subject { broker.open_channel }
+
+      it(nil, adapter: :bunny)      { is_expected.to be_a Bunny::Channel }
+      it(nil, adapter: :march_hare) { is_expected.to be_a MarchHare::Channel }
     end
 
     context 'with channel_prefetch set' do
       let(:prefetch_value) { 1 }
       before { config[:channel_prefetch] = prefetch_value }
-      after  { broker.disconnect }
 
       it "set's channel's prefetch", adapter: :bunny do
-        expect_any_instance_of(Bunny::Channel).
-          to receive(:prefetch).with(prefetch_value)
-        broker.set_up_amqp_connection
+        expect_any_instance_of(Bunny::Channel).to receive(:prefetch).with(prefetch_value)
+        broker.open_channel
       end
 
       it "set's channel's prefetch", adapter: :march_hare do
-        expect_any_instance_of(MarchHare::Channel).
-          to receive(:prefetch=).with(prefetch_value)
-        broker.set_up_amqp_connection
+        expect_any_instance_of(MarchHare::Channel).to receive(:prefetch=).with(prefetch_value)
+        broker.open_channel
       end
     end
 
     context 'with force_publisher_confirms set' do
       let(:force_publisher_confirms_value) { true }
       before { config[:force_publisher_confirms] = force_publisher_confirms_value }
-      after  { broker.disconnect }
 
       it 'waits for confirmation', adapter: :bunny do
-        expect_any_instance_of(Bunny::Channel).
-          to receive(:confirm_select)
-        broker.set_up_amqp_connection
+        expect_any_instance_of(Bunny::Channel).to receive(:confirm_select)
+        broker.open_channel
       end
 
       it 'waits for confirmation', adapter: :march_hare do
-        expect_any_instance_of(MarchHare::Channel).
-          to receive(:confirm_select)
-        broker.set_up_amqp_connection
+        expect_any_instance_of(MarchHare::Channel).to receive(:confirm_select)
+        broker.open_channel
       end
+    end
+  end
+
+  describe '#declare_exchange' do
+    before do
+      broker.open_connection!
+      broker.open_channel!
+    end
+    after { broker.disconnect }
+
+    describe 'return value' do
+      subject { broker.declare_exchange }
+
+      it(nil, adapter: :bunny)      { is_expected.to be_a Bunny::Exchange }
+      it(nil, adapter: :march_hare) { is_expected.to be_a MarchHare::Exchange }
     end
   end
 
