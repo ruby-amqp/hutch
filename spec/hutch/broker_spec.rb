@@ -76,6 +76,26 @@ describe Hutch::Broker do
       before { config[:mq_host] = 'notarealhost' }
       it { expect { broker.open_connection }.to raise_error(StandardError) }
     end
+
+    it 'does not set #connection' do
+      connection = broker.open_connection
+
+      expect(broker.connection).to be_nil
+
+      connection.close
+    end
+  end
+
+  describe '#open_connection!' do
+    it 'sets the #connection to #open_connection' do
+      connection = double('connection').as_null_object
+
+      expect(broker).to receive(:open_connection).and_return(connection)
+
+      broker.open_connection!
+
+      expect(broker.connection).to eq(connection)
+    end
   end
 
   describe '#open_channel', rabbitmq: true do
@@ -87,6 +107,11 @@ describe Hutch::Broker do
 
       it(nil, adapter: :bunny)      { is_expected.to be_a Bunny::Channel }
       it(nil, adapter: :march_hare) { is_expected.to be_a MarchHare::Channel }
+    end
+
+    it 'does not set #channel' do
+      broker.open_channel
+      expect(broker.channel).to be_nil
     end
 
     context 'with channel_prefetch set' do
@@ -120,6 +145,18 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#open_channel!' do
+    it 'sets the #channel to #open_channel' do
+      channel = double('channel').as_null_object
+
+      expect(broker).to receive(:open_channel).and_return(channel)
+
+      broker.open_channel!
+
+      expect(broker.channel).to eq(channel)
+    end
+  end
+
   describe '#declare_exchange' do
     before do
       broker.open_connection!
@@ -132,6 +169,23 @@ describe Hutch::Broker do
 
       it(nil, adapter: :bunny)      { is_expected.to be_a Bunny::Exchange }
       it(nil, adapter: :march_hare) { is_expected.to be_a MarchHare::Exchange }
+    end
+
+    it 'does not set #exchange' do
+      broker.declare_exchange
+      expect(broker.exchange).to be_nil
+    end
+  end
+
+  describe '#declare_exchange!' do
+    it 'sets the #exchange to #declare_exchange' do
+      exchange = double('exchange').as_null_object
+
+      expect(broker).to receive(:declare_exchange).and_return(exchange)
+
+      broker.declare_exchange!
+
+      expect(broker.exchange).to eq(exchange)
     end
   end
 
