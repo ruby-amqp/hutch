@@ -9,6 +9,13 @@ The option is ignored on JRuby.
 
 Contributed by Seamus Abshere.
 
+### Worker: Log received messages using level DEBUG instead of INFO
+
+Received messages used to be logged using severity level INFO. 
+This has been lowered to DEBUG.
+
+Contributed by Jesper Josefsson
+
 ## 0.21.0 — February 7th, 2016
 
 ### JRuby Compatibility Restored
