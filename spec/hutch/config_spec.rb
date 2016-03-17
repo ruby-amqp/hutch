@@ -9,7 +9,7 @@ describe Hutch::Config do
       subject { Hutch::Config.get(:mq_host) }
 
       context 'with no overridden value' do
-        it { is_expected.to eq('localhost') }
+        it { is_expected.to eq('127.0.0.1') }
       end
 
       context 'with an overridden value' do

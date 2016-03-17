@@ -248,7 +248,7 @@ describe Hutch::Broker do
 
   describe '#bind_queue' do
 
-    around { |example| broker.connect { example.run } }
+    around { |example| broker.connect(host: "127.0.0.1") { example.run } }
 
     let(:routing_keys) { %w( a b c ) }
     let(:queue) { double('Queue', bind: nil, unbind: nil, name: 'consumer') }
