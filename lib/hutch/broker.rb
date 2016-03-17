@@ -50,38 +50,53 @@ module Hutch
     def set_up_amqp_connection
       open_connection!
       open_channel!
-
-      exchange_name = @config[:mq_exchange]
-      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
-      logger.info "using topic exchange '#{exchange_name}'"
-
-      with_bunny_precondition_handler('exchange') do
-        @exchange = @channel.topic(exchange_name, exchange_options)
-      end
+      declare_exchange!
     end
 
-    def open_connection!
+    def open_connection
       logger.info "connecting to rabbitmq (#{sanitized_uri})"
 
-      @connection = Hutch::Adapter.new(connection_params)
+      connection = Hutch::Adapter.new(connection_params)
 
       with_bunny_connection_handler(sanitized_uri) do
-        @connection.start
+        connection.start
       end
 
       logger.info "connected to RabbitMQ at #{connection_params[:host]} as #{connection_params[:username]}"
-      @connection
+      connection
     end
 
-    def open_channel!
+    def open_connection!
+      @connection = open_connection
+    end
+
+    def open_channel
       logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}, abort on exception #{consumer_pool_abort_on_exception}"
-      @channel = @connection.create_channel(nil, consumer_pool_size, consumer_pool_abort_on_exception).tap do |ch|
-        @connection.prefetch_channel(ch, @config[:channel_prefetch])
+      connection.create_channel(nil, consumer_pool_size, consumer_pool_abort_on_exception).tap do |ch|
+        connection.prefetch_channel(ch, @config[:channel_prefetch])
         if @config[:publisher_confirms] || @config[:force_publisher_confirms]
           logger.info 'enabling publisher confirms'
           ch.confirm_select
         end
       end
+    end
+
+    def open_channel!
+      @channel = open_channel
+    end
+
+    def declare_exchange(ch = channel)
+      exchange_name = @config[:mq_exchange]
+      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
+      logger.info "using topic exchange '#{exchange_name}'"
+
+      with_bunny_precondition_handler('exchange') do
+        ch.topic(exchange_name, exchange_options)
+      end
+    end
+
+    def declare_exchange!(*args)
+      @exchange = declare_exchange(*args)
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
@@ -127,7 +142,7 @@ module Hutch
     # Return a mapping of queue names to the routing keys they're bound to.
     def bindings
       results = Hash.new { |hash, key| hash[key] = [] }
-      @api_client.bindings.each do |binding|
+      api_client.bindings.each do |binding|
         next if binding['destination'] == binding['routing_key']
         next unless binding['source'] == @config[:mq_exchange]
         next unless binding['vhost'] == @config[:mq_vhost]
@@ -146,7 +161,7 @@ module Hutch
         queue_bindings.each do |dest, keys|
           keys.reject { |key| routing_keys.include?(key) }.each do |key|
             logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(@exchange, routing_key: key)
+            queue.unbind(exchange, routing_key: key)
           end
         end
       end
@@ -154,7 +169,7 @@ module Hutch
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
         logger.debug "creating binding #{queue.name} <--> #{routing_key}"
-        queue.bind(@exchange, routing_key: routing_key)
+        queue.bind(exchange, routing_key: routing_key)
       end
     end
 
@@ -181,19 +196,19 @@ module Hutch
     end
 
     def requeue(delivery_tag)
-      @channel.reject(delivery_tag, true)
+      channel.reject(delivery_tag, true)
     end
 
     def reject(delivery_tag, requeue=false)
-      @channel.reject(delivery_tag, requeue)
+      channel.reject(delivery_tag, requeue)
     end
 
     def ack(delivery_tag)
-      @channel.ack(delivery_tag, false)
+      channel.ack(delivery_tag, false)
     end
 
     def nack(delivery_tag)
-      @channel.nack(delivery_tag, false, false)
+      channel.nack(delivery_tag, false, false)
     end
 
     def publish(routing_key, message, properties = {}, options = {})
@@ -203,7 +218,7 @@ module Hutch
 
       non_overridable_properties = {
         routing_key:  routing_key,
-        timestamp:    @connection.current_timestamp,
+        timestamp:    connection.current_timestamp,
         content_type: serializer.content_type,
       }
       properties[:message_id]   ||= generate_id
@@ -219,7 +234,7 @@ module Hutch
         "publishing #{spec} to #{routing_key}"
       }
 
-      response = @exchange.publish(payload, {persistent: true}.
+      response = exchange.publish(payload, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
@@ -229,15 +244,15 @@ module Hutch
     end
 
     def confirm_select(*args)
-      @channel.confirm_select(*args)
+      channel.confirm_select(*args)
     end
 
     def wait_for_confirms
-      @channel.wait_for_confirms
+      channel.wait_for_confirms
     end
 
     def using_publisher_confirmations?
-      @channel.using_publisher_confirmations?
+      channel.using_publisher_confirmations?
     end
 
     private
@@ -249,8 +264,8 @@ module Hutch
     end
 
     def ensure_connection!(routing_key, message)
-      raise_publish_error('no connection to broker', routing_key, message) unless @connection
-      raise_publish_error('connection is closed', routing_key, message) unless @connection.open?
+      raise_publish_error('no connection to broker', routing_key, message) unless connection
+      raise_publish_error('connection is closed', routing_key, message) unless connection.open?
     end
 
     def api_config
@@ -356,7 +371,7 @@ module Hutch
     end
 
     def channel_work_pool
-      @channel.work_pool
+      channel.work_pool
     end
 
     def consumer_pool_size
