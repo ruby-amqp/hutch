@@ -7,7 +7,7 @@ module Hutch
   class Broker
     include Logging
 
-    attr_accessor :connection, :channel, :exchange, :api_client
+    attr_accessor :connection, :channel, :api_client
 
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -39,9 +39,10 @@ module Hutch
     end
 
     def disconnect
+      clear_thread_store
       @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @channel, @connection, @api_client = nil, nil, nil, nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -51,13 +52,22 @@ module Hutch
       open_connection!
       open_channel!
 
-      exchange_name = @config[:mq_exchange]
-      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
-      logger.info "using topic exchange '#{exchange_name}'"
-
-      with_bunny_precondition_handler('exchange') do
-        @exchange = @channel.topic(exchange_name, exchange_options)
+      if !thread_store[:publish_channel]
+        thread_store[:publish_channel] ||= @channel
+        exchange # declare the exchange
       end
+    end
+
+    def publish_channel
+      thread_store[:publish_channel] ||= set_up_publish_channel
+    end
+
+    def exchange
+      thread_store[:exchange] ||= set_up_exchange(publish_channel)
+    end
+
+    def exchange=(ex)
+      thread_store[:exchange] = ex
     end
 
     def open_connection!
@@ -74,14 +84,7 @@ module Hutch
     end
 
     def open_channel!
-      logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}, abort on exception #{consumer_pool_abort_on_exception}"
-      @channel = @connection.create_channel(nil, consumer_pool_size, consumer_pool_abort_on_exception).tap do |ch|
-        @connection.prefetch_channel(ch, @config[:channel_prefetch])
-        if @config[:publisher_confirms] || @config[:force_publisher_confirms]
-          logger.info 'enabling publisher confirms'
-          ch.confirm_select
-        end
-      end
+      @channel = set_up_consumers_channel
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
@@ -146,7 +149,7 @@ module Hutch
         queue_bindings.each do |dest, keys|
           keys.reject { |key| routing_keys.include?(key) }.each do |key|
             logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(@exchange, routing_key: key)
+            queue.unbind(exchange, routing_key: key)
           end
         end
       end
@@ -154,7 +157,7 @@ module Hutch
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
         logger.debug "creating binding #{queue.name} <--> #{routing_key}"
-        queue.bind(@exchange, routing_key: routing_key)
+        queue.bind(exchange, routing_key: routing_key)
       end
     end
 
@@ -219,12 +222,12 @@ module Hutch
         "publishing #{spec} to #{routing_key}"
       }
 
-      response = @exchange.publish(payload, {persistent: true}.
+      response = exchange.publish(payload, {persistent: true}.
         merge(properties).
         merge(global_properties).
         merge(non_overridable_properties))
 
-      channel.wait_for_confirms if @config[:force_publisher_confirms]
+      publish_channel.wait_for_confirms if @config[:force_publisher_confirms]
       response
     end
 
@@ -375,5 +378,60 @@ module Hutch
       Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
 
+    def thread_store
+      Thread.current["hutch_broker_#{object_id}"] ||= {}
+    end
+
+    def clear_thread_store
+      Thread.list.each do |t|
+        next unless t["hutch_broker_#{object_id}"]
+
+        ch = t["hutch_broker_#{object_id}"][:publish_channel]
+
+        if ch and ch != @channel
+          ch.close
+        end
+
+        t["hutch_broker_#{object_id}"] = nil
+      end
+    end
+
+    def set_up_consumers_channel
+      logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}, abort on exception #{consumer_pool_abort_on_exception}"
+
+      @connection.create_channel(nil, consumer_pool_size, consumer_pool_abort_on_exception).tap do |ch|
+        @connection.prefetch_channel(ch, @config[:channel_prefetch])
+        use_publisher_confirms_if_needed(ch)
+      end
+    end
+
+    def set_up_publish_channel
+      return unless @connection
+
+      logger.info 'opening rabbitmq channel for publishing'
+
+      @connection.create_channel.tap do |ch|
+        use_publisher_confirms_if_needed(ch)
+      end
+    end
+
+    def use_publisher_confirms_if_needed(ch)
+      if @config[:publisher_confirms] || @config[:force_publisher_confirms]
+        logger.info "enabling publisher confirms on channel #{ch.id}"
+        ch.confirm_select
+      end
+    end
+
+    def set_up_exchange(ch)
+      return unless ch
+
+      exchange_name = @config[:mq_exchange]
+      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
+      logger.info "using topic exchange '#{exchange_name}'"
+
+      with_bunny_precondition_handler('exchange') do
+        ch.topic(exchange_name, exchange_options)
+      end
+    end
   end
 end
