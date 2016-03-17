@@ -10,7 +10,7 @@ module Hutch
 
     def self.initialize(params = {})
       @config = {
-        mq_host: 'localhost',
+        mq_host: '127.0.0.1',
         mq_port: 5672,
         mq_exchange: 'hutch',  # TODO: should this be required?
         mq_exchange_options: {},
@@ -22,7 +22,7 @@ module Hutch
         mq_verify_peer: true,
         mq_username: 'guest',
         mq_password: 'guest',
-        mq_api_host: 'localhost',
+        mq_api_host: '127.0.0.1',
         mq_api_port: 15672,
         mq_api_ssl: false,
         heartbeat: 30,
