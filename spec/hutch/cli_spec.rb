@@ -13,7 +13,7 @@ describe Hutch::CLI do
         it "bails" do
           expect {
             cli.parse_options(["--config=#{file}"])
-          }.to raise_error SystemExit
+          }.to raise_error SystemExit, "Config file '/path/to/nonexistant/file' not found"
         end
       end
 
@@ -37,7 +37,7 @@ describe Hutch::CLI do
         it "bails" do
           expect {
             cli.parse_options(["--mq-tls-key=#{file}"])
-          }.to raise_error SystemExit
+          }.to raise_error SystemExit, "Private key file '/path/to/nonexistant/file' not found"
         end
       end
 
@@ -61,7 +61,7 @@ describe Hutch::CLI do
         it "bails" do
           expect {
             cli.parse_options(["--mq-tls-cert=#{file}"])
-          }.to raise_error SystemExit
+          }.to raise_error SystemExit, "Certificate file '/path/to/nonexistant/file' not found"
         end
       end
 
