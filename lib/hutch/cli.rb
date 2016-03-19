@@ -109,14 +109,16 @@ module Hutch
           Hutch::Config.mq_tls = tls
         end
 
-        opts.on('--mq-tls-cert FILE', 'Certificate  for TLS client verification') do |file|
-          abort "Certificate file '#{file}' not found" unless File.exists?(file)
-          Hutch::Config.mq_tls_cert = file
+        opts.on('--mq-tls-cert FILE', 'Certificate for TLS client verification') do |file|
+          abort_without_file(file, 'Certificate file') do
+            Hutch::Config.mq_tls_cert = file
+          end
         end
 
         opts.on('--mq-tls-key FILE', 'Private key for TLS client verification') do |file|
-          abort "Private key file '#{file}' not found" unless File.exists?(file)
-          Hutch::Config.mq_tls_key = file
+          abort_without_file(file, 'Private key file') do
+            Hutch::Config.mq_tls_key = file
+          end
         end
 
         opts.on('--mq-exchange EXCHANGE',
@@ -154,7 +156,7 @@ module Hutch
           begin
             File.open(file) { |fp| Hutch::Config.load_from_file(fp) }
           rescue Errno::ENOENT
-            abort "Config file '#{file}' not found"
+            abort_with_message("Config file '#{file}' not found")
           end
         end
 
@@ -204,5 +206,16 @@ module Hutch
       File.open(pidfile, 'w') { |f| f.puts ::Process.pid }
     end
 
+    private
+
+    def abort_without_file(file, file_description, &block)
+      abort_with_message("#{file_description} '#{file}' not found") unless File.exists?(file)
+
+      yield
+    end
+
+    def abort_with_message(message)
+      abort message
+    end
   end
 end
