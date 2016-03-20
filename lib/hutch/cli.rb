@@ -3,11 +3,12 @@ require 'optparse'
 require 'hutch/version'
 require 'hutch/logging'
 require 'hutch/exceptions'
-require 'hutch/config'
+require 'hutch/cli_config'
 
 module Hutch
   class CLI
     include Logging
+    include CLIConfig
 
     # Run a Hutch worker with the command line interface.
     def run(argv = ARGV)
@@ -29,9 +30,12 @@ module Hutch
       end
     end
 
+    private
+
     def load_app
       # Try to load a Rails app in the current directory
       load_rails_app('.') if Hutch::Config.autoload_rails
+
       Hutch::Config.require_paths.each do |path|
         # See if each path is a Rails app. If so, try to load it.
         next if load_rails_app(path)
@@ -97,106 +101,28 @@ module Hutch
       OptionParser.new do |opts|
         opts.banner = 'usage: hutch [options]'
 
-        opts.on('--mq-host HOST', 'Set the RabbitMQ host') do |host|
-          Hutch::Config.mq_host = host
-        end
-
-        opts.on('--mq-port PORT', 'Set the RabbitMQ port') do |port|
-          Hutch::Config.mq_port = port
-        end
-
-        opts.on("-t", "--[no-]mq-tls", 'Use TLS for the AMQP connection') do |tls|
-          Hutch::Config.mq_tls = tls
-        end
-
-        opts.on('--mq-tls-cert FILE', 'Certificate for TLS client verification') do |file|
-          abort_without_file(file, 'Certificate file') do
-            Hutch::Config.mq_tls_cert = file
-          end
-        end
-
-        opts.on('--mq-tls-key FILE', 'Private key for TLS client verification') do |file|
-          abort_without_file(file, 'Private key file') do
-            Hutch::Config.mq_tls_key = file
-          end
-        end
-
-        opts.on('--mq-exchange EXCHANGE',
-                'Set the RabbitMQ exchange') do |exchange|
-          Hutch::Config.mq_exchange = exchange
-        end
-
-        opts.on('--mq-vhost VHOST', 'Set the RabbitMQ vhost') do |vhost|
-          Hutch::Config.mq_vhost = vhost
-        end
-
-        opts.on('--mq-username USERNAME',
-                'Set the RabbitMQ username') do |username|
-          Hutch::Config.mq_username = username
-        end
-
-        opts.on('--mq-password PASSWORD',
-                'Set the RabbitMQ password') do |password|
-          Hutch::Config.mq_password = password
-        end
-
-        opts.on('--mq-api-host HOST', 'Set the RabbitMQ API host') do |host|
-          Hutch::Config.mq_api_host = host
-        end
-
-        opts.on('--mq-api-port PORT', 'Set the RabbitMQ API port') do |port|
-          Hutch::Config.mq_api_port = port
-        end
-
-        opts.on("-s", "--[no-]mq-api-ssl", 'Use SSL for the RabbitMQ API') do |api_ssl|
-          Hutch::Config.mq_api_ssl = api_ssl
-        end
-
-        opts.on('--config FILE', 'Load Hutch configuration from a file') do |file|
-          begin
-            File.open(file) { |fp| Hutch::Config.load_from_file(fp) }
-          rescue Errno::ENOENT
-            abort_with_message("Config file '#{file}' not found")
-          end
-        end
-
-        opts.on('--require PATH', 'Require a Rails app or path') do |path|
-          Hutch::Config.require_paths << path
-        end
-
-        opts.on('--[no-]autoload-rails', 'Require the current rails app directory') do |autoload_rails|
-          Hutch::Config.autoload_rails = autoload_rails
-        end
-
-        opts.on('-q', '--quiet', 'Quiet logging') do
-          Hutch::Config.log_level = Logger::WARN
-        end
-
-        opts.on('-v', '--verbose', 'Verbose logging') do
-          Hutch::Config.log_level = Logger::DEBUG
-        end
-
-        opts.on('--namespace NAMESPACE', 'Queue namespace') do |namespace|
-          Hutch::Config.namespace = namespace
-        end
-
-        opts.on('-d', '--daemonise', 'Daemonise') do |daemonise|
-          Hutch::Config.daemonise = daemonise
-        end
-
-        opts.on('--pidfile PIDFILE', 'Pidfile') do |pidfile|
-          Hutch::Config.pidfile = pidfile
-        end
-
-        opts.on('--version', 'Print the version and exit') do
-          puts "hutch v#{VERSION}"
-          exit 0
-        end
-
-        opts.on('-h', '--help', 'Show this message and exit') do
-          puts opts
-          exit 0
-        end
+        opt_host(opts)
+        opt_port(opts)
+        opt_tls(opts)
+        opt_cert_file(opts)
+        opt_key_file(opts)
+        opt_exchange(opts)
+        opt_vhost(opts)
+        opt_username(opts)
+        opt_password(opts)
+        opt_api_host(opts)
+        opt_api_port(opts)
+        opt_api_ssl(opts)
+        opt_config_file(opts)
+        opt_path(opts)
+        opt_autoload_rails(opts)
+        opt_quiet_logging(opts)
+        opt_verbose_logging(opts)
+        opt_namespace(opts)
+        opt_daemonise(opts)
+        opt_pidfile(opts)
+        opt_print_version(opts)
+        opt_print_help(opts)
       end.parse!(args)
     end
 
@@ -204,18 +130,6 @@ module Hutch
       pidfile = File.expand_path(Hutch::Config.pidfile)
       Hutch.logger.info "writing pid in #{pidfile}"
       File.open(pidfile, 'w') { |f| f.puts ::Process.pid }
-    end
-
-    private
-
-    def abort_without_file(file, file_description, &block)
-      abort_with_message("#{file_description} '#{file}' not found") unless File.exists?(file)
-
-      yield
-    end
-
-    def abort_with_message(message)
-      abort message
     end
   end
 end
