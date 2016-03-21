@@ -5,6 +5,11 @@ require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/config'
 
+=begin
+Hutch::CLI handles turning CLI commands and options into method calls on Hutch
+classes.
+=end
+
 module Hutch
   class CLI
     include Logging
@@ -84,9 +89,7 @@ module Hutch
     # Kick off the work loop. This method returns when the worker is shut down
     # gracefully (with a SIGQUIT, SIGTERM or SIGINT).
     def start_work_loop
-      Hutch.connect
-      @worker = Hutch::Worker.new(Hutch.broker, Hutch.consumers, Hutch::Config.setup_procs)
-      @worker.run
+      Hutch::Worker.new.run
       :success
     rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
       logger.fatal ex.message

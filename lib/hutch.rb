@@ -12,6 +12,7 @@ require 'hutch/version'
 require 'hutch/error_handlers'
 require 'hutch/exceptions'
 require 'hutch/tracers'
+require 'hutch/main_loop'
 
 module Hutch
   def self.register_consumer(consumer)
