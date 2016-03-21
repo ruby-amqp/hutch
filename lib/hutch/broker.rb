@@ -1,7 +1,7 @@
 require 'carrot-top'
-require 'securerandom'
 require 'hutch/logging'
 require 'hutch/exceptions'
+require 'hutch/publisher'
 
 module Hutch
   class Broker
@@ -51,6 +51,7 @@ module Hutch
       open_connection!
       open_channel!
       declare_exchange!
+      declare_publisher!
     end
 
     def open_connection
@@ -97,6 +98,10 @@ module Hutch
 
     def declare_exchange!(*args)
       @exchange = declare_exchange(*args)
+    end
+
+    def declare_publisher!
+      @publisher = Hutch::Publisher.new(connection, channel, exchange, @config)
     end
 
     # Set up the connection to the RabbitMQ management API. Unfortunately, this
@@ -215,41 +220,8 @@ module Hutch
       channel.nack(delivery_tag, false, false)
     end
 
-    def log_publication(serializer, payload, routing_key)
-      logger.info {
-        spec =
-          if serializer.binary?
-            "#{payload.bytesize} bytes message"
-          else
-            "message '#{payload}'"
-          end
-        "publishing #{spec} to #{routing_key}"
-      }
-    end
-
-    def publish(routing_key, message, properties = {}, options = {})
-      ensure_connection!(routing_key, message)
-
-      serializer = options[:serializer] || @config[:serializer]
-
-      non_overridable_properties = {
-        routing_key:  routing_key,
-        timestamp:    connection.current_timestamp,
-        content_type: serializer.content_type,
-      }
-      properties[:message_id]   ||= generate_id
-
-      payload = serializer.encode(message)
-
-      log_publication(serializer, payload, routing_key)
-
-      response = exchange.publish(payload, {persistent: true}.
-        merge(properties).
-        merge(global_properties).
-        merge(non_overridable_properties))
-
-      channel.wait_for_confirms if @config[:force_publisher_confirms]
-      response
+    def publish(*args)
+      @publisher.publish(*args)
     end
 
     def confirm_select(*args)
@@ -265,18 +237,6 @@ module Hutch
     end
 
     private
-
-    def raise_publish_error(reason, routing_key, message)
-      msg = "unable to publish - #{reason}. Message: #{JSON.dump(message)}, Routing key: #{routing_key}."
-      logger.error(msg)
-      raise PublishError, msg
-    end
-
-    def ensure_connection!(routing_key, message)
-      raise_publish_error('no connection to broker', routing_key, message) unless connection
-      raise_publish_error('connection is closed', routing_key, message) unless connection.open?
-    end
-
     def api_config
       @api_config ||= OpenStruct.new.tap do |config|
         config.host = @config[:mq_api_host]
@@ -389,14 +349,6 @@ module Hutch
 
     def consumer_pool_abort_on_exception
       @config[:consumer_pool_abort_on_exception]
-    end
-
-    def generate_id
-      SecureRandom.uuid
-    end
-
-    def global_properties
-      Hutch.global_properties.respond_to?(:call) ? Hutch.global_properties.call : Hutch.global_properties
     end
 
   end

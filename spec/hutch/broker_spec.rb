@@ -419,6 +419,8 @@ describe Hutch::Broker do
     end
 
     context 'without a valid connection' do
+      before { broker.set_up_amqp_connection; broker.disconnect }
+
       it 'raises an exception' do
         expect { broker.publish('test.key', 'message') }.
           to raise_exception(Hutch::PublishError)
