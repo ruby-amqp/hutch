@@ -151,20 +151,24 @@ module Hutch
       results
     end
 
+    # Find the existing bindings, and unbind any redundant bindings
+    def unbind_redundant_bindings(queue, routing_keys)
+      return unless http_api_use_enabled?
+
+      bindings.each do |dest, keys|
+        next unless dest == queue.name
+        keys.reject { |key| routing_keys.include?(key) }.each do |key|
+          logger.debug "removing redundant binding #{queue.name} <--> #{key}"
+          queue.unbind(exchange, routing_key: key)
+        end
+      end
+    end
+
     # Bind a queue to the broker's exchange on the routing keys provided. Any
     # existing bindings on the queue that aren't present in the array of
     # routing keys will be unbound.
     def bind_queue(queue, routing_keys)
-      if http_api_use_enabled?
-        # Find the existing bindings, and unbind any redundant bindings
-        queue_bindings = bindings.select { |dest, keys| dest == queue.name }
-        queue_bindings.each do |dest, keys|
-          keys.reject { |key| routing_keys.include?(key) }.each do |key|
-            logger.debug "removing redundant binding #{queue.name} <--> #{key}"
-            queue.unbind(exchange, routing_key: key)
-          end
-        end
-      end
+      unbind_redundant_bindings(queue, routing_keys)
 
       # Ensure all the desired bindings are present
       routing_keys.each do |routing_key|
@@ -211,6 +215,18 @@ module Hutch
       channel.nack(delivery_tag, false, false)
     end
 
+    def log_publication(serializer, payload, routing_key)
+      logger.info {
+        spec =
+          if serializer.binary?
+            "#{payload.bytesize} bytes message"
+          else
+            "message '#{payload}'"
+          end
+        "publishing #{spec} to #{routing_key}"
+      }
+    end
+
     def publish(routing_key, message, properties = {}, options = {})
       ensure_connection!(routing_key, message)
 
@@ -224,15 +240,8 @@ module Hutch
       properties[:message_id]   ||= generate_id
 
       payload = serializer.encode(message)
-      logger.info {
-        spec =
-          if serializer.binary?
-            "#{payload.bytesize} bytes message"
-          else
-            "message '#{payload}'"
-          end
-        "publishing #{spec} to #{routing_key}"
-      }
+
+      log_publication(serializer, payload, routing_key)
 
       response = exchange.publish(payload, {persistent: true}.
         merge(properties).
