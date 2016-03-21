@@ -85,7 +85,7 @@ module Hutch
     # gracefully (with a SIGQUIT, SIGTERM or SIGINT).
     def start_work_loop
       Hutch.connect
-      @worker = Hutch::Worker.new(Hutch.broker, Hutch.consumers)
+      @worker = Hutch::Worker.new(Hutch.broker, Hutch::Config[:setup_procs])
       @worker.run
       :success
     rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
