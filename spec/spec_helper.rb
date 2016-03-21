@@ -13,8 +13,10 @@ require 'raven'
 require 'hutch'
 require 'logger'
 
+# set logger to be a null logger
+Hutch::Logging.logger = Logger.new(File::NULL)
+
 RSpec.configure do |config|
-  config.before(:all) { Hutch::Config.log_level = Logger::FATAL }
   config.raise_errors_for_deprecations!
 
   if defined?(JRUBY_VERSION)
