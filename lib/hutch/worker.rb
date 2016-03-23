@@ -10,9 +10,10 @@ module Hutch
 
     SHUTDOWN_SIGNALS = %w(QUIT TERM INT)
 
-    def initialize(broker, consumers)
+    def initialize(broker, consumers, setup_procs)
       @broker        = broker
       self.consumers = consumers
+      self.setup_procs = setup_procs
     end
 
     # Run the main event loop. The consumers will be set up with queues, and
@@ -20,6 +21,7 @@ module Hutch
     # never returns.
     def run
       setup_queues
+      setup_procs.each(&:call)
 
       # Set up signal handlers for graceful shutdown
       register_signal_handlers
@@ -153,6 +155,8 @@ module Hutch
     end
 
     private
+
+    attr_accessor :setup_procs
 
     def supported_shutdown_signals
       SHUTDOWN_SIGNALS.keep_if { |s| Signal.list.keys.include? s }.map(&:to_sym)

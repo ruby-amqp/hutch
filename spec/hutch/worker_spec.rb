@@ -7,7 +7,19 @@ describe Hutch::Worker do
                           get_serializer: nil) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
-  subject(:worker) { Hutch::Worker.new(broker, consumers) }
+  let(:setup_procs) { Array.new(2) { Proc.new {} } }
+  subject(:worker) { Hutch::Worker.new(broker, consumers, setup_procs) }
+
+  describe ".#run" do
+    it "calls each setup proc" do
+      setup_procs.each { |prc| expect(prc).to receive(:call) }
+      allow(worker).to receive(:setup_queues)
+      allow(worker).to receive(:register_signal_handlers)
+      allow(worker).to receive(:main_loop)
+
+      worker.run
+    end
+  end
 
   describe '#setup_queues' do
     it 'sets up queues for each of the consumers' do

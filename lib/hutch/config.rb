@@ -36,6 +36,7 @@ module Hutch
         # note that this is not a list, it is a chain of responsibility
         # that will fall back to "nack unconditionally"
         error_acknowledgements: [],
+        setup_procs: [],
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         daemonise: false,
