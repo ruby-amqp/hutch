@@ -1,5 +1,19 @@
 ## 0.22.0 — (unreleased)
 
+### Custom Setup Steps in Hutch::Worker
+
+`Hutch::Worker` now accepts a list of callables that are invoked
+after queue setup.
+
+Contributed by Kelly Stannard.
+
+### More Flexible and Better Abstracted Hutch::Broker
+
+`Hutch::Broker` was refactored with some bits extracted into separate
+classes or methods, making them easier to override.
+
+Contributed by Aleksandar Ivanov and Ryan Hosford.
+
 ### Configurable Consumer Thread Pool Exception Handling (MRI only)
 
 `:consumer_pool_abort_on_exception` is a new option
