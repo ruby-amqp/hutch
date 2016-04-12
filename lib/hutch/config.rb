@@ -70,7 +70,7 @@ module Hutch
       }
     end
 
-    def self.clear!
+    def self.reset!
       @config = default_config
     end
 

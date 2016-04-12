@@ -5,7 +5,7 @@ describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
 
   before do
-    Hutch::Config.clear!
+    Hutch::Config.reset!
   end
 
   describe '.get' do
