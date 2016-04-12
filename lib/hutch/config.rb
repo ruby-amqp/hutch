@@ -16,7 +16,7 @@ module Hutch
       {
         mq_host: '127.0.0.1',
         mq_port: 5672,
-        mq_exchange: 'hutch', # TODO: should this be required?
+        mq_exchange: 'hutch',  # TODO: should this be required?
         mq_exchange_options: {},
         mq_vhost: '/',
         mq_tls: false,
