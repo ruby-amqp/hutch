@@ -8,6 +8,33 @@ module Hutch
   module Config
     require 'yaml'
 
+    STRING_SETTINGS = %w(mq_host
+                         mq_exchange
+                         mq_vhost
+                         mq_username
+                         mq_password
+                         mq_api_host)
+
+    INTEGER_SETTINGS = %w(mq_port
+                          mq_api_port
+                          heartbeat
+                          channel_prefetch
+                          connection_timeout
+                          read_timeout
+                          write_timeout
+                          graceful_exit_timeout
+                          consumer_pool_size)
+
+    BOOLEAN_SETTINGS = %w(mq_tls
+                          mq_verify_peer
+                          mq_api_ssl
+                          autoload_rails
+                          daemonize
+                          publisher_confirms
+                          force_publisher_confirms
+                          enable_http_api_use
+                          consumer_pool_abort_on_exception)
+
     def self.initialize(params = {})
       @config = default_config.merge(params)
     end
