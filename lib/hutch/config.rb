@@ -9,10 +9,14 @@ module Hutch
     require 'yaml'
 
     def self.initialize(params = {})
-      @config = {
+      @config = default_config.merge(params)
+    end
+
+    def self.default_config
+      {
         mq_host: '127.0.0.1',
         mq_port: 5672,
-        mq_exchange: 'hutch',  # TODO: should this be required?
+        mq_exchange: 'hutch', # TODO: should this be required?
         mq_exchange_options: {},
         mq_vhost: '/',
         mq_tls: false,
@@ -63,7 +67,11 @@ module Hutch
         consumer_pool_abort_on_exception: false,
 
         serializer: Hutch::Serializers::JSON,
-      }.merge(params)
+      }
+    end
+
+    def self.clear!
+      @config = default_config
     end
 
     def self.get(attr)
