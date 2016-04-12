@@ -3,7 +3,7 @@ require 'tempfile'
 
 describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
-  
+
   before do
     Hutch::Config.clear!
   end
@@ -137,7 +137,7 @@ describe Hutch::Config do
         <<-YAML
 mq_host: 'localhost'
 mq_username: '<%= "calvin" %>'
-        YAML
+YAML
       end
       it 'loads in the config data' do
         Hutch::Config.load_from_file(file)
