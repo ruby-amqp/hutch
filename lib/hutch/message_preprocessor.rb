@@ -5,20 +5,21 @@ module Hutch
   class MessagePreprocessor
     include Logging
 
-    def self.to_proc
-      Proc.new do |*args|
-        delivery_info, properties, payload = Hutch::Adapter.decode_message(*args)
-        new(Hutch.broker).call(consumer, delivery_info, properties, payload)
+    def self.to_proc(consumer)
+      Proc.new do |*message_args|
+        new(Hutch.broker, consumer, message_args).call
       end
     end
 
-    def initialize(broker)
+    def initialize(broker, consumer, message_args)
+      self.delivery_info, self.properties, self.payload = Hutch::Adapter.decode_message(*message_args)
+      self.consumer = consumer
       self.broker = broker
     end
 
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
-    def call(consumer, delivery_info, properties, payload)
+    def call
       serializer = consumer.get_serializer || Hutch::Config[:serializer]
       logger.debug {
         spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
@@ -33,32 +34,33 @@ module Hutch
       with_tracing(consumer_instance).handle(message)
       broker.ack(delivery_info.delivery_tag)
     rescue => ex
-      acknowledge_error(delivery_info, properties, broker, ex)
-      handle_error(properties.message_id, payload, consumer, ex)
+      acknowledge_error(ex)
+      handle_error(ex)
     end
 
-    attr_accessor :broker
+    private
+
+    attr_accessor :broker, :consumer, :delivery_info, :properties, :payload
 
     def with_tracing(klass)
       Hutch::Config[:tracer].new(klass)
     end
 
-    def handle_error(message_id, payload, consumer, ex)
+    def handle_error(ex)
       Hutch::Config[:error_handlers].each do |backend|
-        backend.handle(message_id, payload, consumer, ex)
+        backend.handle(properties.message_id, payload, consumer, ex)
       end
     end
 
-    def acknowledge_error(delivery_info, properties, broker, ex)
-      acks = error_acknowledgements +
-        [Hutch::Acknowledgements::NackOnAllFailures.new]
-      acks.find do |backend|
+    def acknowledge_error(ex)
+      error_acknowledgements.find do |backend|
         backend.handle(delivery_info, properties, broker, ex)
       end
     end
 
     def error_acknowledgements
-      Hutch::Config[:error_acknowledgements]
+      Hutch::Config[:error_acknowledgements] +
+        [Hutch::Acknowledgements::NackOnAllFailures.new]
     end
   end
 end

@@ -32,7 +32,7 @@ module Hutch
         queue = broker.queue(consumer.get_queue_name, consumer.get_arguments)
         broker.bind_queue(queue, consumer.routing_keys)
 
-        queue.subscribe(manual_ack: true, &Config[:message_preprocessing_proc])
+        queue.subscribe(manual_ack: true, &Config[:message_preprocessing_proc].to_proc(consumer))
       end
     end
   end
