@@ -74,7 +74,7 @@ describe Hutch::Broker do
 
     context 'when given invalid details' do
       before { config[:mq_host] = 'notarealhost' }
-      it { expect { broker.open_connection }.to raise_error(Hutch::ConnectionError) }
+      it { expect { broker.open_connection }.to raise_error(StandardError) }
     end
 
     it 'does not set #connection' do
