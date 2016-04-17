@@ -121,11 +121,5 @@ module Hutch
         get(attr)
       end
     end
-
-    private
-
-    def deep_copy(obj)
-      Marshal.load(Marshal.dump(obj))
-    end
   end
 end

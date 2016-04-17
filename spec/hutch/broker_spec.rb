@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'hutch/broker'
 
 describe Hutch::Broker do
-  let(:config) { deep_copy(Hutch::Config.user_config) }
+  let(:config) { Hutch::Config.initialize(client_logger: Hutch::Logging.logger) }
   subject(:broker) { Hutch::Broker.new(config) }
 
   describe '#connect' do
@@ -74,7 +74,7 @@ describe Hutch::Broker do
 
     context 'when given invalid details' do
       before { config[:mq_host] = 'notarealhost' }
-      it { expect { broker.open_connection }.to raise_error(StandardError) }
+      it { expect { broker.open_connection }.to raise_error(Hutch::ConnectionError) }
     end
 
     it 'does not set #connection' do
