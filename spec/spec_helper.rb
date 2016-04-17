@@ -36,7 +36,3 @@ ensure
     Object.send(:remove_const, constant)
   end
 end
-
-def deep_copy(obj)
-  Marshal.load(Marshal.dump(obj))
-end

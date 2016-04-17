@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'hutch/broker'
 
 describe Hutch::Broker do
-  let(:config) { deep_copy(Hutch::Config.user_config) }
+  let(:config) { Hutch::Config.initialize(client_logger: Hutch::Logging.logger) }
   subject(:broker) { Hutch::Broker.new(config) }
 
   describe '#connect' do
