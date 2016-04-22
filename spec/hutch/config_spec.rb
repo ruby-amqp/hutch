@@ -4,6 +4,10 @@ require 'tempfile'
 describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
 
+  before do
+    Hutch::Config.reset!
+  end
+
   describe '.get' do
     context 'for valid attributes' do
       subject { Hutch::Config.get(:mq_host) }
@@ -52,6 +56,30 @@ describe Hutch::Config do
       let(:invalid_getter) { ->{ Hutch::Config.invalid_attr } }
       specify { expect(invalid_getter).to raise_error NoMethodError }
     end
+
+    context 'for an ENV-overriden value attribute' do
+      around do |example|
+        ENV['HUTCH_MQ_HOST'] = 'example.com'
+        ENV['HUTCH_MQ_PORT'] = '10001'
+        ENV['HUTCH_MQ_TLS'] = 'true'
+        example.run
+        ENV.delete('HUTCH_MQ_HOST')
+        ENV.delete('HUTCH_MQ_PORT')
+        ENV.delete('HUTCH_MQ_TLS')
+      end
+
+      it 'returns the override' do
+        expect(Hutch::Config.mq_host).to eq 'example.com'
+      end
+
+      it 'returns the override for integers' do
+        expect(Hutch::Config.mq_port).to eq 10001
+      end
+
+      it 'returns the override for booleans' do
+        expect(Hutch::Config.mq_tls).to eq true
+      end
+    end
   end
 
   describe 'a magic setter' do
@@ -96,26 +124,21 @@ describe Hutch::Config do
         expect(Hutch::Config.mq_username).to eq username
       end
     end
-  end
 
-  describe '.load_from_file' do
-    let(:host) { 'localhost' }
-    let(:username) { 'calvin' }
-    let(:file) do
-      Tempfile.new('configs.yaml').tap do |t|
-        t.write(config_contents)
-        t.rewind
+    context 'when using ERB' do
+      let(:host) { 'localhost' }
+      let(:file) do
+        Tempfile.new('configs.yaml').tap do |t|
+          t.write(config_contents)
+          t.rewind
+        end
       end
-    end
-
-    context 'when using ERb' do
       let(:config_contents) do
         <<-YAML
 mq_host: 'localhost'
 mq_username: '<%= "calvin" %>'
 YAML
       end
-
       it 'loads in the config data' do
         Hutch::Config.load_from_file(file)
         expect(Hutch::Config.mq_host).to eq host
