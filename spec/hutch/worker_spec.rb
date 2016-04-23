@@ -32,7 +32,6 @@ describe Hutch::Worker do
 
   describe '#setup_queue' do
     let(:queue) { double('Queue', bind: nil, subscribe: nil) }
-    before { allow(worker).to receive_messages(consumer_queue: queue) }
     before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
