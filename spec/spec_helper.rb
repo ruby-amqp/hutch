@@ -24,6 +24,10 @@ RSpec.configure do |config|
   else
     config.filter_run_excluding adapter: :march_hare
   end
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
 end
 
 # Constants (classes, etc) defined within a block passed to this method
