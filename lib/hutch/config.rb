@@ -38,10 +38,12 @@ module Hutch
     ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
 
     def self.initialize(params = {})
-      @config = default_config.merge(env_based_config).merge(params)
+      @config = defaults.merge(params)
+      define_methods
+      @config
     end
 
-    def self.default_config
+    def self.defaults
       {
         mq_host: '127.0.0.1',
         mq_port: 5672,
@@ -189,14 +191,15 @@ module Hutch
       end
     end
 
-    def self.method_missing(method, *args, &block)
-      attr = method.to_s.sub(/=$/, '').to_sym
-      return super unless default_config.key?(attr)
+    def self.define_methods
+      @config.keys.each do |key|
+        define_singleton_method(key) do
+          get(key)
+        end
 
-      if method =~ /=$/
-        set(attr, args.first)
-      else
-        get(attr)
+        define_singleton_method("#{key}=") do |val|
+          set(key, val)
+        end
       end
     end
   end
