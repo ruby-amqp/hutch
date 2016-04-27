@@ -35,7 +35,7 @@ module Hutch
                    enable_http_api_use
                    consumer_pool_abort_on_exception).freeze
 
-    ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).freeze
+    ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
 
     def self.initialize(params = {})
       @config = default_config.merge(env_based_config).merge(params)
@@ -100,13 +100,13 @@ module Hutch
     end
 
     # Override defaults with ENV variables which begin with HUTCH_
+    #
+    # @return [Hash]
     def self.env_based_config
       env_keys_configured.each_with_object({}) {|attr, result|
         value = ENV[key_for(attr)]
 
         case
-        when value.nil?
-          # Can not set nil via ENV vars
         when is_bool(attr) || value == 'false'
           result[attr] = to_bool(value)
         when is_num(attr)
@@ -117,11 +117,11 @@ module Hutch
       }
     end
 
+    # @return [Array<Symbol>]
     def self.env_keys_configured
-      ALL_KEYS.select { |attr|
-        check_attr(attr.to_sym)
-        ENV.key?(key_for(attr))
-      }.map(&:to_sym)
+      ALL_KEYS.each {|attr| check_attr(attr) }
+
+      ALL_KEYS.select { |attr| ENV.key?(key_for(attr)) }
     end
 
     def self.reset!
