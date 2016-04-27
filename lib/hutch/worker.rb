@@ -42,7 +42,7 @@ module Hutch
       end
     end
 
-    # Register handlers for SIG{QUIT,TERM,INT} to shut down the worker
+    # Register handlers for SIGQUIT, SIGTERM, SIGINT to shut down the worker
     # gracefully. Forceful shutdowns are very bad!
     def register_signal_handlers
       Thread.main[:signal_queue] = []
