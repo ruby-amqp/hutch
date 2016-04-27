@@ -121,7 +121,7 @@ module Hutch
     end
 
     def self.reset!
-      @config = initialize(default_config.merge(env_based_config))
+      @config = initialize
     end
 
     def self.get(attr)
