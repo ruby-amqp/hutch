@@ -13,6 +13,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'activesupport', '>= 3.0'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov', '~> 0.7.1'
+  gem.add_development_dependency 'yard', '~> 0.8'
 
   gem.name = 'hutch'
   gem.summary = 'Easy inter-service communication using RabbitMQ.'
