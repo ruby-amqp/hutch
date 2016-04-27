@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/blank'
+
 require 'carrot-top'
 require 'hutch/logging'
 require 'hutch/exceptions'
@@ -41,7 +43,10 @@ module Hutch
     def disconnect
       @channel.close    if @channel
       @connection.close if @connection
-      @channel, @connection, @exchange, @api_client = nil, nil, nil, nil
+      @channel = nil
+      @connection = nil
+      @exchange = nil
+      @api_client = nil
     end
 
     # Connect to RabbitMQ via AMQP. This sets up the main connection and
@@ -88,7 +93,7 @@ module Hutch
 
     def declare_exchange(ch = channel)
       exchange_name = @config[:mq_exchange]
-      exchange_options = { durable: true }.merge @config[:mq_exchange_options]
+      exchange_options = { durable: true }.merge(@config[:mq_exchange_options])
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
@@ -139,7 +144,7 @@ module Hutch
     def queue(name, arguments = {})
       with_bunny_precondition_handler('queue') do
         namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        name = name.prepend(namespace + ":") unless namespace.empty?
+        name = name.prepend(namespace + ":") if namespace.present?
         channel.queue(name, durable: true, arguments: arguments)
       end
     end
@@ -255,11 +260,7 @@ module Hutch
       {}.tap do |params|
         params[:host]               = @config[:mq_host]
         params[:port]               = @config[:mq_port]
-        params[:vhost]              = if @config[:mq_vhost] && "" != @config[:mq_vhost]
-                                        @config[:mq_vhost]
-                                      else
-                                        Hutch::Adapter::DEFAULT_VHOST
-                                      end
+        params[:vhost]              = @config[:mq_vhost].presence || Hutch::Adapter::DEFAULT_VHOST
         params[:username]           = @config[:mq_username]
         params[:password]           = @config[:mq_password]
         params[:tls]                = @config[:mq_tls]
@@ -283,7 +284,7 @@ module Hutch
     end
 
     def parse_uri
-      return unless @config[:uri] && !@config[:uri].empty?
+      return if @config[:uri].blank?
 
       u = URI.parse(@config[:uri])
 
