@@ -163,7 +163,7 @@ module Hutch
     end
 
     def self.user_config
-      @config ||= initialize(default_config.merge(env_based_config))
+      @config ||= initialize
     end
 
     def self.to_hash
