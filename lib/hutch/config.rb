@@ -157,7 +157,7 @@ module Hutch
     end
 
     def self.check_attr(attr)
-      unless default_config.key?(attr.to_sym)
+      unless default_config.key?(attr)
         raise UnknownAttributeError, "#{attr.inspect} is not a valid config attribute"
       end
     end
