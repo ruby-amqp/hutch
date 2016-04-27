@@ -260,11 +260,7 @@ module Hutch
       {}.tap do |params|
         params[:host]               = @config[:mq_host]
         params[:port]               = @config[:mq_port]
-        params[:vhost]              = if @config[:mq_vhost].present?
-                                        @config[:mq_vhost]
-                                      else
-                                        Hutch::Adapter::DEFAULT_VHOST
-                                      end
+        params[:vhost]              = @config[:mq_vhost].presence || Hutch::Adapter::DEFAULT_VHOST
         params[:username]           = @config[:mq_username]
         params[:password]           = @config[:mq_password]
         params[:tls]                = @config[:mq_tls]
