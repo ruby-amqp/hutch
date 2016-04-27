@@ -56,7 +56,7 @@ module Hutch
         mq_username: 'guest',
         mq_password: 'guest',
         mq_api_host: '127.0.0.1',
-        mq_api_port: 15_672,
+        mq_api_port: 15672,
         mq_api_ssl: false,
         heartbeat: 30,
         # placeholder, allows specifying connection parameters
