@@ -101,9 +101,7 @@ module Hutch
 
     # Override defaults with ENV variables which begin with HUTCH_
     def self.env_based_config
-      env_keys_configured.each_with_object({}) {|attr_name, result|
-        attr = attr_name.to_sym
-        check_attr(attr)
+      env_keys_configured.each_with_object({}) {|attr, result|
         value = ENV[key_for(attr)]
 
         case
@@ -120,7 +118,10 @@ module Hutch
     end
 
     def self.env_keys_configured
-      ALL_KEYS.select { |attr| ENV.key?(key_for(attr)) }
+      ALL_KEYS.select { |attr|
+        check_attr(attr.to_sym)
+        ENV.key?(key_for(attr))
+      }.map(&:to_sym)
     end
 
     def self.reset!
