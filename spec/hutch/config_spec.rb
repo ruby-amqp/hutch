@@ -4,6 +4,10 @@ require 'tempfile'
 describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
 
+  before do
+    Hutch::Config.reset!
+  end
+
   describe '.get' do
     context 'for valid attributes' do
       subject { Hutch::Config.get(:mq_host) }
@@ -13,14 +17,24 @@ describe Hutch::Config do
       end
 
       context 'with an overridden value' do
-        before  { allow(Hutch::Config).to receive_messages(user_config: { mq_host: new_value }) }
+        before do
+          allow(Hutch::Config).to receive_messages(
+            user_config: { mq_host: new_value }
+          )
+        end
+
         it { is_expected.to eq(new_value) }
       end
     end
 
     context 'for invalid attributes' do
-      let(:invalid_get) { ->{ Hutch::Config.get(:invalid_attr) } }
-      specify { expect(invalid_get).to raise_error Hutch::UnknownAttributeError }
+      let(:invalid_get) do
+        -> { Hutch::Config.get(:invalid_attr) }
+      end
+
+      specify do
+        expect(invalid_get).to raise_error Hutch::UnknownAttributeError
+      end
     end
   end
 
@@ -35,8 +49,13 @@ describe Hutch::Config do
     end
 
     context 'for invalid attributes' do
-      let(:invalid_set) { ->{ Hutch::Config.set(:invalid_attr, new_value) } }
-      specify { expect(invalid_set).to raise_error Hutch::UnknownAttributeError }
+      let(:invalid_set) do
+        -> { Hutch::Config.set(:invalid_attr, new_value) }
+      end
+
+      specify do
+        expect(invalid_set).to raise_error Hutch::UnknownAttributeError
+      end
     end
   end
 
@@ -49,8 +68,32 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_getter) { ->{ Hutch::Config.invalid_attr } }
+      let(:invalid_getter) { -> { Hutch::Config.invalid_attr } }
       specify { expect(invalid_getter).to raise_error NoMethodError }
+    end
+
+    context 'for an ENV-overriden value attribute' do
+      around do |example|
+        ENV['HUTCH_MQ_HOST'] = 'example.com'
+        ENV['HUTCH_MQ_PORT'] = '10001'
+        ENV['HUTCH_MQ_TLS'] = 'true'
+        example.run
+        ENV.delete('HUTCH_MQ_HOST')
+        ENV.delete('HUTCH_MQ_PORT')
+        ENV.delete('HUTCH_MQ_TLS')
+      end
+
+      it 'returns the override' do
+        expect(Hutch::Config.mq_host).to eq 'example.com'
+      end
+
+      it 'returns the override for integers' do
+        expect(Hutch::Config.mq_port).to eq 10_001
+      end
+
+      it 'returns the override for booleans' do
+        expect(Hutch::Config.mq_tls).to eq true
+      end
     end
   end
 
@@ -63,7 +106,7 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_setter) { ->{ Hutch::Config.invalid_attr = new_value } }
+      let(:invalid_setter) { -> { Hutch::Config.invalid_attr = new_value } }
       specify { expect(invalid_setter).to raise_error NoMethodError }
     end
   end
@@ -81,9 +124,9 @@ describe Hutch::Config do
     context 'when an attribute is invalid' do
       let(:config_data) { { random_attribute: 'socks' } }
       it 'raises an error' do
-        expect {
+        expect do
           Hutch::Config.load_from_file(file)
-        }.to raise_error(NoMethodError)
+        end.to raise_error(NoMethodError)
       end
     end
 
@@ -96,26 +139,21 @@ describe Hutch::Config do
         expect(Hutch::Config.mq_username).to eq username
       end
     end
-  end
 
-  describe '.load_from_file' do
-    let(:host) { 'localhost' }
-    let(:username) { 'calvin' }
-    let(:file) do
-      Tempfile.new('configs.yaml').tap do |t|
-        t.write(config_contents)
-        t.rewind
+    context 'when using ERB' do
+      let(:host) { 'localhost' }
+      let(:file) do
+        Tempfile.new('configs.yaml').tap do |t|
+          t.write(config_contents)
+          t.rewind
+        end
       end
-    end
-
-    context 'when using ERb' do
       let(:config_contents) do
         <<-YAML
 mq_host: 'localhost'
 mq_username: '<%= "calvin" %>'
 YAML
       end
-
       it 'loads in the config data' do
         Hutch::Config.load_from_file(file)
         expect(Hutch::Config.mq_host).to eq host
