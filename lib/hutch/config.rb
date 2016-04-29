@@ -5,9 +5,18 @@ require 'logger'
 module Hutch
   class UnknownAttributeError < StandardError; end
 
+  # Configuration settings, available everywhere
+  #
+  # There are defaults, which can be overridden by ENV variables prefixed by
+  # <tt>HUTCH_</tt>, and each of these can be overridden using the {.set}
+  # method.
+  #
+  # @example Configuring on the command-line
+  #   HUTCH_PUBLISHER_CONFIRMS=false hutch
   module Config
     require 'yaml'
 
+    # Settings which accept a String
     STRING_KEYS = %w(mq_host
                      mq_exchange
                      mq_vhost
@@ -15,6 +24,7 @@ module Hutch
                      mq_password
                      mq_api_host).freeze
 
+    # Settings which accept a Number
     NUMBER_KEYS = %w(mq_port
                      mq_api_port
                      heartbeat
@@ -25,6 +35,7 @@ module Hutch
                      graceful_exit_timeout
                      consumer_pool_size).freeze
 
+    # Settings which accept a Boolean
     BOOL_KEYS = %w(mq_tls
                    mq_verify_peer
                    mq_api_ssl
@@ -35,12 +46,16 @@ module Hutch
                    enable_http_api_use
                    consumer_pool_abort_on_exception).freeze
 
+    # Convenience collection of all setting keys
     ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
 
     def self.initialize(params = {})
       @config = default_config.merge(env_based_config).merge(params)
     end
 
+    # Default settings
+    #
+    # @return [Hash]
     def self.default_config
       {
         mq_host: '127.0.0.1',
@@ -99,7 +114,7 @@ module Hutch
       }
     end
 
-    # Override defaults with ENV variables which begin with HUTCH_
+    # Override defaults with ENV variables which begin with <tt>HUTCH_</tt>
     #
     # @return [Hash]
     def self.env_based_config

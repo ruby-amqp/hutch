@@ -107,7 +107,7 @@ a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.htm
 class FailedPaymentConsumer
   include Hutch::Consumer
   consume 'gc.ps.payment.failed'
-  
+
   def process(message)
     logger.info "Marking payment #{message[:id]} as failed"
     mark_payment_as_failed(message[:id])
