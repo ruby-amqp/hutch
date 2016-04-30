@@ -40,7 +40,7 @@ module Hutch
     # RabbitMQ hostname
     string_setting :mq_host, '127.0.0.1'
 
-    # RabbitMQ Exchange
+    # RabbitMQ Exchange to use for publishing
     string_setting :mq_exchange, 'hutch'
 
     # RabbitMQ vhost to use
@@ -63,18 +63,28 @@ module Hutch
 
     # [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html)
     number_setting :heartbeat, 30
+    # The <tt>basic.qos</tt> prefetch value to use. Default: `0`, no limit. See Bunny and RabbitMQ documentation.
     number_setting :channel_prefetch, 0
+    # Bunny's socket open timeout
     number_setting :connection_timeout, 11
+    # Bunny's socket read timeout
     number_setting :read_timeout, 11
+    # Bunny's socket write timeout
     number_setting :write_timeout, 11
+    # FIXME: DOCUMENT THIS
     number_setting :graceful_exit_timeout, 11
+    # 
     number_setting :consumer_pool_size, 1
 
     boolean_setting :mq_tls, false
+    # Should SSL certificate be verified?
     boolean_setting :mq_verify_peer, true
     boolean_setting :mq_api_ssl, false
     boolean_setting :autoload_rails, true
+    # Should the Hutch runner process daemonise?
     boolean_setting :daemonise, false
+    # Enables publisher confirms. Leaves it up to the app how they are tracked
+    # (e.g. using Hutch::Broker#confirm_select callback or Hutch::Broker#wait_for_confirms)
     boolean_setting :publisher_confirms, false
     boolean_setting :force_publisher_confirms, false
     boolean_setting :enable_http_api_use, true
