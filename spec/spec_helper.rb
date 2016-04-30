@@ -9,7 +9,6 @@ SimpleCov.start do
   add_filter '/.bundle/'
 end
 
-require 'raven'
 require 'hutch'
 require 'logger'
 
