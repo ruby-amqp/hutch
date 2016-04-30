@@ -11,20 +11,21 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
     object = YARD::CodeObjects::MethodObject.new(namespace, name)
     register(object)
 
-    # modify the code object for the new instance method
+    # Modify the code object for the new instance method
     object.dynamic = true
-    # add custom metadata to the object
+    # Add custom metadata to the object
     object['custom_field'] = '(Found using method_missing)'
 
     # Module-level configuration notes
     hutch_config = YARD::CodeObjects::ModuleObject.new(:root, "Hutch::Config")
     collection_name = statement.first.first
     default_value = statement.parameters[1].jump(:tstring_content, :ident).source
-    
+
     (hutch_config['setting_rows'] ||= []) << {
       name: name,
       default_value: default_value,
-      type: collection_name.sub('_setting', '').capitalize
+      type: collection_name.sub('_setting', '').capitalize,
+      description: object.docstring
     }
   rescue => e
     $stderr.puts e.message, e.inspect

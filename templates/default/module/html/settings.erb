@@ -19,6 +19,9 @@
           <th>
             ENV variable
           </th>
+          <th>
+            Description
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -28,6 +31,7 @@
           <td><%= setting[:default_value] %></td>
           <td><%= setting[:type] %></td>
           <td><tt>HUTCH_<%= setting[:name].upcase %></tt></td>
+          <td><%= html_markup_markdown setting[:description] %></td>
         </tr>
       <% end %>
       </tbody>

@@ -37,15 +37,31 @@ module Hutch
       BOOL_KEYS << name
     end
 
+    # RabbitMQ hostname
     string_setting :mq_host, '127.0.0.1'
+
+    # RabbitMQ Exchange
     string_setting :mq_exchange, 'hutch'
+
+    # RabbitMQ vhost to use
     string_setting :mq_vhost, '/'
+
+    # RabbitMQ username to use. As of RabbitMQ 3.3.0, <tt>guest</tt> can only can connect from localhost.
     string_setting :mq_username, 'guest'
+
+    # RabbitMQ password
     string_setting :mq_password, 'guest'
+
+    # RabbitMQ API Host
     string_setting :mq_api_host, '127.0.0.1'
 
+    # RabbitMQ port
     number_setting :mq_port, 5672
+
+    # RabbitMQ API port
     number_setting :mq_api_port, 15672
+
+    # [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html)
     number_setting :heartbeat, 30
     number_setting :channel_prefetch, 0
     number_setting :connection_timeout, 11
