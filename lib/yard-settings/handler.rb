@@ -19,8 +19,11 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
     # Module-level configuration notes
     hutch_config = YARD::CodeObjects::ModuleObject.new(:root, "Hutch::Config")
     collection_name = statement.first.first
-
-    (hutch_config[collection_name] ||= []) << { name: name }
+    default_value = statement.parameters[1].jump(:tstring_content, :ident).source
+    (hutch_config[collection_name] ||= []) << {
+      name: name,
+      default_value: default_value
+    }
   rescue => e
     require "pry"
     binding.pry

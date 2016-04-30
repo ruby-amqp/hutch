@@ -20,46 +20,49 @@ module Hutch
     BOOL_KEYS = Set.new
 
     # Define a String user setting
-    def self.string_setting(name)
+    # @!visibility private
+    def self.string_setting(name, _default_value)
       STRING_KEYS << name
     end
 
     # Define a Number user setting
-    def self.number_setting(name)
+    # @!visibility private
+    def self.number_setting(name, _default_value)
       NUMBER_KEYS << name
     end
 
     # Define a Boolean user setting
-    def self.boolean_setting(name)
+    # @!visibility private
+    def self.boolean_setting(name, _default_value)
       BOOL_KEYS << name
     end
 
-    string_setting :mq_host
-    string_setting :mq_exchange
-    string_setting :mq_vhost
-    string_setting :mq_username
-    string_setting :mq_password
-    string_setting :mq_api_host
+    string_setting :mq_host, '127.0.0.1'
+    string_setting :mq_exchange, 'hutch'
+    string_setting :mq_vhost, '/'
+    string_setting :mq_username, 'guest'
+    string_setting :mq_password, 'guest'
+    string_setting :mq_api_host, '127.0.0.1'
 
-    number_setting :mq_port
-    number_setting :mq_api_port
-    number_setting :heartbeat
-    number_setting :channel_prefetch
-    number_setting :connection_timeout
-    number_setting :read_timeout
-    number_setting :write_timeout
-    number_setting :graceful_exit_timeout
-    number_setting :consumer_pool_size
+    number_setting :mq_port, 5672
+    number_setting :mq_api_port, 15672
+    number_setting :heartbeat, 30
+    number_setting :channel_prefetch, 0
+    number_setting :connection_timeout, 11
+    number_setting :read_timeout, 11
+    number_setting :write_timeout, 11
+    number_setting :graceful_exit_timeout, 11
+    number_setting :consumer_pool_size, 1
 
-    boolean_setting :mq_tls
-    boolean_setting :mq_verify_peer
-    boolean_setting :mq_api_ssl
-    boolean_setting :autoload_rails
-    boolean_setting :daemonise
-    boolean_setting :publisher_confirms
-    boolean_setting :force_publisher_confirms
-    boolean_setting :enable_http_api_use
-    boolean_setting :consumer_pool_abort_on_exception
+    boolean_setting :mq_tls, false
+    boolean_setting :mq_verify_peer, true
+    boolean_setting :mq_api_ssl, false
+    boolean_setting :autoload_rails, true
+    boolean_setting :daemonise, false
+    boolean_setting :publisher_confirms, false
+    boolean_setting :force_publisher_confirms, false
+    boolean_setting :enable_http_api_use, true
+    boolean_setting :consumer_pool_abort_on_exception, false
 
     # Set of all setting keys
     ALL_KEYS = BOOL_KEYS + NUMBER_KEYS + STRING_KEYS
