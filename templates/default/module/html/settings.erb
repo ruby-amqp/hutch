@@ -1,0 +1,55 @@
+<% if object['string_setting'] || object['number_setting'] || object['boolean_setting'] %>
+  <h2>
+    Configuration
+  </h2>
+
+  <div class="tags">
+    <table border="1" class="settings" style="border-spacing: 0.5rem; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>
+            Setting name
+          </th>
+          <th>
+            Type
+          </th>
+          <th>
+            Default value
+          </th>
+          <th>
+            ENV variable
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      <% for setting in object['string_setting'] %>
+        <tr>
+          <td><%= setting[:name] %></td>
+          <td>String</td>
+          <td>TODO</td>
+          <td>HUTCH_<%= setting[:name].upcase %></td>
+        </tr>
+      <% end %>
+
+      <% for setting in object['number_setting'] %>
+        <tr>
+          <td><%= setting[:name] %></td>
+          <td>Number</td>
+          <td>TODO</td>
+          <td>HUTCH_<%= setting[:name].upcase %></td>
+        </tr>
+      <% end %>
+
+      <% for setting in object['boolean_setting'] %>
+        <tr>
+          <td><%= setting[:name] %></td>
+          <td>Boolean</td>
+          <td>TODO</td>
+          <td>HUTCH_<%= setting[:name].upcase %></td>
+        </tr>
+      <% end %>
+
+      </tbody>
+    </table>
+  </div>
+<% end %>

@@ -1,0 +1,17 @@
+<h2>Configuration settings</h2>
+<style>
+.rake_tasks { width: 800px; }
+.rake_tasks th, .take_tasks td { text-align: left; }
+</style>
+<table class="rake_tasks">
+  <% @tasks.each do |task| %>
+    <tr>
+    <th><tt><%= task.full_path %></tt></th>
+    <% if task.full_path == 'default' %>
+    <th><%= task.tag(:task_deps).text %></th>
+    <% else %>
+    <td><%= task.docstring %></td>
+    <% end %>
+    </tr>
+  <% end %>
+</table>

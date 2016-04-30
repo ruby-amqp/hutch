@@ -1,0 +1,19 @@
+<%= object['custom_field'] %>
+<%= object['string_setting'] %>
+
+<% if object['string_setting'] || object['number_setting'] || object['boolean_setting'] %>
+<div class="tags">
+  <h3>Settings:</h3>
+  <ul class="settings">
+    <% for setting in object['string_setting'] %>
+      <li>String setting <%= setting.inspect %></li>
+    <% end %>
+    <% for setting in object['number_setting'] %>
+      <li>Number setting <%= setting.inspect %></li>
+    <% end %>
+    <% for setting in object['boolean_setting'] %>
+      <li>Boolean setting <%= setting.inspect %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
