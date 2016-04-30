@@ -14,7 +14,6 @@ Gem::Specification.new do |gem|
   gem.homepage = 'https://github.com/gocardless/hutch'
   gem.require_paths = ['lib']
   gem.license = 'MIT'
-  gem.executables = ['hutch']
-  gem.files = Dir.glob("{lib,bin}/**/*")
+  gem.files = Dir.glob("lib/**/*")
   gem.test_files = Dir.glob("spec/**/*")
 end
