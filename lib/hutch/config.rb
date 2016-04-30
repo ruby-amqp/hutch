@@ -15,39 +15,54 @@ module Hutch
   #   HUTCH_PUBLISHER_CONFIRMS=false hutch
   module Config
     require 'yaml'
+    STRING_KEYS = Set.new
+    NUMBER_KEYS = Set.new
+    BOOL_KEYS = Set.new
 
-    # Settings which accept a String
-    STRING_KEYS = %w(mq_host
-                     mq_exchange
-                     mq_vhost
-                     mq_username
-                     mq_password
-                     mq_api_host).freeze
+    # Define a String user setting
+    def self.string_setting(name)
+      STRING_KEYS << name
+    end
 
-    # Settings which accept a Number
-    NUMBER_KEYS = %w(mq_port
-                     mq_api_port
-                     heartbeat
-                     channel_prefetch
-                     connection_timeout
-                     read_timeout
-                     write_timeout
-                     graceful_exit_timeout
-                     consumer_pool_size).freeze
+    # Define a Number user setting
+    def self.number_setting(name)
+      NUMBER_KEYS << name
+    end
 
-    # Settings which accept a Boolean
-    BOOL_KEYS = %w(mq_tls
-                   mq_verify_peer
-                   mq_api_ssl
-                   autoload_rails
-                   daemonise
-                   publisher_confirms
-                   force_publisher_confirms
-                   enable_http_api_use
-                   consumer_pool_abort_on_exception).freeze
+    # Define a Boolean user setting
+    def self.boolean_setting(name)
+      BOOL_KEYS << name
+    end
 
-    # Convenience collection of all setting keys
-    ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
+    string_setting :mq_host
+    string_setting :mq_exchange
+    string_setting :mq_vhost
+    string_setting :mq_username
+    string_setting :mq_password
+    string_setting :mq_api_host
+
+    number_setting :mq_port
+    number_setting :mq_api_port
+    number_setting :heartbeat
+    number_setting :channel_prefetch
+    number_setting :connection_timeout
+    number_setting :read_timeout
+    number_setting :write_timeout
+    number_setting :graceful_exit_timeout
+    number_setting :consumer_pool_size
+
+    boolean_setting :mq_tls
+    boolean_setting :mq_verify_peer
+    boolean_setting :mq_api_ssl
+    boolean_setting :autoload_rails
+    boolean_setting :daemonise
+    boolean_setting :publisher_confirms
+    boolean_setting :force_publisher_confirms
+    boolean_setting :enable_http_api_use
+    boolean_setting :consumer_pool_abort_on_exception
+
+    # Set of all setting keys
+    ALL_KEYS = BOOL_KEYS + NUMBER_KEYS + STRING_KEYS
 
     def self.initialize(params = {})
       @config = default_config.merge(env_based_config).merge(params)
@@ -154,7 +169,7 @@ module Hutch
     end
 
     def self.is_bool(attr)
-      BOOL_KEYS.include?(attr.to_s)
+      BOOL_KEYS.include?(attr)
     end
 
     def self.to_bool(value)
@@ -162,7 +177,7 @@ module Hutch
     end
 
     def self.is_num(attr)
-      NUMBER_KEYS.include?(attr.to_s)
+      NUMBER_KEYS.include?(attr)
     end
 
     def self.set(attr, value)
