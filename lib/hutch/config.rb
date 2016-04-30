@@ -21,20 +21,23 @@ module Hutch
 
     # Define a String user setting
     # @!visibility private
-    def self.string_setting(name, _default_value)
+    def self.string_setting(name, default_value)
       STRING_KEYS << name
+      default_value
     end
 
     # Define a Number user setting
     # @!visibility private
-    def self.number_setting(name, _default_value)
+    def self.number_setting(name, default_value)
       NUMBER_KEYS << name
+      default_value
     end
 
     # Define a Boolean user setting
     # @!visibility private
-    def self.boolean_setting(name, _default_value)
+    def self.boolean_setting(name, default_value)
       BOOL_KEYS << name
+      default_value
     end
 
     # RabbitMQ hostname
