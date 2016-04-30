@@ -1,10 +1,10 @@
-<% if object['string_setting'] || object['number_setting'] || object['boolean_setting'] %>
+<% if object['setting_rows'] %>
   <h2>
     Configuration
   </h2>
 
   <div class="tags">
-    <table border="1" class="settings" style="border-spacing: 0.5rem; border-collapse: collapse;">
+    <table border="1" class="settings">
       <thead>
         <tr>
           <th>
@@ -22,33 +22,14 @@
         </tr>
       </thead>
       <tbody>
-      <% for setting in object['string_setting'] %>
+      <% for setting in object['setting_rows'] %>
         <tr>
-          <td><%= setting[:name] %></td>
+          <td><tt><%= setting[:name] %></tt></td>
           <td><%= setting[:default_value] %></td>
-          <td>String</td>
-          <td>HUTCH_<%= setting[:name].upcase %></td>
+          <td><%= setting[:type] %></td>
+          <td><tt>HUTCH_<%= setting[:name].upcase %></tt></td>
         </tr>
       <% end %>
-
-      <% for setting in object['number_setting'] %>
-        <tr>
-          <td><%= setting[:name] %></td>
-          <td><%= setting[:default_value] %></td>
-          <td>Number</td>
-          <td>HUTCH_<%= setting[:name].upcase %></td>
-        </tr>
-      <% end %>
-
-      <% for setting in object['boolean_setting'] %>
-        <tr>
-          <td><%= setting[:name] %></td>
-          <td><%= setting[:default_value] %></td>
-          <td>Boolean</td>
-          <td>HUTCH_<%= setting[:name].upcase %></td>
-        </tr>
-      <% end %>
-
       </tbody>
     </table>
   </div>

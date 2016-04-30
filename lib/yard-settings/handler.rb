@@ -20,9 +20,11 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
     hutch_config = YARD::CodeObjects::ModuleObject.new(:root, "Hutch::Config")
     collection_name = statement.first.first
     default_value = statement.parameters[1].jump(:tstring_content, :ident).source
-    (hutch_config[collection_name] ||= []) << {
+    
+    (hutch_config['setting_rows'] ||= []) << {
       name: name,
-      default_value: default_value
+      default_value: default_value,
+      type: collection_name.sub('_setting', '').capitalize
     }
   rescue => e
     $stderr.puts e.message, e.inspect

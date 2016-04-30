@@ -1,0 +1,8 @@
+.settings {
+  border-spacing: 2.5rem;
+  border-collapse: collapse;
+}
+
+.settings tbody td {
+  padding: .5em 1em;
+}
