@@ -15,29 +15,29 @@ module Hutch
   #   HUTCH_PUBLISHER_CONFIRMS=false hutch
   module Config
     require 'yaml'
-    STRING_KEYS = Set.new
-    NUMBER_KEYS = Set.new
-    BOOL_KEYS = Set.new
+    @string_keys = Set.new
+    @number_keys = Set.new
+    @boolean_keys = Set.new
     @settings_defaults = {}
 
     # Define a String user setting
     # @!visibility private
     def self.string_setting(name, default_value)
-      STRING_KEYS << name
+      @string_keys << name
       @settings_defaults[name] = default_value
     end
 
     # Define a Number user setting
     # @!visibility private
     def self.number_setting(name, default_value)
-      NUMBER_KEYS << name
+      @number_keys << name
       @settings_defaults[name] = default_value
     end
 
     # Define a Boolean user setting
     # @!visibility private
     def self.boolean_setting(name, default_value)
-      BOOL_KEYS << name
+      @boolean_keys << name
       @settings_defaults[name] = default_value
     end
 
@@ -90,12 +90,18 @@ module Hutch
     # Enables publisher confirms. Leaves it up to the app how they are tracked
     # (e.g. using Hutch::Broker#confirm_select callback or Hutch::Broker#wait_for_confirms)
     boolean_setting :publisher_confirms, false
+    # Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for
+    # every publish. **This is the safest option which also offers the 
+    # lowest throughput**.
     boolean_setting :force_publisher_confirms, false
+    # Enable use of RabbitMQ HTTP API
     boolean_setting :enable_http_api_use, true
+    # Defines whether Bunny's consumer work pool threads should abort
+    # on exception. The option is ignored on JRuby.
     boolean_setting :consumer_pool_abort_on_exception, false
 
     # Set of all setting keys
-    ALL_KEYS = BOOL_KEYS + NUMBER_KEYS + STRING_KEYS
+    ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 
     def self.initialize(params = {})
       @config = default_config.merge(env_based_config).merge(params)
@@ -165,7 +171,7 @@ module Hutch
     end
 
     def self.is_bool(attr)
-      BOOL_KEYS.include?(attr)
+      @boolean_keys.include?(attr)
     end
 
     def self.to_bool(value)
@@ -173,7 +179,7 @@ module Hutch
     end
 
     def self.is_num(attr)
-      NUMBER_KEYS.include?(attr)
+      @number_keys.include?(attr)
     end
 
     def self.set(attr, value)
