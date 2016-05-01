@@ -27,9 +27,5 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
       type: collection_name.sub('_setting', '').capitalize,
       description: object.docstring
     }
-  rescue => e
-    $stderr.puts e.message, e.inspect
-    #require "pry"
-    #binding.pry
   end
 end
