@@ -18,26 +18,27 @@ module Hutch
     STRING_KEYS = Set.new
     NUMBER_KEYS = Set.new
     BOOL_KEYS = Set.new
+    @settings_defaults = {}
 
     # Define a String user setting
     # @!visibility private
     def self.string_setting(name, default_value)
       STRING_KEYS << name
-      default_value
+      @settings_defaults[name] = default_value
     end
 
     # Define a Number user setting
     # @!visibility private
     def self.number_setting(name, default_value)
       NUMBER_KEYS << name
-      default_value
+      @settings_defaults[name] = default_value
     end
 
     # Define a Boolean user setting
     # @!visibility private
     def self.boolean_setting(name, default_value)
       BOOL_KEYS << name
-      default_value
+      @settings_defaults[name] = default_value
     end
 
     # RabbitMQ hostname
@@ -104,29 +105,14 @@ module Hutch
     #
     # @return [Hash]
     def self.default_config
-      {
-        mq_host: '127.0.0.1',
-        mq_port: 5672,
-        mq_exchange: 'hutch', # TODO: should this be required?
+      @settings_defaults.merge({
         mq_exchange_options: {},
-        mq_vhost: '/',
-        mq_tls: false,
         mq_tls_cert: nil,
         mq_tls_key: nil,
         mq_tls_ca_certificates: nil,
-        mq_verify_peer: true,
-        mq_username: 'guest',
-        mq_password: 'guest',
-        mq_api_host: '127.0.0.1',
-        mq_api_port: 15672,
-        mq_api_ssl: false,
-        heartbeat: 30,
-        # placeholder, allows specifying connection parameters
-        # as a URI.
         uri: nil,
         log_level: Logger::INFO,
         require_paths: [],
-        autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
         # note that this is not a list, it is a chain of responsibility
         # that will fall back to "nack unconditionally"
@@ -134,31 +120,9 @@ module Hutch
         setup_procs: [],
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
-        daemonise: false,
         pidfile: nil,
-        channel_prefetch: 0,
-        # enables publisher confirms, leaves it up to the app
-        # how they are tracked
-        publisher_confirms: false,
-        # like `publisher_confirms` above but also
-        # forces waiting for a confirm for every publish
-        force_publisher_confirms: false,
-        # Heroku needs > 10. MK.
-        connection_timeout: 11,
-        read_timeout: 11,
-        write_timeout: 11,
-        enable_http_api_use: true,
-        # Number of seconds that a running consumer is given
-        # to finish its job when gracefully exiting Hutch, before
-        # it's killed.
-        graceful_exit_timeout: 11,
-        client_logger: nil,
-
-        consumer_pool_size: 1,
-        consumer_pool_abort_on_exception: false,
-
         serializer: Hutch::Serializers::JSON
-      }
+      })
     end
 
     # Override defaults with ENV variables which begin with <tt>HUTCH_</tt>
