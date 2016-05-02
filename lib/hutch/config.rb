@@ -1,4 +1,6 @@
 require 'hutch/error_handlers/logger'
+require 'hutch/tracers'
+require 'hutch/serializers/json'
 require 'erb'
 require 'logger'
 
@@ -39,7 +41,7 @@ module Hutch
 
     def self.initialize(params = {})
       @config = default_config
-      @config.merge(env_based_config).merge(params)
+      @config.merge!(env_based_config).merge!(params)
       define_methods
       @config
     end
