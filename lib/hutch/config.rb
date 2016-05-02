@@ -38,12 +38,13 @@ module Hutch
     ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
 
     def self.initialize(params = {})
-      @config = defaults.merge(params)
+      @config = default_config
+      @config.merge(env_based_config).merge(params)
       define_methods
       @config
     end
 
-    def self.defaults
+    def self.default_config
       {
         mq_host: '127.0.0.1',
         mq_port: 5672,
@@ -163,7 +164,7 @@ module Hutch
     end
 
     def self.check_attr(attr)
-      unless default_config.key?(attr)
+      unless user_config.key?(attr)
         raise UnknownAttributeError, "#{attr.inspect} is not a valid config attribute"
       end
     end
