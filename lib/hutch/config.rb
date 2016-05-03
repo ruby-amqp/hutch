@@ -129,10 +129,6 @@ module Hutch
       ALL_KEYS.select { |attr| ENV.key?(key_for(attr)) }
     end
 
-    def self.reset!
-      @config = initialize
-    end
-
     def self.get(attr)
       check_attr(attr)
       user_config[attr]
