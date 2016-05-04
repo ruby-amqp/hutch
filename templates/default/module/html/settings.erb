@@ -1,0 +1,40 @@
+<% if object['setting_rows'] %>
+  <h2>
+    Configuration
+  </h2>
+
+  <div class="tags">
+    <table border="1" class="settings">
+      <thead>
+        <tr>
+          <th>
+            Setting name
+          </th>
+          <th>
+            Default value
+          </th>
+          <th>
+            Type
+          </th>
+          <th>
+            ENV variable
+          </th>
+          <th>
+            Description
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+      <% for setting in object['setting_rows'] %>
+        <tr>
+          <td><tt><%= setting[:name] %></tt></td>
+          <td><%= setting[:default_value] %></td>
+          <td><%= setting[:type] %></td>
+          <td><tt>HUTCH_<%= setting[:name].upcase %></tt></td>
+          <td><%= html_markup_markdown setting[:description] %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

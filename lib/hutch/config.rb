@@ -5,66 +5,120 @@ require 'logger'
 module Hutch
   class UnknownAttributeError < StandardError; end
 
+  # Configuration settings, available everywhere
+  #
+  # There are defaults, which can be overridden by ENV variables prefixed by
+  # <tt>HUTCH_</tt>, and each of these can be overridden using the {.set}
+  # method.
+  #
+  # @example Configuring on the command-line
+  #   HUTCH_PUBLISHER_CONFIRMS=false hutch
   module Config
     require 'yaml'
+    @string_keys = Set.new
+    @number_keys = Set.new
+    @boolean_keys = Set.new
+    @settings_defaults = {}
 
-    STRING_KEYS = %w(mq_host
-                     mq_exchange
-                     mq_vhost
-                     mq_username
-                     mq_password
-                     mq_api_host).freeze
+    # Define a String user setting
+    # @!visibility private
+    def self.string_setting(name, default_value)
+      @string_keys << name
+      @settings_defaults[name] = default_value
+    end
 
-    NUMBER_KEYS = %w(mq_port
-                     mq_api_port
-                     heartbeat
-                     channel_prefetch
-                     connection_timeout
-                     read_timeout
-                     write_timeout
-                     graceful_exit_timeout
-                     consumer_pool_size).freeze
+    # Define a Number user setting
+    # @!visibility private
+    def self.number_setting(name, default_value)
+      @number_keys << name
+      @settings_defaults[name] = default_value
+    end
 
-    BOOL_KEYS = %w(mq_tls
-                   mq_verify_peer
-                   mq_api_ssl
-                   autoload_rails
-                   daemonise
-                   publisher_confirms
-                   force_publisher_confirms
-                   enable_http_api_use
-                   consumer_pool_abort_on_exception).freeze
+    # Define a Boolean user setting
+    # @!visibility private
+    def self.boolean_setting(name, default_value)
+      @boolean_keys << name
+      @settings_defaults[name] = default_value
+    end
 
-    ALL_KEYS = (BOOL_KEYS + NUMBER_KEYS + STRING_KEYS).map(&:to_sym).freeze
+    # RabbitMQ hostname
+    string_setting :mq_host, '127.0.0.1'
+
+    # RabbitMQ Exchange to use for publishing
+    string_setting :mq_exchange, 'hutch'
+
+    # RabbitMQ vhost to use
+    string_setting :mq_vhost, '/'
+
+    # RabbitMQ username to use. As of RabbitMQ 3.3.0, <tt>guest</tt> can only can connect from localhost.
+    string_setting :mq_username, 'guest'
+
+    # RabbitMQ password
+    string_setting :mq_password, 'guest'
+
+    # RabbitMQ API Host
+    string_setting :mq_api_host, '127.0.0.1'
+
+    # RabbitMQ port
+    number_setting :mq_port, 5672
+
+    # RabbitMQ API port
+    number_setting :mq_api_port, 15672
+
+    # [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html)
+    number_setting :heartbeat, 30
+    # The <tt>basic.qos</tt> prefetch value to use. Default: `0`, no limit. See Bunny and RabbitMQ documentation.
+    number_setting :channel_prefetch, 0
+    # Bunny's socket open timeout
+    number_setting :connection_timeout, 11
+    # Bunny's socket read timeout
+    number_setting :read_timeout, 11
+    # Bunny's socket write timeout
+    number_setting :write_timeout, 11
+    # FIXME: DOCUMENT THIS
+    number_setting :graceful_exit_timeout, 11
+    # 
+    number_setting :consumer_pool_size, 1
+
+    boolean_setting :mq_tls, false
+    # Should SSL certificate be verified?
+    boolean_setting :mq_verify_peer, true
+    boolean_setting :mq_api_ssl, false
+    boolean_setting :autoload_rails, true
+    # Should the Hutch runner process daemonise?
+    boolean_setting :daemonise, false
+    # Enables publisher confirms. Leaves it up to the app how they are tracked
+    # (e.g. using Hutch::Broker#confirm_select callback or Hutch::Broker#wait_for_confirms)
+    boolean_setting :publisher_confirms, false
+    # Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for
+    # every publish. **This is the safest option which also offers the 
+    # lowest throughput**.
+    boolean_setting :force_publisher_confirms, false
+    # Enable use of RabbitMQ HTTP API
+    boolean_setting :enable_http_api_use, true
+    # Defines whether Bunny's consumer work pool threads should abort
+    # on exception. The option is ignored on JRuby.
+    boolean_setting :consumer_pool_abort_on_exception, false
+
+    # Set of all setting keys
+    ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 
     def self.initialize(params = {})
       @config = default_config.merge(env_based_config).merge(params)
     end
 
+    # Default settings
+    #
+    # @return [Hash]
     def self.default_config
-      {
-        mq_host: '127.0.0.1',
-        mq_port: 5672,
-        mq_exchange: 'hutch', # TODO: should this be required?
+      @settings_defaults.merge({
         mq_exchange_options: {},
-        mq_vhost: '/',
-        mq_tls: false,
         mq_tls_cert: nil,
         mq_tls_key: nil,
         mq_tls_ca_certificates: nil,
-        mq_verify_peer: true,
-        mq_username: 'guest',
-        mq_password: 'guest',
-        mq_api_host: '127.0.0.1',
-        mq_api_port: 15672,
-        mq_api_ssl: false,
-        heartbeat: 30,
-        # placeholder, allows specifying connection parameters
-        # as a URI.
         uri: nil,
         log_level: Logger::INFO,
         require_paths: [],
-        autoload_rails: true,
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
         # note that this is not a list, it is a chain of responsibility
         # that will fall back to "nack unconditionally"
@@ -72,34 +126,12 @@ module Hutch
         setup_procs: [],
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
-        daemonise: false,
         pidfile: nil,
-        channel_prefetch: 0,
-        # enables publisher confirms, leaves it up to the app
-        # how they are tracked
-        publisher_confirms: false,
-        # like `publisher_confirms` above but also
-        # forces waiting for a confirm for every publish
-        force_publisher_confirms: false,
-        # Heroku needs > 10. MK.
-        connection_timeout: 11,
-        read_timeout: 11,
-        write_timeout: 11,
-        enable_http_api_use: true,
-        # Number of seconds that a running consumer is given
-        # to finish its job when gracefully exiting Hutch, before
-        # it's killed.
-        graceful_exit_timeout: 11,
-        client_logger: nil,
-
-        consumer_pool_size: 1,
-        consumer_pool_abort_on_exception: false,
-
         serializer: Hutch::Serializers::JSON
-      }
+      })
     end
 
-    # Override defaults with ENV variables which begin with HUTCH_
+    # Override defaults with ENV variables which begin with <tt>HUTCH_</tt>
     #
     # @return [Hash]
     def self.env_based_config
@@ -139,7 +171,7 @@ module Hutch
     end
 
     def self.is_bool(attr)
-      BOOL_KEYS.include?(attr.to_s)
+      @boolean_keys.include?(attr)
     end
 
     def self.to_bool(value)
@@ -147,7 +179,7 @@ module Hutch
     end
 
     def self.is_num(attr)
-      NUMBER_KEYS.include?(attr.to_s)
+      @number_keys.include?(attr)
     end
 
     def self.set(attr, value)

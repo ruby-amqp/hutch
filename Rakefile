@@ -11,4 +11,11 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = %w(--color --format doc)
 end
 
-task :default => :spec
+task default: :spec
+
+#
+# Re-generate API docs
+#
+require 'yard'
+require 'yard/rake/yardoc_task'
+YARD::Rake::YardocTask.new

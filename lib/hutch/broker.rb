@@ -11,10 +11,20 @@ module Hutch
 
     attr_accessor :connection, :channel, :exchange, :api_client
 
+    # @param config [nil,Hash] Configuration override
     def initialize(config = nil)
       @config = config || Hutch::Config
     end
 
+    # Connect to broker
+    #
+    # @example
+    #   Hutch::Broker.new.connect(enable_http_api_use: true) do
+    #     # will disconnect after this block
+    #   end
+    #
+    # @param [Hash] options The options to connect with
+    # @option options [Boolean] :enable_http_api_use
     def connect(options = {})
       @options = options
       set_up_amqp_connection
@@ -49,9 +59,10 @@ module Hutch
       @api_client = nil
     end
 
-    # Connect to RabbitMQ via AMQP. This sets up the main connection and
-    # channel we use for talking to RabbitMQ. It also ensures the existance of
-    # the exchange we'll be using.
+    # Connect to RabbitMQ via AMQP
+    #
+    # This sets up the main connection and channel we use for talking to
+    # RabbitMQ. It also ensures the existence of the exchange we'll be using.
     def set_up_amqp_connection
       open_connection!
       open_channel!
@@ -237,6 +248,7 @@ module Hutch
       channel.wait_for_confirms
     end
 
+    # @return [Boolean] True if channel is set up to use publisher confirmations.
     def using_publisher_confirmations?
       channel.using_publisher_confirmations?
     end
@@ -351,6 +363,5 @@ module Hutch
     def consumer_pool_abort_on_exception
       @config[:consumer_pool_abort_on_exception]
     end
-
   end
 end

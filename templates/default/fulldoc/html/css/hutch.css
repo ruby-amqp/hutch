@@ -1,0 +1,13 @@
+.settings {
+  border-spacing: 2.5rem;
+  border-collapse: collapse;
+}
+
+.settings thead th {
+  text-align: left;
+}
+
+.settings thead th,
+.settings tbody td {
+  padding: .5em 1em;
+}

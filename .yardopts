@@ -1,2 +1,5 @@
--m markdown
+--load "./lib/yard-settings/yard-settings.rb"
+--title "Hutch API docs"
+-
+README.md
 
