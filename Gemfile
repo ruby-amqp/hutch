@@ -9,11 +9,9 @@ group :development do
 end
 
 group :development, :test do
-  gem "sentry-raven"
-  gem "honeybadger"
+  gem "rspec", "~> 3.0"
   gem "coveralls", require: false
   gem "newrelic_rpm"
-  gem "airbrake"
 end
 
 group :development, :darwin do
