@@ -1,4 +1,6 @@
 require 'hutch/error_handlers/logger'
+require 'hutch/tracers'
+require 'hutch/serializers/json'
 require 'erb'
 require 'logger'
 
@@ -104,7 +106,10 @@ module Hutch
     ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 
     def self.initialize(params = {})
-      @config = default_config.merge(env_based_config).merge(params)
+      @config = default_config
+      @config.merge!(env_based_config).merge!(params)
+      define_methods
+      @config
     end
 
     # Default settings
@@ -156,10 +161,6 @@ module Hutch
       ALL_KEYS.select { |attr| ENV.key?(key_for(attr)) }
     end
 
-    def self.reset!
-      @config = initialize
-    end
-
     def self.get(attr)
       check_attr(attr)
       user_config[attr]
@@ -193,7 +194,7 @@ module Hutch
     end
 
     def self.check_attr(attr)
-      unless default_config.key?(attr)
+      unless user_config.key?(attr)
         raise UnknownAttributeError, "#{attr.inspect} is not a valid config attribute"
       end
     end
@@ -221,14 +222,15 @@ module Hutch
       end
     end
 
-    def self.method_missing(method, *args, &block)
-      attr = method.to_s.sub(/=$/, '').to_sym
-      return super unless default_config.key?(attr)
+    def self.define_methods
+      @config.keys.each do |key|
+        define_singleton_method(key) do
+          get(key)
+        end
 
-      if method =~ /=$/
-        set(attr, args.first)
-      else
-        get(attr)
+        define_singleton_method("#{key}=") do |val|
+          set(key, val)
+        end
       end
     end
   end
