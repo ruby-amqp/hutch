@@ -209,14 +209,13 @@ module Hutch
     private
 
     def daemonise_process
-      if Hutch::Config.daemonise
-        if defined?(JRUBY_VERSION)
-          Hutch.logger.warn "JRuby ignores the --daemonise option"
-          return
-        end
-
-        ::Process.daemon(true)
+      return unless Hutch::Config.daemonise
+      if defined?(JRUBY_VERSION)
+        Hutch.logger.warn "JRuby ignores the --daemonise option"
+        return
       end
+
+      ::Process.daemon(true)
     end
 
     def abort_without_file(file, file_description, &block)
