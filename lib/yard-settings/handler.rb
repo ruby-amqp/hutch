@@ -25,7 +25,14 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
       name: name,
       default_value: default_value,
       type: collection_name.sub('_setting', '').capitalize,
-      description: object.docstring
+      description: object.docstring,
+      first_line_of_description: first_line_of_description(object)
     }
+  end
+
+  def first_line_of_description(object)
+    return '' if object.docstring.blank?
+
+    p object.docstring.split("\n").first
   end
 end
