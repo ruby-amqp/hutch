@@ -52,54 +52,82 @@ module Hutch
     # RabbitMQ vhost to use
     string_setting :mq_vhost, '/'
 
-    # RabbitMQ username to use. As of RabbitMQ 3.3.0, <tt>guest</tt> can only can connect from localhost.
+    # RabbitMQ username to use.
+    #
+    # As of RabbitMQ 3.3.0, <tt>guest</tt> can only can connect from localhost.
     string_setting :mq_username, 'guest'
 
     # RabbitMQ password
     string_setting :mq_password, 'guest'
 
-    # RabbitMQ API Host
+    # RabbitMQ HTTP API hostname
     string_setting :mq_api_host, '127.0.0.1'
 
     # RabbitMQ port
     number_setting :mq_port, 5672
 
-    # RabbitMQ API port
+    # RabbitMQ HTTP API port
     number_setting :mq_api_port, 15672
 
     # [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html)
     number_setting :heartbeat, 30
-    # The <tt>basic.qos</tt> prefetch value to use. Default: `0`, no limit. See Bunny and RabbitMQ documentation.
+
+    # The <tt>basic.qos</tt> prefetch value to use.
+    #
+    # Default: `0`, no limit. See Bunny and RabbitMQ documentation.
     number_setting :channel_prefetch, 0
+
     # Bunny's socket open timeout
     number_setting :connection_timeout, 11
+
     # Bunny's socket read timeout
     number_setting :read_timeout, 11
+
     # Bunny's socket write timeout
     number_setting :write_timeout, 11
+
     # FIXME: DOCUMENT THIS
     number_setting :graceful_exit_timeout, 11
-    # 
+
+    # Bunny consumer work pool size
     number_setting :consumer_pool_size, 1
 
+    # Should TLS be used?
     boolean_setting :mq_tls, false
+
     # Should SSL certificate be verified?
     boolean_setting :mq_verify_peer, true
+
+    # Should SSL be used for the RabbitMQ API?
     boolean_setting :mq_api_ssl, false
+
+    # Should the current Rails app directory be required?
     boolean_setting :autoload_rails, true
+
     # Should the Hutch runner process daemonise?
+    #
+    # The option is ignored on JRuby.
     boolean_setting :daemonise, false
-    # Enables publisher confirms. Leaves it up to the app how they are tracked
+
+    # Should RabbitMQ publisher confirms be enabled?
+    #
+    # Leaves it up to the app how they are tracked
     # (e.g. using Hutch::Broker#confirm_select callback or Hutch::Broker#wait_for_confirms)
     boolean_setting :publisher_confirms, false
+
     # Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for
-    # every publish. **This is the safest option which also offers the 
+    # every publish.
+    #
+    # **This is the safest option which also offers the
     # lowest throughput**.
     boolean_setting :force_publisher_confirms, false
-    # Enable use of RabbitMQ HTTP API
+
+    # Should the RabbitMQ HTTP API be used?
     boolean_setting :enable_http_api_use, true
-    # Defines whether Bunny's consumer work pool threads should abort
-    # on exception. The option is ignored on JRuby.
+
+    # Should Bunny's consumer work pool threads abort on exception.
+    #
+    # The option is ignored on JRuby.
     boolean_setting :consumer_pool_abort_on_exception, false
 
     # Set of all setting keys
