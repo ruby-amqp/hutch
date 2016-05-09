@@ -33,6 +33,6 @@ class SettingsHandlerBase < YARD::Handlers::Ruby::Base
   def first_line_of_description(object)
     return '' if object.docstring.blank?
 
-    p object.docstring.split("\n").first
+    object.docstring.lines.first
   end
 end
