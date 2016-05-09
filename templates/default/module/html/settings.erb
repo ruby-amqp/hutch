@@ -27,7 +27,7 @@
       <tbody>
       <% for setting in object['setting_rows'] %>
         <tr>
-          <td><tt><%= setting[:name] %></tt></td>
+          <td><tt><%= resolve_links "{Hutch::Config##{setting[:name]} #{setting[:name]}}" %></tt></td>
           <td><%= setting[:default_value] %></td>
           <td><%= setting[:type] %></td>
           <td><tt>HUTCH_<%= setting[:name].upcase %></tt></td>
