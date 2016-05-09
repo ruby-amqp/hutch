@@ -13,7 +13,7 @@ module Hutch
     def run(argv = ARGV)
       parse_options(argv)
 
-      ::Process.daemon(true) if Hutch::Config.daemonise
+      daemonise_process
 
       write_pid if Hutch::Config.pidfile
 
@@ -207,6 +207,16 @@ module Hutch
     end
 
     private
+
+    def daemonise_process
+      return unless Hutch::Config.daemonise
+      if defined?(JRUBY_VERSION)
+        Hutch.logger.warn "JRuby ignores the --daemonise option"
+        return
+      end
+
+      ::Process.daemon(true)
+    end
 
     def abort_without_file(file, file_description, &block)
       abort_with_message("#{file_description} '#{file}' not found") unless File.exists?(file)
