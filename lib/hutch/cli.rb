@@ -16,6 +16,7 @@ module Hutch
 
     # Run a Hutch worker with the command line interface.
     def run(argv = ARGV)
+      Hutch::Config.initialize
       parse_options(argv)
 
       daemonise_process
