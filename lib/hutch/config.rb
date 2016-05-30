@@ -162,6 +162,7 @@ module Hutch
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         pidfile: nil,
+        client_logger: nil,
         serializer: Hutch::Serializers::JSON
       })
     end
