@@ -6,7 +6,7 @@ describe Hutch::MessagePreprocessor do
   include ConsumerFactory
 
   subject(:handler) { described_class.new(broker, consumer, args) }
-  let(:broker) { instance_double("Hutch::Broker") }
+  let(:broker) { Hutch::Broker.new }
   let(:consumer) { build_consumer }
   let(:args) { [double.as_null_object, double.as_null_object, double.as_null_object] }
   let(:payload) { '{}' }

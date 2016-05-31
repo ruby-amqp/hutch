@@ -5,7 +5,7 @@ require 'hutch/setup/queues'
 describe Hutch::Setup::Queues do
   include ConsumerFactory
 
-  let(:broker) { instance_double("Hutch::Broker") }
+  let(:broker) { Hutch::Broker.new }
   let(:consumers) { Array.new(2) { build_consumer } }
   subject(:setup_performer) { described_class.new(broker, consumers) }
 

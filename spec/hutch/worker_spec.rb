@@ -3,7 +3,7 @@ require 'hutch/worker'
 
 describe Hutch::Worker do
   let(:setup_procs) { Array.new(2) { Proc.new {} } }
-  let(:broker) { instance_double("Hutch::Broker") }
+  let(:broker) { Hutch::Broker.new }
   let(:worker) { subject }
 
   describe "#run" do
