@@ -1,4 +1,5 @@
 require 'hutch/error_handlers/logger'
+require 'hutch/setup/queues'
 require 'hutch/tracers'
 require 'hutch/serializers/json'
 require 'erb'
@@ -156,10 +157,12 @@ module Hutch
         # note that this is not a list, it is a chain of responsibility
         # that will fall back to "nack unconditionally"
         error_acknowledgements: [],
-        setup_procs: [],
+        setup_procs: [ Hutch::Setup::Queues ],
+        message_preprocessing_proc: Hutch::MessagePreprocessor,
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         pidfile: nil,
+        client_logger: nil,
         serializer: Hutch::Serializers::JSON
       })
     end
