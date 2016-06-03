@@ -2,14 +2,13 @@ require 'hutch/waiter'
 
 RSpec.describe Hutch::Waiter do
   describe '.wait_until_signaled' do
+    let(:pid) { Process.pid }
     def start_kill_thread(signal)
       Thread.new do
         # sleep allows the worker time to set up the signal handling
         # before the kill signal is sent.
-        puts 1
-        sleep 0.1
-        puts 2
-        Process.kill signal, 0
+        sleep 0.001
+        Process.kill signal, pid
       end
     end
 
@@ -20,9 +19,7 @@ RSpec.describe Hutch::Waiter do
             .with("caught sig#{signal.downcase}, stopping hutch...")
 
           start_kill_thread(signal)
-          puts 3
           described_class.wait_until_signaled
-          puts 4
         end
       end
     end
