@@ -6,7 +6,7 @@ RSpec.describe Hutch::Waiter do
       Thread.new do
         # sleep allows the worker time to set up the signal handling
         # before the kill signal is sent.
-        sleep 0.1
+        sleep 30
         Process.kill signal, 0
       end
     end
