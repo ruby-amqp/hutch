@@ -281,21 +281,6 @@ describe Hutch::Broker do
     end
   end
 
-  describe '#wait_on_threads' do
-    let(:thread) { double('Thread') }
-    before { allow(broker).to receive(:work_pool_threads).and_return(threads) }
-
-    context 'when all threads finish within the timeout' do
-      let(:threads) { [double(join: thread), double(join: thread)] }
-      specify { expect(broker.wait_on_threads(1)).to be_truthy }
-    end
-
-    context 'when timeout expires for one thread' do
-      let(:threads) { [double(join: thread), double(join: nil)] }
-      specify { expect(broker.wait_on_threads(1)).to be_falsey }
-    end
-  end
-
   describe '#stop', adapter: :bunny do
     let(:thread_1) { double('Thread') }
     let(:thread_2) { double('Thread') }
