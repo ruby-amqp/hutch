@@ -198,15 +198,6 @@ module Hutch
       end
     end
 
-    # Each subscriber is run in a thread. This calls Thread#join on each of the
-    # subscriber threads.
-    def wait_on_threads(timeout)
-      # Thread#join returns nil when the timeout is hit. If any return nil,
-      # the threads didn't all join so we return false.
-      per_thread_timeout = timeout.to_f / work_pool_threads.length
-      work_pool_threads.none? { |thread| thread.join(per_thread_timeout).nil? }
-    end
-
     def stop
       if defined?(JRUBY_VERSION)
         channel.close
@@ -346,10 +337,6 @@ module Hutch
     rescue Hutch::Adapter::ConnectionRefused => ex
       logger.error "amqp connection error: #{ex.message.downcase}"
       raise ConnectionError.new("couldn't connect to rabbitmq at #{uri}. Check your configuration, network connectivity and RabbitMQ logs.")
-    end
-
-    def work_pool_threads
-      channel_work_pool.threads || []
     end
 
     def channel_work_pool

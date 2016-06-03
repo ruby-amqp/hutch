@@ -14,8 +14,8 @@ describe Hutch::Worker do
     it "calls each setup proc" do
       setup_procs.each { |prc| expect(prc).to receive(:call) }
       allow(worker).to receive(:setup_queues)
-      allow(worker).to receive(:register_signal_handlers)
-      allow(worker).to receive(:main_loop)
+      allow(Hutch::Waiter).to receive(:wait_until_signaled)
+      allow(broker).to receive(:stop)
 
       worker.run
     end
