@@ -2,6 +2,7 @@ require 'hutch/message'
 require 'hutch/logging'
 require 'hutch/broker'
 require 'hutch/acknowledgements/nack_on_all_failures'
+require 'hutch/waiter'
 require 'carrot-top'
 
 module Hutch
