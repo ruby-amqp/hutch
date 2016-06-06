@@ -1,5 +1,16 @@
 ## 0.22.0 — (unreleased)
 
+### Message Payload is Reported to Sentry
+
+Contributed by Matt Thompson.
+
+### Daemonization Flag Ignored on JRuby
+
+Hutch will no longer try to daemonize its process on JRuby
+(since it is not supported) and will emit a warning instead.
+
+Contributed by Olle Jonsson.
+
 ### Custom Setup Steps in Hutch::Worker
 
 `Hutch::Worker` now accepts a list of callables that are invoked
@@ -28,7 +39,13 @@ Contributed by Seamus Abshere.
 Received messages used to be logged using severity level INFO. 
 This has been lowered to DEBUG.
 
-Contributed by Jesper Josefsson
+Contributed by Jesper Josefsson.
+
+### Refactoring
+
+Olle Jonsson and Kelly Stannard have contributed
+multiple internal improvements that have no behaviour changes.
+
 
 ## 0.21.0 — February 7th, 2016
 
