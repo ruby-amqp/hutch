@@ -1,9 +1,9 @@
 require 'optparse'
 
-require 'hutch/version'
 require 'hutch/logging'
-require 'hutch/exceptions'
 require 'hutch/config'
+require 'hutch/version'
+require 'hutch/exceptions'
 
 module Hutch
   class CLI
@@ -11,6 +11,7 @@ module Hutch
 
     # Run a Hutch worker with the command line interface.
     def run(argv = ARGV)
+      Hutch::Config.initialize
       parse_options(argv)
 
       daemonise_process
