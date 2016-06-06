@@ -151,6 +151,7 @@ module Hutch
         mq_tls_ca_certificates: nil,
         uri: nil,
         log_level: Logger::INFO,
+        client_logger: nil,
         require_paths: [],
         error_handlers: [Hutch::ErrorHandlers::Logger.new],
         # note that this is not a list, it is a chain of responsibility
