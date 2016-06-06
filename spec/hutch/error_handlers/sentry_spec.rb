@@ -13,7 +13,7 @@ describe Hutch::ErrorHandlers::Sentry do
     end
 
     it "logs the error to Sentry" do
-      expect(Raven).to receive(:capture_exception).with(error)
+      expect(Raven).to receive(:capture_exception).with(error, extra: { payload: "{}" })
       error_handler.handle("1", "{}", double, error)
     end
   end
