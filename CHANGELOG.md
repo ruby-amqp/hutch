@@ -3,7 +3,7 @@
 No changes yet.
 
 
-## 0.22.0 — June 7th, 2016
+## 0.22.1 — June 7th, 2016
 
 ### Message Payload is Reported to Sentry
 
