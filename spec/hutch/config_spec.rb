@@ -5,6 +5,7 @@ describe Hutch::Config do
   let(:new_value) { 'not-localhost' }
 
   before do
+    Hutch::Config.instance_variable_set(:@config, nil)
     Hutch::Config.initialize
   end
 
@@ -166,6 +167,19 @@ YAML
     it 'will accept strings and symbols as config keys' do
       expect(Hutch::Config.get(:mq_host)).to eq '127.0.0.1'
       expect(Hutch::Config.get('mq_host')).to eq '127.0.0.1'
+    end
+
+    describe 'it will not overwrite existing config' do
+      it 'with defaults' do
+        expect(Hutch::Config.get(:mq_host)).to eq '127.0.0.1'
+        Hutch::Config.initialize
+
+        Hutch::Config.set(:mq_host, 'example2.com')
+
+        expect(Hutch::Config.get(:mq_host)).to eq 'example2.com'
+        Hutch::Config.initialize
+        expect(Hutch::Config.get(:mq_host)).to eq 'example2.com'
+      end
     end
   end
 end

@@ -134,9 +134,12 @@ module Hutch
     ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 
     def self.initialize(params = {})
-      @config = default_config
-      @config.merge!(env_based_config).merge!(params)
-      define_methods
+      unless @config
+        @config = default_config
+        define_methods
+        @config.merge!(env_based_config)
+      end
+      @config.merge!(params)
       @config
     end
 
