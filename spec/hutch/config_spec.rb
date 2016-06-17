@@ -161,4 +161,11 @@ YAML
       end
     end
   end
+
+  context 'developer ergonomics' do
+    it 'will accept strings and symbols as config keys' do
+      expect(Hutch::Config.get(:mq_host)).to eq '127.0.0.1'
+      expect(Hutch::Config.get('mq_host')).to eq '127.0.0.1'
+    end
+  end
 end

@@ -191,8 +191,8 @@ module Hutch
     end
 
     def self.get(attr)
-      check_attr(attr)
-      user_config[attr]
+      check_attr(attr.to_sym)
+      user_config[attr.to_sym]
     end
 
     def self.key_for(attr)
@@ -213,8 +213,8 @@ module Hutch
     end
 
     def self.set(attr, value)
-      check_attr(attr)
-      user_config[attr] = value
+      check_attr(attr.to_sym)
+      user_config[attr.to_sym] = value
     end
 
     class << self
