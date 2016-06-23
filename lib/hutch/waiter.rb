@@ -4,7 +4,7 @@ module Hutch
   class Waiter
     include Logging
 
-    SHUTDOWN_SIGNALS = %w(QUIT TERM INT)
+    SHUTDOWN_SIGNALS = %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.freeze
 
     def self.wait_until_signaled
       new.wait_until_signaled

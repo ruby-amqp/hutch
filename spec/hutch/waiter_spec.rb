@@ -12,7 +12,7 @@ RSpec.describe Hutch::Waiter do
       end
     end
 
-    %w(QUIT TERM INT).each do |signal|
+    described_class::SHUTDOWN_SIGNALS.each do |signal|
       context "a #{signal} signal is received" do
         it "logs that hutch is stopping" do
           expect(Hutch::Logging.logger).to receive(:info)
