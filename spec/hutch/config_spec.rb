@@ -9,6 +9,10 @@ describe Hutch::Config do
     Hutch::Config.initialize
   end
 
+  after do
+    Hutch::Config.instance_variable_set(:@config, nil)
+  end
+
   describe '.get' do
     context 'for valid attributes' do
       subject { Hutch::Config.get(:mq_host) }
@@ -19,9 +23,7 @@ describe Hutch::Config do
 
       context 'with an overridden value' do
         before do
-          allow(Hutch::Config).to receive_messages(
-            user_config: { mq_host: new_value }
-          )
+          Hutch::Config.set(:mq_host, new_value)
         end
 
         it { is_expected.to eq(new_value) }
