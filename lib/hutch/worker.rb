@@ -9,8 +9,6 @@ module Hutch
   class Worker
     include Logging
 
-    SHUTDOWN_SIGNALS = %w(QUIT TERM INT)
-
     def initialize(broker, consumers, setup_procs)
       @broker        = broker
       self.consumers = consumers
