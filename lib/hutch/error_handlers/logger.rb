@@ -5,7 +5,8 @@ module Hutch
     class Logger
       include Logging
 
-      def handle(message_id, payload, consumer, ex)
+      def handle(properties, payload, consumer, ex)
+        message_id = properties.message_id
         prefix = "message(#{message_id || '-'}): "
         logger.error prefix + "error in consumer '#{consumer}'"
         logger.error prefix + "#{ex.class} - #{ex.message}"

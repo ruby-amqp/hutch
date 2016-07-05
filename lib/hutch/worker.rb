@@ -68,16 +68,16 @@ module Hutch
       @broker.ack(delivery_info.delivery_tag)
     rescue => ex
       acknowledge_error(delivery_info, properties, @broker, ex)
-      handle_error(properties.message_id, payload, consumer, ex)
+      handle_error(properties, payload, consumer, ex)
     end
 
     def with_tracing(klass)
       Hutch::Config[:tracer].new(klass)
     end
 
-    def handle_error(message_id, payload, consumer, ex)
+    def handle_error(*args)
       Hutch::Config[:error_handlers].each do |backend|
-        backend.handle(message_id, payload, consumer, ex)
+        backend.handle(*args)
       end
     end
 
