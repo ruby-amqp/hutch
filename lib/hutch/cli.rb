@@ -189,6 +189,12 @@ module Hutch
           Hutch::Config.pidfile = pidfile
         end
 
+        opts.on('--consumers', 'Print consumers information and exit') do
+          load_app
+          puts Hutch::CLI::ConsumersInspector.format
+          exit 0
+        end
+
         opts.on('--version', 'Print the version and exit') do
           puts "hutch v#{VERSION}"
           exit 0
