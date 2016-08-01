@@ -1,7 +1,20 @@
 ## 0.23.0 — (unreleased)
 
-No changes yet.
+This release contains a **breaking change** in the error
+handlers interface.
 
+### All Message Properties Passed to Error Handlers
+
+Previously error handlers were provided a message ID as first
+argument to `ErrorHandler#handle`. Now it is a hash of all message
+properties.
+
+This is a **breaking public API change**. If you do not use custom
+error handlers, you are not affected.
+
+Contributed by Pierre-Louis Gottfrois.
+
+GH issue: [hutch#238](https://github.com/gocardless/hutch/pull/238)
 
 ## 0.22.1 — June 7th, 2016
 
