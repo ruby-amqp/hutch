@@ -14,6 +14,7 @@ describe Hutch::ErrorHandlers::Airbrake do
 
     it "logs the error to Airbrake" do
       message_id = "1"
+      properties = OpenStruct.new(message_id: message_id)
       payload = "{}"
       consumer = double
       ex = error
@@ -28,7 +29,7 @@ describe Hutch::ErrorHandlers::Airbrake do
         :cgi_data => ENV.to_hash,
       }
       expect(::Airbrake).to receive(:notify_or_ignore).with(ex, message)
-      error_handler.handle(message_id, payload, consumer, ex)
+      error_handler.handle(properties, payload, consumer, ex)
     end
   end
 end

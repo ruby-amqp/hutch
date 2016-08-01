@@ -14,6 +14,7 @@ describe Hutch::ErrorHandlers::Honeybadger do
 
     it "logs the error to Honeybadger" do
       message_id = "1"
+      properties = OpenStruct.new(message_id: message_id)
       payload = "{}"
       consumer = double
       ex = error
@@ -30,7 +31,7 @@ describe Hutch::ErrorHandlers::Honeybadger do
           }
       }
       expect(::Honeybadger).to receive(:notify_or_ignore).with(message)
-      error_handler.handle(message_id, payload, consumer, ex)
+      error_handler.handle(properties, payload, consumer, ex)
     end
   end
 end
