@@ -264,3 +264,5 @@ module Hutch
     end
   end
 end
+
+Hutch::Config.initialize
