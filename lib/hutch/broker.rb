@@ -245,6 +245,7 @@ module Hutch
     end
 
     private
+
     def api_config
       @api_config ||= OpenStruct.new.tap do |config|
         config.host = @config[:mq_api_host]

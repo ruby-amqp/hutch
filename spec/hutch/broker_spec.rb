@@ -2,8 +2,16 @@ require 'spec_helper'
 require 'hutch/broker'
 
 describe Hutch::Broker do
-  let(:config) { Hutch::Config.initialize(client_logger: Hutch::Logging.logger) }
-  subject(:broker) { Hutch::Broker.new(config) }
+  before do
+    Hutch::Config.initialize(client_logger: Hutch::Logging.logger)
+    @config = Hutch::Config.to_hash
+  end
+  let!(:config) { @config }
+  after do
+    Hutch::Config.instance_variable_set(:@config, nil)
+    Hutch::Config.initialize
+  end
+  let(:broker) { Hutch::Broker.new(config) }
 
   describe '#connect' do
     before { allow(broker).to receive(:set_up_amqp_connection) }
@@ -195,7 +203,7 @@ describe Hutch::Broker do
       after  { broker.disconnect }
 
       describe '#api_client' do
-        subject { super().api_client }
+        subject { broker.api_client }
         it { is_expected.to be_a CarrotTop }
       end
     end
