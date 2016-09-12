@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.11.2'
-  gem.add_runtime_dependency 'activesupport', '>= 4.0'
+  gem.add_runtime_dependency 'activesupport', (RUBY_VERSION >= '2.3' ? '>= 4.0' : '~> 4.0')
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov', '~> 0.7.1'
   gem.add_development_dependency 'yard', '~> 0.8'
