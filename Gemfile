@@ -4,14 +4,14 @@ gemspec
 
 group :development do
   gem "rake"
-  gem "guard", "~> 0.8.8"
-  gem "guard-rspec", "~> 0.5.4"
+  gem "guard", "~> 2.14", platform: :mri
+  gem "guard-rspec", "~> 4.7", platform: :mri
 end
 
 group :development, :test do
   gem "sentry-raven"
   gem "honeybadger"
-  gem "coveralls", require: false
+  gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
   gem "airbrake", "~> 5.0"
   gem "opbeat", "~> 3.0.9"
