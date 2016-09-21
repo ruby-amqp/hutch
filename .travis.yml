@@ -4,12 +4,18 @@ before_install: gem i bundler
 matrix:
   include:
     - rvm: 2.3.0
+      gemfile: gemfiles/Gemfile.activesupport5
     - rvm: 2.2
+      gemfile: gemfiles/Gemfile.activesupport4
     - rvm: 2.1
+      gemfile: gemfiles/Gemfile.activesupport4
     - rvm: 2.0
+      gemfile: gemfiles/Gemfile.activesupport4
     - rvm: jruby-9.1.5.0
-      env: JRUBY_OPTS='--debug'
       jdk: oraclejdk8
+      gemfile: gemfiles/Gemfile.activesupport5
+      env:
+        - JRUBY_OPTS='--debug'
 
 services:
   - rabbitmq
