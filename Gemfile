@@ -14,6 +14,7 @@ group :development, :test do
   gem "coveralls", require: false
   gem "newrelic_rpm"
   gem "airbrake", "~> 5.0"
+  gem "opbeat", "~> 3.0.9"
 end
 
 group :development, :darwin do
