@@ -7,6 +7,9 @@ rvm:
   - "2.0"
   - "jruby-9.1.5.0"
 
+jdk:
+  - oraclejdk8
+
 env:
   JRUBY_OPTS: "--debug"
 
@@ -15,7 +18,13 @@ sudo: false
 services:
   - rabbitmq
 
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
+matrix:
+  exclude:
+    - rvm: 2.3.0
+      jdk: oraclejdk8
+    - rvm: 2.2
+      jdk: oraclejdk8
+    - rvm: 2.1
+      jdk: oraclejdk8
+    - rvm: 2.0
+      jdk: oraclejdk8
