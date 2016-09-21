@@ -1,6 +1,6 @@
 language: ruby
 cache: bundler
-
+before_install: gem i bundler
 matrix:
   include:
     - rvm: 2.3.0
