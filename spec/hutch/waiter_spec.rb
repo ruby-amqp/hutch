@@ -13,6 +13,10 @@ RSpec.describe Hutch::Waiter do
     end
 
     described_class::SHUTDOWN_SIGNALS.each do |signal|
+      # JRuby does not support QUIT:
+      # The signal QUIT is in use by the JVM and will not work correctly on this platform
+      next if signal == 'QUIT' && defined?(JRUBY_VERSION)
+
       context "a #{signal} signal is received" do
         it "logs that hutch is stopping" do
           expect(Hutch::Logging.logger).to receive(:info)
