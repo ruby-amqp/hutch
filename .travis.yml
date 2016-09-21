@@ -8,6 +8,7 @@ rvm:
   - "jruby-9.1.5.0"
 
 jdk:
+  - oraclejdk7
   - oraclejdk8
 
 env:
@@ -28,3 +29,5 @@ matrix:
       jdk: oraclejdk8
     - rvm: 2.0
       jdk: oraclejdk8
+    - rvm: jruby-9.1.5.0
+      jdk: oraclejdk7
