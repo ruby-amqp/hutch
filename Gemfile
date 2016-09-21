@@ -4,8 +4,8 @@ gemspec
 
 group :development do
   gem "rake"
-  gem "guard", "~> 2.14", platform: :mri
-  gem "guard-rspec", "~> 4.7", platform: :mri
+  gem "guard", "~> 2.14", platform: :mri_23
+  gem "guard-rspec", "~> 4.7", platform: :mri_23
 end
 
 group :development, :test do
