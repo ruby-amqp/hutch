@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'hutch/error_handlers/opbeat'
-
 describe Hutch::ErrorHandlers::Opbeat do
   let(:error_handler) { Hutch::ErrorHandlers::Opbeat.new }
 
