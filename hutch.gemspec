@@ -10,17 +10,7 @@ Gem::Specification.new do |gem|
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.12.1'
-  gem.add_runtime_dependency 'activesupport', (RUBY_VERSION >= '2.3' ? '>= 4.0' : '~> 4.0')
-  gem.add_development_dependency 'rspec', '~> 3.0'
-  gem.add_development_dependency 'simplecov', '~> 0.12'
-  gem.add_development_dependency 'yard', '~> 0.9'
-
-  if defined?(JRUBY_VERSION)
-    gem.add_development_dependency 'kramdown', '> 0'
-  else
-    gem.add_development_dependency 'redcarpet', '> 0'
-  end
-  gem.add_development_dependency 'github-markup', '> 0'
+  gem.add_runtime_dependency 'activesupport'
 
   gem.name = 'hutch'
   gem.summary = 'Easy inter-service communication using RabbitMQ.'
