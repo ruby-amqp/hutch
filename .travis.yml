@@ -11,7 +11,7 @@ jdk:
   - oraclejdk8
 
 env:
-  JRUBY_OPTS: "--debug"
+  - JRUBY_OPTS=--debug
 
 sudo: false
 
