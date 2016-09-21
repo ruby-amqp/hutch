@@ -20,14 +20,14 @@ services:
   - rabbitmq
 
 matrix:
-  exclude:
+  include:
     - rvm: 2.3.0
-      jdk: oraclejdk8
-    - rvm: 2.2
-      jdk: oraclejdk8
-    - rvm: 2.1
-      jdk: oraclejdk8
-    - rvm: 2.0
-      jdk: oraclejdk8
-    - rvm: jruby-9.1.5.0
       jdk: oraclejdk7
+    - rvm: 2.2
+      jdk: oraclejdk7
+    - rvm: 2.1
+      jdk: oraclejdk7
+    - rvm: 2.0
+      jdk: oraclejdk7
+    - rvm: jruby-9.1.5.0
+      jdk: oraclejdk8
