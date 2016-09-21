@@ -16,6 +16,10 @@ Contributed by Pierre-Louis Gottfrois.
 
 GH issue: [hutch#238](https://github.com/gocardless/hutch/pull/238)
 
+### Opbeat Error Handler
+
+Contributed by Olle Jonsson.
+
 ## 0.22.1 — June 7th, 2016
 
 ### Message Payload is Reported to Sentry
