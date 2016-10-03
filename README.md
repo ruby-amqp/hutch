@@ -317,6 +317,20 @@ Known configuration parameters are:
  * `write_timeout`: Bunny's socket write timeout (default: `11`)
  * `tracer`: tracer to use to track message processing
 
+### Environment variables
+
+The file configuration options mentioned above can also be passed in via environment variables, using the `HUTCH_` prefix, eg.
+
+ * `connection_timeout` &rarr; `HUTCH_CONNECTION_TIMEOUT`.
+
+### Configuration precedence
+
+In order from lowest to highest precedence:
+
+0. Default values
+0. `HUTCH_*` environment variables
+0. Configuration file
+0. Explicit settings through `Hutch::Config.set`
 
 ## Supported RabbitMQ Versions
 
