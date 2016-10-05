@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
     gem.add_runtime_dependency 'bunny', '>= 2.5.0'
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
-  gem.add_runtime_dependency 'multi_json', '~> 1.12.1'
+  gem.add_runtime_dependency 'multi_json', '~> 1.12'
   gem.add_runtime_dependency 'activesupport'
 
   gem.name = 'hutch'
