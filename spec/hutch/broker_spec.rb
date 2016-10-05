@@ -329,12 +329,12 @@ describe Hutch::Broker do
 
       it 'publishes to the exchange' do
         expect(broker.exchange).to receive(:publish).once
-        broker.publish('test.key', 'message')
+        broker.publish('test.key', {key: "value"})
       end
 
       it 'sets default properties' do
         expect(broker.exchange).to receive(:publish).with(
-          JSON.dump("message"),
+          JSON.dump({key: "value"}),
           hash_including(
             persistent: true,
             routing_key: 'test.key',
@@ -342,12 +342,12 @@ describe Hutch::Broker do
           )
         )
 
-        broker.publish('test.key', 'message')
+        broker.publish('test.key', {key: "value"})
       end
 
       it 'allows passing message properties' do
         expect(broker.exchange).to receive(:publish).once
-        broker.publish('test.key', 'message', {expiration: "2000", persistent: false})
+        broker.publish('test.key', {key: "value"}, {expiration: "2000", persistent: false})
       end
 
       context 'when there are global properties' do
@@ -358,8 +358,8 @@ describe Hutch::Broker do
 
           it 'merges the properties' do
             expect(broker.exchange).
-              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
-            broker.publish('test.key', 'message')
+              to receive(:publish).with('{"key":"value"}', hash_including(app_id: 'app'))
+            broker.publish('test.key', {key: "value"})
           end
         end
 
@@ -370,8 +370,8 @@ describe Hutch::Broker do
 
           it 'calls the proc and merges the properties' do
             expect(broker.exchange).
-              to receive(:publish).with('"message"', hash_including(app_id: 'app'))
-            broker.publish('test.key', 'message')
+              to receive(:publish).with('{"key":"value"}', hash_including(app_id: 'app'))
+            broker.publish('test.key', {key: "value"})
           end
         end
       end
@@ -380,13 +380,13 @@ describe Hutch::Broker do
         it 'does not wait for confirms on the channel', adapter: :bunny do
           expect_any_instance_of(Bunny::Channel).
             to_not receive(:wait_for_confirms)
-          broker.publish('test.key', 'message')
+          broker.publish('test.key', {key: "value"})
         end
 
         it 'does not wait for confirms on the channel', adapter: :march_hare do
           expect_any_instance_of(MarchHare::Channel).
             to_not receive(:wait_for_confirms)
-          broker.publish('test.key', 'message')
+          broker.publish('test.key', {key: "value"})
         end
       end
 
@@ -400,13 +400,13 @@ describe Hutch::Broker do
         it 'waits for confirms on the channel', adapter: :bunny do
           expect_any_instance_of(Bunny::Channel).
             to receive(:wait_for_confirms)
-          broker.publish('test.key', 'message')
+          broker.publish('test.key', {key: "value"})
         end
 
         it 'waits for confirms on the channel', adapter: :march_hare do
           expect_any_instance_of(MarchHare::Channel).
             to receive(:wait_for_confirms)
-          broker.publish('test.key', 'message')
+          broker.publish('test.key', {key: "value"})
         end
       end
     end
@@ -415,13 +415,13 @@ describe Hutch::Broker do
       before { broker.set_up_amqp_connection; broker.disconnect }
 
       it 'raises an exception' do
-        expect { broker.publish('test.key', 'message') }.
+        expect { broker.publish('test.key', {key: "value"}) }.
           to raise_exception(Hutch::PublishError)
       end
 
       it 'logs an error' do
         expect(broker.logger).to receive(:error)
-        broker.publish('test.key', 'message') rescue nil
+        broker.publish('test.key', {key: "value"}) rescue nil
       end
     end
   end
