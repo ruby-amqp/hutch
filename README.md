@@ -332,6 +332,250 @@ In order from lowest to highest precedence:
 0. Configuration file
 0. Explicit settings through `Hutch::Config.set`
 
+### Generated list of configuration options
+
+<table border="1" class="settings">
+  <thead>
+    <tr>
+      <th>
+        Setting name
+      </th>
+      <th>
+        Default value
+      </th>
+      <th>
+        Type
+      </th>
+      <th>
+        ENV variable
+      </th>
+      <th>
+        Description
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  
+    <tr>
+      <td><tt>mq_host</tt></td>
+      <td>127.0.0.1</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_HOST</tt></td>
+      <td><p>RabbitMQ hostname</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_exchange</tt></td>
+      <td>hutch</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_EXCHANGE</tt></td>
+      <td><p>RabbitMQ Exchange to use for publishing</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_vhost</tt></td>
+      <td>/</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_VHOST</tt></td>
+      <td><p>RabbitMQ vhost to use</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_username</tt></td>
+      <td>guest</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_USERNAME</tt></td>
+      <td><p>RabbitMQ username to use.</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_password</tt></td>
+      <td>guest</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_PASSWORD</tt></td>
+      <td><p>RabbitMQ password</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_api_host</tt></td>
+      <td>127.0.0.1</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_API_HOST</tt></td>
+      <td><p>RabbitMQ HTTP API hostname</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_port</tt></td>
+      <td>5672</td>
+      <td>Number</td>
+      <td><tt>HUTCH_MQ_PORT</tt></td>
+      <td><p>RabbitMQ port</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_api_port</tt></td>
+      <td>15672</td>
+      <td>Number</td>
+      <td><tt>HUTCH_MQ_API_PORT</tt></td>
+      <td><p>RabbitMQ HTTP API port</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>heartbeat</tt></td>
+      <td>30</td>
+      <td>Number</td>
+      <td><tt>HUTCH_HEARTBEAT</tt></td>
+      <td><p><a href="http://rabbitmq.com/heartbeats.html">RabbitMQ heartbeat timeout</a></p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>channel_prefetch</tt></td>
+      <td>0</td>
+      <td>Number</td>
+      <td><tt>HUTCH_CHANNEL_PREFETCH</tt></td>
+      <td><p>The <tt>basic.qos</tt> prefetch value to use.</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>connection_timeout</tt></td>
+      <td>11</td>
+      <td>Number</td>
+      <td><tt>HUTCH_CONNECTION_TIMEOUT</tt></td>
+      <td><p>Bunny's socket open timeout</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>read_timeout</tt></td>
+      <td>11</td>
+      <td>Number</td>
+      <td><tt>HUTCH_READ_TIMEOUT</tt></td>
+      <td><p>Bunny's socket read timeout</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>write_timeout</tt></td>
+      <td>11</td>
+      <td>Number</td>
+      <td><tt>HUTCH_WRITE_TIMEOUT</tt></td>
+      <td><p>Bunny's socket write timeout</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>graceful_exit_timeout</tt></td>
+      <td>11</td>
+      <td>Number</td>
+      <td><tt>HUTCH_GRACEFUL_EXIT_TIMEOUT</tt></td>
+      <td><p>FIXME: DOCUMENT THIS</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>consumer_pool_size</tt></td>
+      <td>1</td>
+      <td>Number</td>
+      <td><tt>HUTCH_CONSUMER_POOL_SIZE</tt></td>
+      <td><p>Bunny consumer work pool size</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_tls</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_MQ_TLS</tt></td>
+      <td><p>Should TLS be used?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_verify_peer</tt></td>
+      <td>true</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_MQ_VERIFY_PEER</tt></td>
+      <td><p>Should SSL certificate be verified?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>mq_api_ssl</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_MQ_API_SSL</tt></td>
+      <td><p>Should SSL be used for the RabbitMQ API?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>autoload_rails</tt></td>
+      <td>true</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_AUTOLOAD_RAILS</tt></td>
+      <td><p>Should the current Rails app directory be required?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>daemonise</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_DAEMONISE</tt></td>
+      <td><p>Should the Hutch runner process daemonise?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>publisher_confirms</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_PUBLISHER_CONFIRMS</tt></td>
+      <td><p>Should RabbitMQ publisher confirms be enabled?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>force_publisher_confirms</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_FORCE_PUBLISHER_CONFIRMS</tt></td>
+      <td><p>Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>enable_http_api_use</tt></td>
+      <td>true</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_ENABLE_HTTP_API_USE</tt></td>
+      <td><p>Should the RabbitMQ HTTP API be used?</p>
+</td>
+    </tr>
+  
+    <tr>
+      <td><tt>consumer_pool_abort_on_exception</tt></td>
+      <td>false</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_CONSUMER_POOL_ABORT_ON_EXCEPTION</tt></td>
+      <td><p>Should Bunny's consumer work pool threads abort on exception.</p>
+</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+
 ## Supported RabbitMQ Versions
 
 Hutch requires RabbitMQ 3.3 or later.
