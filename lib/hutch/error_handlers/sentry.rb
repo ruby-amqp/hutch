@@ -14,9 +14,9 @@ module Hutch
 
       def handle(properties, payload, consumer, ex)
         message_id = properties.message_id
-        prefix = "message(#{message_id || '-'}): "
-        logger.error prefix + "Logging event to Sentry"
-        logger.error prefix + "#{ex.class} - #{ex.message}"
+        prefix = "message(#{message_id || '-'}):"
+        logger.error "#{prefix} Logging event to Sentry"
+        logger.error "#{prefix} #{ex.class} - #{ex.message}"
         Raven.capture_exception(ex, extra: { payload: payload })
       end
     end
