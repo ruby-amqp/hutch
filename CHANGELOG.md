@@ -3,7 +3,7 @@
 No changes yet.
 
 
-## 0.23.0 — October 20th, 2016
+## 0.23.1 — October 20th, 2016
 
 This release contains a **breaking change** in the error
 handlers interface.
