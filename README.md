@@ -438,7 +438,7 @@ In order from lowest to highest precedence:
     </tr>
   
     <tr>
-      <td><tt>channel_prefetch</a></tt></td>
+      <td><tt>channel_prefetch</tt></td>
       <td>0</td>
       <td>Number</td>
       <td><tt>HUTCH_CHANNEL_PREFETCH</tt></td>
