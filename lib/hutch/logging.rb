@@ -9,12 +9,12 @@ module Hutch
       end
     end
 
-    def self.setup_logger(target = $stdout)
+    def self.setup_logger
       require 'hutch/config'
-      @logger = Logger.new(target)
-      @logger.level = Hutch::Config.log_level
-      @logger.formatter = HutchFormatter.new
-      @logger
+      @logger = Logger.new($stdout).tap do |l|
+        l.level = Hutch::Config.log_level
+        l.formatter = HutchFormatter.new
+      end
     end
 
     def self.logger
