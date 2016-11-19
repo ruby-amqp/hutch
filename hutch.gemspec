@@ -10,11 +10,11 @@ Gem::Specification.new do |gem|
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.12'
-  gem.add_runtime_dependency 'activesupport'
+  gem.add_runtime_dependency 'activesupport', '>= 4.2', '< 6'
 
   gem.name = 'hutch'
   gem.summary = 'Easy inter-service communication using RabbitMQ.'
-  gem.description = 'Hutch is a Ruby library for enabling asynchronous ' +
+  gem.description = 'Hutch is a Ruby library for enabling asynchronous ' \
                     'inter-service communication using RabbitMQ.'
   gem.version = Hutch::VERSION.dup
   gem.required_ruby_version = '>= 2.0'
