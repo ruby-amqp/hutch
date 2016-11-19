@@ -1,14 +1,20 @@
 require 'hutch/logging'
 
 module Hutch
+  # Signal-handling class.
   class Waiter
     include Logging
-    
-    class SkipHere < Exception
+
+    class ContinueProcessingSignals < RuntimeError
     end
-    
-    SHUTDOWN_SIGNALS = %w(QUIT TERM INT).keep_if { |s| Signal.list.keys.include? s }.freeze
-    USER_SIGNALS = %w(USR1 USR2).keep_if { |s| Signal.list.keys.include?(s) }.freeze
+
+    def self.supported_signals_of(list)
+      list.keep_if { |s| Signal.list.keys.include? s }
+    end
+
+    SHUTDOWN_SIGNALS = supported_signals_of(%w(QUIT TERM INT)).freeze
+    USER_SIGNALS = supported_signals_of(%w(TTIN USR1 USR2)).freeze
+    REGISTERED_SIGNALS = (SHUTDOWN_SIGNALS + USER_SIGNALS).freeze
 
     def self.wait_until_signaled
       new.wait_until_signaled
@@ -18,23 +24,57 @@ module Hutch
       self.sig_read, self.sig_write = IO.pipe
 
       register_signal_handlers
-      
+
       begin
         wait_for_signal
 
-        sig = sig_read.gets.strip.downcase
-        if USER_SIGNALS.include?(sig.upcase)
-          logger.info "FUN TIME! #{sig}"
-          raise SkipHere
-        else
-          logger.info "caught sig#{sig}, stopping hutch..."
-        end
-      rescue SkipHere
+        sig = sig_read.gets.strip
+        handle_signal(sig)
+      rescue ContinueProcessingSignals
         retry
       end
     end
 
+    def handle_signal(sig)
+      raise ContinueProcessingSignals unless REGISTERED_SIGNALS.include?(sig)
+      if user_signal?(sig)
+        handle_user_signal(sig)
+      else
+        handle_shutdown_signal(sig)
+      end
+    end
+
+    def handle_shutdown_signal(sig)
+      logger.info "caught SIG#{sig}, stopping hutch..."
+    end
+
+    # @raises ContinueProcessingSignals
+    def handle_user_signal(sig)
+      case sig
+      when 'TTIN' then handle_ttin
+      when 'USR1', 'USR2' then handle_user_defined_signals
+      else
+        raise "Assertion failed - unhandled signal: #{sig.inspect}"
+      end
+      raise ContinueProcessingSignals
+    end
+
     private
+
+    def handle_ttin
+      Thread.list.each do |thread|
+        logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+        if thread.backtrace
+          logger.warn thread.backtrace.join("\n")
+        else
+          logger.warn '<no backtrace available>'
+        end
+      end
+    end
+
+    def handle_user_defined_signals
+      logger.warn "SIG#{sig} noted. Continuing." # TODO: Find useful behavior
+    end
 
     attr_accessor :sig_read, :sig_write
 
@@ -43,13 +83,17 @@ module Hutch
     end
 
     def register_signal_handlers
-      (SHUTDOWN_SIGNALS + USER_SIGNALS).each do |sig|
+      REGISTERED_SIGNALS.each do |sig|
         # This needs to be reentrant, so we queue up signals to be handled
         # in the run loop, rather than acting on signals here
         trap(sig) do
           sig_write.puts(sig)
         end
       end
+    end
+
+    def user_signal?(sig)
+      USER_SIGNALS.include?(sig)
     end
   end
 end
