@@ -13,7 +13,8 @@ module Hutch
     end
 
     SHUTDOWN_SIGNALS = supported_signals_of(%w(QUIT TERM INT)).freeze
-    USER_SIGNALS = supported_signals_of(%w(TTIN USR1 USR2)).freeze
+    # We have chosen a JRuby-supported signal
+    USER_SIGNALS = supported_signals_of(%w(USR2)).freeze
     REGISTERED_SIGNALS = (SHUTDOWN_SIGNALS + USER_SIGNALS).freeze
 
     def self.wait_until_signaled
@@ -51,17 +52,15 @@ module Hutch
     # @raises ContinueProcessingSignals
     def handle_user_signal(sig)
       case sig
-      when 'TTIN' then handle_ttin
-      when 'USR1', 'USR2' then handle_user_defined_signals
-      else
-        raise "Assertion failed - unhandled signal: #{sig.inspect}"
+      when 'USR2' then handle_usr2
+      else raise "Assertion failed - unhandled signal: #{sig.inspect}"
       end
       raise ContinueProcessingSignals
     end
 
     private
 
-    def handle_ttin
+    def handle_usr2
       Thread.list.each do |thread|
         logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
         if thread.backtrace
@@ -70,10 +69,6 @@ module Hutch
           logger.warn '<no backtrace available>'
         end
       end
-    end
-
-    def handle_user_defined_signals
-      logger.warn "SIG#{sig} noted. Continuing." # TODO: Find useful behavior
     end
 
     attr_accessor :sig_read, :sig_write
