@@ -1,3 +1,4 @@
+require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 
 desc "Run an IRB session with Hutch pre-loaded"

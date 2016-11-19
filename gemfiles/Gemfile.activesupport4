@@ -1,2 +1,0 @@
-eval_gemfile File.expand_path('../../Gemfile', __FILE__)
-gem 'activesupport', '~> 4.0'
