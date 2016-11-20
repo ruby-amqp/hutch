@@ -2,6 +2,9 @@ require 'hutch/logging'
 
 module Hutch
   # Signal-handling class.
+  #
+  # Currently, the signal USR2 performs a thread dump,
+  # while QUIT, TERM and INT all perform a graceful shutdown.
   class Waiter
     include Logging
 
@@ -45,29 +48,34 @@ module Hutch
       end
     end
 
-    def handle_shutdown_signal(sig)
-      logger.info "caught SIG#{sig}, stopping hutch..."
-    end
-
     # @raises ContinueProcessingSignals
     def handle_user_signal(sig)
       case sig
-      when 'USR2' then handle_usr2
+      when 'USR2' then log_thread_backtraces
       else raise "Assertion failed - unhandled signal: #{sig.inspect}"
       end
       raise ContinueProcessingSignals
     end
 
+    def handle_shutdown_signal(sig)
+      logger.info "caught SIG#{sig}, stopping hutch..."
+    end
+
     private
 
-    def handle_usr2
+    def log_thread_backtraces
+      logger.info 'Requested a VM-wide thread stack trace dump...'
       Thread.list.each do |thread|
-        logger.warn "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
-        if thread.backtrace
-          logger.warn thread.backtrace.join("\n")
-        else
-          logger.warn '<no backtrace available>'
-        end
+        logger.info "Thread TID-#{thread.object_id.to_s(36)} #{thread['label']}"
+        logger.info backtrace_for(thread)
+      end
+    end
+
+    def backtrace_for(thread)
+      if thread.backtrace
+        thread.backtrace.join("\n")
+      else
+        '<no backtrace available>'
       end
     end
 
