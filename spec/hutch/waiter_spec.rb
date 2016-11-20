@@ -20,7 +20,7 @@ RSpec.describe Hutch::Waiter do
       context "a #{signal} signal is received" do
         it "logs that hutch is stopping" do
           expect(Hutch::Logging.logger).to receive(:info)
-            .with("caught sig#{signal.downcase}, stopping hutch...")
+            .with("caught SIG#{signal}, stopping hutch...")
 
           start_kill_thread(signal)
           described_class.wait_until_signaled
