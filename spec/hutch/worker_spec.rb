@@ -1,7 +1,5 @@
 require 'spec_helper'
 require 'hutch/worker'
-require 'bunny/channel'
-require 'bunny/queue'
 
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
@@ -33,12 +31,8 @@ describe Hutch::Worker do
   end
 
   describe '#setup_queue' do
-    let(:queue) { instance_double(Bunny::Queue, bind: nil, subscribe: nil, channel: channel) }
-    let(:channel) { instance_double(Bunny::Channel) }
-    before do
-      allow(broker).to receive_messages(queue: queue, bind_queue: nil)
-      allow(channel).to receive(:generate_consumer_tag).with('hutch').and_return('hutch-random-tag')
-    end
+    let(:queue) { double('Queue', bind: nil, subscribe: nil) }
+    before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
       expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_arguments).and_return(queue)
@@ -51,15 +45,14 @@ describe Hutch::Worker do
     end
 
     it 'sets up a subscription' do
-      expect(queue).to receive(:subscribe).with(consumer_tag: 'hutch-random-tag', manual_ack: true)
+      expect(queue).to receive(:subscribe).with(consumer_tag: %r(^hutch\-.{36}$), manual_ack: true)
       worker.setup_queue(consumer)
     end
 
     context 'with a configured consumer tag prefix' do
       it 'sets up a subscription with the configured tag prefix' do
         Hutch::Config.set(:consumer_tag_prefix, 'appname')
-        expect(channel).to receive(:generate_consumer_tag).with('appname').and_return('appname-random-tag')
-        expect(queue).to receive(:subscribe).with(consumer_tag: 'appname-random-tag', manual_ack: true)
+        expect(queue).to receive(:subscribe).with(consumer_tag: %r(^appname\-.{36}$), manual_ack: true)
         worker.setup_queue(consumer)
       end
     end
