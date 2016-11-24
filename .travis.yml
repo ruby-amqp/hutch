@@ -3,7 +3,7 @@ cache: bundler
 before_install: gem i bundler
 matrix:
   include:
-    - rvm: 2.3.2
+    - rvm: 2.3.3
     - rvm: 2.2
     - rvm: 2.1
     - rvm: 2.0
