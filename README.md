@@ -358,6 +358,11 @@ In order from lowest to highest precedence:
 
 ### Generated list of configuration options
 
+Generate with
+
+0. `yard doc lib/hutch/config.rb`
+0. Copy the _Configuration_ section from `doc/Hutch/Config.html` here, with the anchor tags stripped.
+
 <table border="1" class="settings" style="overflow:visible;">
   <thead>
     <tr>
@@ -593,6 +598,15 @@ In order from lowest to highest precedence:
       <td>Boolean</td>
       <td><tt>HUTCH_CONSUMER_POOL_ABORT_ON_EXCEPTION</tt></td>
       <td><p>Should Bunny's consumer work pool threads abort on exception.</p>
+</td>
+    </tr>
+
+    <tr>
+      <td><tt>consumer_tag_prefix</tt></td>
+      <td>hutch</td>
+      <td>String</td>
+      <td><tt>HUTCH_CONSUMER_TAG_PREFIX</tt></td>
+      <td><p>Prefix displayed on the consumers tags.</p>
 </td>
     </tr>
   
