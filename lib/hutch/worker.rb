@@ -108,7 +108,9 @@ module Hutch
     def unique_consumer_tag
       prefix = Hutch::Config[:consumer_tag_prefix]
       unique_part = SecureRandom.uuid
-      "#{prefix}-#{unique_part}"
+      "#{prefix}-#{unique_part}".tap do |tag|
+        raise "Tag must be 255 bytes long at most, current one is #{tag.bytesize} ('#{tag}')" if tag.bytesize > 255
+      end
     end
   end
 end
