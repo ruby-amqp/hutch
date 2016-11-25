@@ -1,12 +1,12 @@
 ![](http://cl.ly/image/3h0q3F3G142K/hutch.png)
 
-Hutch is a Ruby library for enabling asynchronous inter-service communication
-in a service-oriented architecture, using RabbitMQ.
-
 [![Gem Version](https://badge.fury.io/rb/hutch.svg)](http://badge.fury.io/rb/hutch)
 [![Build Status](https://travis-ci.org/gocardless/hutch.svg?branch=master)](https://travis-ci.org/gocardless/hutch)
 [![Dependency Status](https://gemnasium.com/gocardless/hutch.svg)](https://gemnasium.com/gocardless/hutch)
 [![Code Climate](https://codeclimate.com/github/gocardless/hutch.svg)](https://codeclimate.com/github/gocardless/hutch)
+
+Hutch is a Ruby library for enabling asynchronous inter-service communication
+in a service-oriented architecture, using RabbitMQ.
 
 To install with RubyGems:
 
@@ -14,16 +14,34 @@ To install with RubyGems:
 gem install hutch
 ```
 
-## Project Maturity
+<!-- Tocer[start]: Auto-generated, don't remove. -->
 
-Hutch is a moderately mature project (started in early 2013)
-that was extracted from production systems.
+### Table of Contents
 
+  - [Requirements](#requirements)
+  - [Overview](#overview)
+    - [Project Maturity](#project-maturity)
+  - [Consumers](#consumers)
+    - [Message Processing Tracers](#message-processing-tracers)
+  - [Running Hutch](#running-hutch)
+    - [Loading Consumers](#loading-consumers)
+    - [Stopping Hutch](#stopping-hutch)
+  - [Producers](#producers)
+    - [Producer Configuration](#producer-configuration)
+    - [Publisher Confirms](#publisher-confirms)
+    - [Writing Well-Behaved Publishers](#writing-well-behaved-publishers)
+  - [Configuration](#configuration)
+    - [Config File](#config-file)
+    - [Environment variables](#environment-variables)
+    - [Configuration precedence](#configuration-precedence)
+    - [Generated list of configuration options](#generated-list-of-configuration-options)
 
-## Supported Ruby Versions
+<!-- Tocer[finish]: Auto-generated, don't remove. -->
 
-Hutch requires CRuby 2.0+ or JRuby 9K.
+## Requirements
 
+- Hutch requires Ruby 2.0+ or JRuby 9K.
+- Hutch requires RabbitMQ 3.3 or later.
 
 ## Overview
 
@@ -39,8 +57,12 @@ and so on. Publishers connect to RabbitMQ via `Hutch.connect` and publish using 
 Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.info)
 (on JRuby) under the hood.
 
+### Project Maturity
 
-## Defining Consumers
+Hutch is a moderately mature project (started in early 2013)
+that was extracted from production systems.
+
+## Consumers
 
 Consumers receive messages from a RabbitMQ queue. That queue may be bound to
 one or more topics (represented by routing keys).
@@ -136,11 +158,13 @@ to learn more.
 
 Tracers allow you to track message processing.
 
-#### NewRelic
+This will enable NewRelic custom instrumentation:
+
 ```ruby
 Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
 ```
-This will enable NewRelic custom instrumentation. Batteries included! Screenshoots available [here](https://monosnap.com/list/557020a000779174f23467e3).
+
+Batteries included! 
 
 ## Running Hutch
 
@@ -279,7 +303,7 @@ end
 If using publisher confirms with amqp gem, see [this issue][pc-issue]
 and [this gist][pc-gist] for more info.
 
-## Configuration Reference
+## Configuration
 
 ### Config File
 
@@ -334,7 +358,7 @@ In order from lowest to highest precedence:
 
 ### Generated list of configuration options
 
-<table border="1" class="settings">
+<table border="1" class="settings" style="overflow:visible;">
   <thead>
     <tr>
       <th>
@@ -575,10 +599,6 @@ In order from lowest to highest precedence:
   </tbody>
 </table>
 
-
-## Supported RabbitMQ Versions
-
-Hutch requires RabbitMQ 3.3 or later.
 
 ---
 
