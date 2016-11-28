@@ -130,6 +130,9 @@ module Hutch
     # The option is ignored on JRuby.
     boolean_setting :consumer_pool_abort_on_exception, false
 
+    # Prefix displayed on the consumers tags.
+    string_setting :consumer_tag_prefix, 'hutch'
+
     # Set of all setting keys
     ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 

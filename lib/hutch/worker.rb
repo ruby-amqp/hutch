@@ -4,6 +4,7 @@ require 'hutch/broker'
 require 'hutch/acknowledgements/nack_on_all_failures'
 require 'hutch/waiter'
 require 'carrot-top'
+require 'securerandom'
 
 module Hutch
   class Worker
@@ -44,7 +45,7 @@ module Hutch
       queue = @broker.queue(consumer.get_queue_name, consumer.get_arguments)
       @broker.bind_queue(queue, consumer.routing_keys)
 
-      queue.subscribe(manual_ack: true) do |*args|
+      queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true) do |*args|
         delivery_info, properties, payload = Hutch::Adapter.decode_message(*args)
         handle_message(consumer, delivery_info, properties, payload)
       end
@@ -103,5 +104,13 @@ module Hutch
     private
 
     attr_accessor :setup_procs
+
+    def unique_consumer_tag
+      prefix = Hutch::Config[:consumer_tag_prefix]
+      unique_part = SecureRandom.uuid
+      "#{prefix}-#{unique_part}".tap do |tag|
+        raise "Tag must be 255 bytes long at most, current one is #{tag.bytesize} ('#{tag}')" if tag.bytesize > 255
+      end
+    end
   end
 end
