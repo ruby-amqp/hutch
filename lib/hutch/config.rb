@@ -60,6 +60,9 @@ module Hutch
     # RabbitMQ password
     string_setting :mq_password, 'guest'
 
+    # RabbitMQ uri
+    string_setting :uri, nil
+
     # RabbitMQ HTTP API hostname
     string_setting :mq_api_host, '127.0.0.1'
 
