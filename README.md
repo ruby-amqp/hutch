@@ -431,6 +431,15 @@ Generate with
     </tr>
   
     <tr>
+      <td><tt>uri</tt></td>
+      <td>nil</td>
+      <td>String</td>
+      <td><tt>HUTCH_URI</tt></td>
+      <td><p>RabbitMQ URI (takes precedence over MQ username, password, host, port and vhost settings)</p>
+</td>
+    </tr>
+  
+    <tr>
       <td><tt>mq_api_host</tt></td>
       <td>127.0.0.1</td>
       <td>String</td>
