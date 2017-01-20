@@ -12,25 +12,39 @@ RSpec.describe Hutch::Waiter do
       end
     end
 
-    described_class::SHUTDOWN_SIGNALS.each do |signal|
-      # JRuby does not support QUIT:
-      # The signal QUIT is in use by the JVM and will not work correctly on this platform
-      next if signal == 'QUIT' && defined?(JRUBY_VERSION)
+    context 'a QUIT signal is received', if: RSpec::Support::Ruby.mri? do
+      it 'logs that hutch is stopping' do
+        expect(Hutch::Logging.logger).to receive(:info)
+          .with('caught SIGQUIT, stopping hutch...')
 
-      context "a #{signal} signal is received" do
-        it "logs that hutch is stopping" do
-          expect(Hutch::Logging.logger).to receive(:info)
-            .with("caught SIG#{signal}, stopping hutch...")
+        start_kill_thread('QUIT')
+        described_class.wait_until_signaled
+      end
+    end
 
-          start_kill_thread(signal)
-          described_class.wait_until_signaled
-        end
+    context 'a TERM signal is received' do
+      it 'logs that hutch is stopping' do
+        expect(Hutch::Logging.logger).to receive(:info)
+          .with('caught SIGTERM, stopping hutch...')
+
+        start_kill_thread('TERM')
+        described_class.wait_until_signaled
+      end
+    end
+
+    context 'a INT signal is received' do
+      it 'logs that hutch is stopping' do
+        expect(Hutch::Logging.logger).to receive(:info)
+          .with('caught SIGINT, stopping hutch...')
+
+        start_kill_thread('INT')
+        described_class.wait_until_signaled
       end
     end
   end
 
   describe described_class::SHUTDOWN_SIGNALS do
-    it "includes only things in Signal.list.keys" do
+    it 'includes only things in Signal.list.keys' do
       expect(described_class).to eq(described_class & Signal.list.keys)
     end
   end
