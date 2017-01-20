@@ -12,7 +12,9 @@ module Hutch
     end
 
     def self.supported_signals_of(list)
-      list.keep_if { |s| Signal.list.keys.include? s }
+      list.keep_if { |s| Signal.list.keys.include?(s) }.tap do |result|
+        result.delete('QUIT') if defined?(JRUBY_VERSION)
+      end
     end
 
     SHUTDOWN_SIGNALS = supported_signals_of(%w(QUIT TERM INT)).freeze
