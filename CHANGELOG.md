@@ -1,4 +1,10 @@
-## 0.24.0 — (unreleased)
+## 0.25.0 — (unreleased)
+
+No changes yet.
+
+
+
+## 0.24.0 — February 1st, 2017
 
 ### Configurable Consumer Prefixes
 
