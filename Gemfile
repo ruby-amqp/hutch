@@ -16,7 +16,7 @@ group :development do
 end
 
 group :development, :test do
-  gem "rspec", "~> 3.0"
+  gem "rspec", "~> 3.5"
   gem "simplecov", "~> 0.12"
 
   gem "sentry-raven"
