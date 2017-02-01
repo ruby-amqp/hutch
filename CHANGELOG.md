@@ -1,6 +1,40 @@
 ## 0.24.0 — (unreleased)
 
-No changes yet.
+### Configurable Consumer Prefixes
+
+Hutch consumers now can use user-provided prefixes for consumer tags.
+
+Contributed by Dávid Lantos.
+
+GitHub issue: [#265](https://github.com/gocardless/hutch/pull/265)
+
+### Signal Handling in Workers
+
+Hutch will now handle several OS signals:
+
+ * `USR2` will log stack traces of all alive VM threads
+ * `QUIT` (except on JRuby), `INT`, `TERM` will cause Hutch daemon to shut down
+ 
+ Contributed by Olle Jonsson.
+
+GitHub issues: [#263](https://github.com/gocardless/hutch/pull/263), [#271](https://github.com/gocardless/hutch/pull/271)
+
+### Opbeat Tracer
+
+Hutch now provides a tracer implementation for [Opbeat](https://opbeat.com/).
+
+Contributed by Olle Jonsson.
+
+GitHub issue: [#262](https://github.com/gocardless/hutch/pull/262)
+
+### `HUTCH_URI` Support
+
+The `HUTCH_URI` environment variable now can be used to configure
+Hutch connection URI.
+
+Contributed by Sam Stickland.
+
+GitHub issue: [#270](https://github.com/gocardless/hutch/pull/270)
 
 
 ## 0.23.1 — October 20th, 2016
