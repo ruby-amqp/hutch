@@ -30,7 +30,7 @@ describe Hutch::ErrorHandlers::Honeybadger do
             :payload => payload
           }
       }
-      expect(::Honeybadger).to receive(:notify_or_ignore).with(message)
+      expect(error_handler).to receive(:notify_honeybadger).with(message)
       error_handler.handle(properties, payload, consumer, ex)
     end
   end
