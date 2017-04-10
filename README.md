@@ -120,7 +120,9 @@ class FailedPaymentConsumer
 end
 ```
 
-Custom queue arguments can be found on [this page](https://www.rabbitmq.com/extensions.html).
+This sets the `x-max-length` header. For more details, see the [RabbitMQ
+documentation on Queue Length Limit](https://www.rabbitmq.com/maxlength.html). To find out more
+about custom queue arguments, consult the [RabbitMQ documentation on AMQP Protocol Extensions](https://www.rabbitmq.com/extensions.html). 
 
 Consumers can write to Hutch's log by calling the logger method. The logger method returns
 a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.html).
