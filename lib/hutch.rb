@@ -60,6 +60,7 @@ module Hutch
   end
 
   def self.publish(*args)
+    connect unless connected?
     broker.publish(*args)
   end
 end

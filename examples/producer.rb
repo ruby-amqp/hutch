@@ -1,6 +1,5 @@
 require 'hutch'
 
-Hutch.connect
 loop do
   print "Press return to send test message..."
   gets

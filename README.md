@@ -249,7 +249,6 @@ possible, this should be used, rather than directly interfacing with RabbitMQ
 libraries.
 
 ```ruby
-Hutch.connect
 Hutch.publish('routing.key', subject: 'payment', action: 'received')
 ```
 
