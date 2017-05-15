@@ -80,8 +80,8 @@ message[:id]  # => "02ABCXYZ"
 To subscribe to a topic, pass a routing key to `consume` in the class
 definition. To bind to multiple routing keys, simply pass extra routing keys
 in as additional arguments. Refer to the [RabbitMQ docs on topic exchanges
-][topic-docs] for more information about how to use routing keys. Here's an
-example consumer:
+](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html) for more information
+about how to use routing keys. Here's an example consumer:
 
 ```ruby
 class FailedPaymentConsumer
