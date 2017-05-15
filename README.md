@@ -302,8 +302,8 @@ AMQP.connect(host: config[:host]) do |connection|
 end
 ```
 
-If using publisher confirms with amqp gem, see [this issue][pc-issue]
-and [this gist][pc-gist] for more info.
+If using publisher confirms with amqp gem, see [this issue](https://github.com/ruby-amqp/amqp/issues/92)
+and [this gist](https://gist.github.com/3042381) for more info.
 
 ## Configuration
 
