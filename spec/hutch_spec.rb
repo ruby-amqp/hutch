@@ -83,5 +83,11 @@ describe Hutch do
       Hutch.publish(*args)
     end
   end
+
+  # only works on `rspec spec/hutch_spec.rb` will be green.
+  # i don`t know why the Hutch::CLI is loaded when `rspec spec`
+  pending 'client side' do
+    expect(Hutch.server?).to be_falsey
+  end
 end
 

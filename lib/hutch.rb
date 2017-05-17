@@ -17,6 +17,10 @@ module Hutch
     self.consumers << consumer
   end
 
+  def self.server?
+    !!defined?(Hutch::CLI)
+  end
+
   def self.consumers
     @consumers ||= []
   end
