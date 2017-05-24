@@ -72,8 +72,8 @@ module Hutch
         end
         rails_path = File.expand_path(File.join(path, 'config/environment.rb'))
         if is_rails_app && File.exist?(rails_path)
-          logger.info "found rails project (#{path}), booting app"
           ENV['RACK_ENV'] ||= ENV['RAILS_ENV'] || 'development'
+          logger.info "found rails project (#{path}), booting app in #{ENV['RACK_ENV']} environment"
           require rails_path
           ::Rails.application.eager_load!
           return true
