@@ -7,7 +7,6 @@ require 'hutch/serializers/identity'
 require 'hutch/serializers/json'
 require 'hutch/config'
 require 'hutch/message'
-require 'hutch/cli'
 require 'hutch/version'
 require 'hutch/error_handlers'
 require 'hutch/exceptions'
@@ -16,6 +15,10 @@ require 'hutch/tracers'
 module Hutch
   def self.register_consumer(consumer)
     self.consumers << consumer
+  end
+
+  def self.server?
+    !!defined?(Hutch::CLI)
   end
 
   def self.consumers

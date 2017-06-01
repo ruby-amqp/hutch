@@ -4,6 +4,10 @@ require 'tempfile'
 describe Hutch::CLI do
   let(:cli) { Hutch::CLI.new }
 
+  it 'it`s server side' do
+    expect(Hutch.server?).to be_truthy
+  end
+
   describe "#parse_options" do
     context "--config" do
       context "when the config file does not exist" do
