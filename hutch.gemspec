@@ -3,7 +3,7 @@ require File.expand_path('../lib/hutch/version', __FILE__)
 Gem::Specification.new do |gem|
   if defined?(JRUBY_VERSION)
     gem.platform = 'java'
-    gem.add_runtime_dependency 'march_hare', '>= 2.22.0'
+    gem.add_runtime_dependency 'march_hare', '>= 3.0.0'
   else
     gem.platform = Gem::Platform::RUBY
     gem.add_runtime_dependency 'bunny', '>= 2.7.0'
