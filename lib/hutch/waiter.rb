@@ -50,7 +50,7 @@ module Hutch
       end
     end
 
-    # @raises ContinueProcessingSignals
+    # @raise ContinueProcessingSignals
     def handle_user_signal(sig)
       case sig
       when 'USR2' then log_thread_backtraces
