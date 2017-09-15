@@ -27,7 +27,7 @@ module Hutch
         if ::Honeybadger.respond_to?(:notify_or_ignore)
           ::Honeybadger.notify_or_ignore(message)
         else
-          ::Honeybadger.notify(message.merge(force: true))
+          ::Honeybadger.notify(message)
         end
       end
     end
