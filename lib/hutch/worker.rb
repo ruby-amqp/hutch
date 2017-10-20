@@ -118,7 +118,7 @@ module Hutch
 
     def group_restrict?(consumer)
       allowed_consumers = consumers_groups[group]
-      allowed_consumers ? allowed_consumers.include?(consumer.name) : true
+      allowed_consumers ? !allowed_consumers.include?(consumer.name) : true
     end
 
     def group
