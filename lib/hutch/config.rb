@@ -136,6 +136,8 @@ module Hutch
     # Prefix displayed on the consumers tags.
     string_setting :consumer_tag_prefix, 'hutch'
 
+    string_setting :group, ''
+
     # Set of all setting keys
     ALL_KEYS = @boolean_keys + @number_keys + @string_keys
 
@@ -167,6 +169,7 @@ module Hutch
         # that will fall back to "nack unconditionally"
         error_acknowledgements: [],
         setup_procs: [],
+        consumers_groups: {},
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         pidfile: nil,
