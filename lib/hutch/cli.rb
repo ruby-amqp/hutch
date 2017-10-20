@@ -189,6 +189,10 @@ module Hutch
           Hutch::Config.pidfile = pidfile
         end
 
+        opts.on('--group GROUP', 'Consumer Group') do |group|
+          Hutch::Config.group = group
+        end
+
         opts.on('--version', 'Print the version and exit') do
           puts "hutch v#{VERSION}"
           exit 0
