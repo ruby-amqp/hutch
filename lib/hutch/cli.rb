@@ -189,7 +189,7 @@ module Hutch
           Hutch::Config.pidfile = pidfile
         end
 
-        opts.on('--group GROUP', 'Consumer Group') do |group|
+        opts.on('--only-group GROUP', 'Consumer Group') do |group|
           Hutch::Config.group = group
         end
 

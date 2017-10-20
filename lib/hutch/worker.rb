@@ -37,7 +37,7 @@ module Hutch
     def setup_queues
       logger.info 'setting up queues'
       @consumers.each do |consumer|
-        next if group_configured? && group_restrict?(consumer)
+        next if group_configured? && group_restricted?(consumer)
 
         setup_queue(consumer)
       end
@@ -116,7 +116,7 @@ module Hutch
       group.present?
     end
 
-    def group_restrict?(consumer)
+    def group_restricted?(consumer)
       allowed_consumers = consumers_groups[group]
       allowed_consumers ? !allowed_consumers.include?(consumer.name) : true
     end
