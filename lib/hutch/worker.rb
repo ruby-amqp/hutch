@@ -110,8 +110,8 @@ module Hutch
     private
 
     def group_configured?
-      if consumers_groups.blank? && group.present?
-        logger.warn 'Consumer groups were not set up.'
+      if group.present? && consumers_groups.blank?
+        logger.warn 'Consumers\' groups were not set up.'
       end
       group.present?
     end
