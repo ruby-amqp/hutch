@@ -36,10 +36,9 @@ module Hutch
     # Set up the queues for each of the worker's consumers.
     def setup_queues
       logger.info 'setting up queues'
-      @consumers.each do |consumer|
-        next if group_configured? && group_restricted?(consumer)
-
-        setup_queue(consumer)
+      vetted = @consumers.reject { |c| group_configured? && group_restricted?(c) }
+      vetted.each do |c|
+        setup_queue(c)
       end
     end
 
@@ -110,23 +109,27 @@ module Hutch
     private
 
     def group_configured?
-      if group.present? && consumers_groups.blank?
-        logger.warn 'Consumers\' groups were not set up.'
+      if group.present? && consumer_groups.blank?
+        logger.info 'Consumer groups are blank'
       end
       group.present?
     end
 
     def group_restricted?(consumer)
-      allowed_consumers = consumers_groups[group]
-      allowed_consumers ? !allowed_consumers.include?(consumer.name) : true
+      consumers_to_load = consumer_groups[group]
+      if consumers_to_load
+        !allowed_consumers.include?(consumer.name)
+      else
+        true
+      end
     end
 
     def group
       Hutch::Config[:group]
     end
 
-    def consumers_groups
-      Hutch::Config[:consumers_groups]
+    def consumer_groups
+      Hutch::Config[:consumer_groups]
     end
 
     attr_accessor :setup_procs

@@ -169,7 +169,7 @@ module Hutch
         # that will fall back to "nack unconditionally"
         error_acknowledgements: [],
         setup_procs: [],
-        consumers_groups: {},
+        consumer_groups: {},
         tracer: Hutch::Tracers::NullTracer,
         namespace: nil,
         pidfile: nil,
