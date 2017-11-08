@@ -90,6 +90,12 @@ module Hutch
       @worker.run
       :success
     rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
+      dummy_props = Class.new do
+        attr_accessor :message_id
+      end
+      Hutch::Config[:error_handlers].each do |backend|
+       backend.handle(dummy_props.new, {}, nil, ex)
+      end
       logger.fatal ex.message
       :error
     end
