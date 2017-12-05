@@ -1,9 +1,9 @@
 require 'hutch/logging'
+require 'hutch/error_handlers/base'
 
 module Hutch
   module ErrorHandlers
-    class Logger
-      include Logging
+    class Logger < ErrorHandlers::Base
 
       def handle(properties, payload, consumer, ex)
         message_id = properties.message_id
