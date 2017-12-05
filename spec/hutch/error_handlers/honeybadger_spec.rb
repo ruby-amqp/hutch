@@ -34,4 +34,25 @@ describe Hutch::ErrorHandlers::Honeybadger do
       error_handler.handle(properties, payload, consumer, ex)
     end
   end
+
+  describe '#handle_setup_exception' do
+    let(:error) do
+      begin
+        raise "Stuff went wrong during setup"
+      rescue RuntimeError => err
+        err
+      end
+    end
+
+    it "logs the error to Honeybadger" do
+      ex = error
+      message = {
+        :error_class => ex.class.name,
+          :error_message => "#{ ex.class.name }: #{ ex.message }",
+          :backtrace => ex.backtrace,
+      }
+      expect(error_handler).to receive(:notify_honeybadger).with(message)
+      error_handler.handle_setup_exception(ex)
+    end
+  end
 end

@@ -19,6 +19,12 @@ module Hutch
         logger.error "#{prefix} #{ex.class} - #{ex.message}"
         ::Opbeat.report(ex, extra: { payload: payload })
       end
+
+      def handle_setup_exception(ex)
+        logger.error "Logging setup exception to Opbeat"
+        logger.error "#{ex.class} - #{ex.message}"
+        ::Opbeat.report(ex)
+      end
     end
   end
 end

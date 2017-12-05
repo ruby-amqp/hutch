@@ -19,6 +19,13 @@ module Hutch
         logger.error "#{prefix} #{ex.class} - #{ex.message}"
         Raven.capture_exception(ex, extra: { payload: payload })
       end
+
+      def handle_setup_exception(ex)
+        logger.error "Logging setup exception to Sentry"
+        logger.error "#{ex.class} - #{ex.message}"
+        Raven.capture_exception(ex)
+      end
+
     end
   end
 end

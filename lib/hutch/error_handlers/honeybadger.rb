@@ -20,6 +20,14 @@ module Hutch
                            parameters: { payload: payload })
       end
 
+      def handle_setup_exception(ex)
+        logger.error "Logging setup exception to Honeybadger"
+        logger.error "#{ex.class} - #{ex.message}"
+        notify_honeybadger(error_class: ex.class.name,
+                           error_message: "#{ex.class.name}: #{ex.message}",
+                           backtrace: ex.backtrace)
+      end
+
       # Wrap API to support 3.0.0+
       #
       # @see https://github.com/honeybadger-io/honeybadger-ruby/blob/master/CHANGELOG.md#300---2017-02-06

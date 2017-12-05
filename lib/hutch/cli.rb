@@ -90,6 +90,9 @@ module Hutch
       @worker.run
       :success
     rescue ConnectionError, AuthenticationError, WorkerSetupError => ex
+      Hutch::Config[:error_handlers].each do |backend|
+        backend.handle_setup_exception(ex)
+      end
       logger.fatal ex.message
       :error
     end
