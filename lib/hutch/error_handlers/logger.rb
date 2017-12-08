@@ -12,6 +12,11 @@ module Hutch
         logger.error "#{prefix} #{ex.class} - #{ex.message}"
         logger.error (['backtrace:'] + ex.backtrace).join("\n")
       end
+
+      def handle_setup_exception(ex)
+        logger.error "#{ex.class} - #{ex.message}"
+        logger.error (['backtrace:'] + ex.backtrace).join("\n")
+      end
     end
   end
 end

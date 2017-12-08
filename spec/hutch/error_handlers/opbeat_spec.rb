@@ -19,4 +19,19 @@ describe Hutch::ErrorHandlers::Opbeat do
       error_handler.handle(properties, payload, double, error)
     end
   end
+
+  describe '#handle_setup_exception' do
+    let(:error) do
+      begin
+        raise "Stuff went wrong during setup"
+      rescue RuntimeError => err
+        err
+      end
+    end
+
+    it "logs the error to Opbeat" do
+      expect(Opbeat).to receive(:report).with(error)
+      error_handler.handle_setup_exception(error)
+    end
+  end
 end
