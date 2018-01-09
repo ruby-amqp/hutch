@@ -7,8 +7,6 @@ matrix:
     - rvm: 2.4.2
     - rvm: 2.3.5
     - rvm: 2.2.8
-    - rvm: 2.1
-    - rvm: 2.0
     - rvm: jruby-9.1.15.0
       jdk: oraclejdk8
       env:
