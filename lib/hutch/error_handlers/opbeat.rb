@@ -1,10 +1,10 @@
 require 'hutch/logging'
 require 'opbeat'
+require 'hutch/error_handlers/base'
 
 module Hutch
   module ErrorHandlers
-    class Opbeat
-      include Logging
+    class Opbeat < Base
 
       def initialize
         unless ::Opbeat.respond_to?(:report)

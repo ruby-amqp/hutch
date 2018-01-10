@@ -1,11 +1,11 @@
 require 'hutch/logging'
 require 'honeybadger'
+require 'hutch/error_handlers/base'
 
 module Hutch
   module ErrorHandlers
     # Error handler for the Honeybadger.io service
-    class Honeybadger
-      include Logging
+    class Honeybadger < Base
 
       def handle(properties, payload, consumer, ex)
         message_id = properties.message_id

@@ -1,10 +1,10 @@
 require 'hutch/logging'
 require 'airbrake'
+require 'hutch/error_handlers/base'
 
 module Hutch
   module ErrorHandlers
-    class Airbrake
-      include Logging
+    class Airbrake < Base
 
       def handle(properties, payload, consumer, ex)
         message_id = properties.message_id
