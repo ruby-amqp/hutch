@@ -1,10 +1,10 @@
 require 'hutch/logging'
 require 'raven'
+require 'hutch/error_handlers/base'
 
 module Hutch
   module ErrorHandlers
-    class Sentry
-      include Logging
+    class Sentry < Base
 
       def initialize
         unless Raven.respond_to?(:capture_exception)

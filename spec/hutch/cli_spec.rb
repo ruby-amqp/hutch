@@ -4,6 +4,19 @@ require 'tempfile'
 describe Hutch::CLI do
   let(:cli) { Hutch::CLI.new }
 
+  describe "#start_work_loop" do
+    context "connection error during setup" do
+      let(:error) { Hutch::ConnectionError.new }
+      it "gets reported using error handlers" do
+        allow(Hutch).to receive(:connect).and_raise(error)
+        Hutch::Config[:error_handlers].each do |backend|
+          expect(backend).to receive(:handle_setup_exception).with(error)
+        end
+        cli.start_work_loop
+      end
+    end
+  end
+
   describe "#parse_options" do
     context "--config" do
       context "when the config file does not exist" do
