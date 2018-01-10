@@ -97,7 +97,7 @@ describe Hutch::Worker do
       it 'requeues the message' do
         allow(consumer_instance).to receive(:process).and_raise('failed')
         requeuer = double
-        allow(requeuer).to receive(:handle).ordered { |delivery_info, properties, broker, e|
+        allow(requeuer).to receive(:handle) { |delivery_info, properties, broker, e|
           broker.requeue delivery_info.delivery_tag
           true
         }
