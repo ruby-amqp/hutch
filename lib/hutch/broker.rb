@@ -292,11 +292,16 @@ module Hutch
 
       u = URI.parse(@config[:uri])
 
+      @config[:mq_tls]      = u.scheme == 'amqps'
       @config[:mq_host]     = u.host
-      @config[:mq_port]     = u.port
+      @config[:mq_port]     = u.port || default_mq_port
       @config[:mq_vhost]    = u.path.sub(/^\//, "")
       @config[:mq_username] = u.user
       @config[:mq_password] = u.password
+    end
+
+    def default_mq_port
+      @config[:mq_tls] ? AMQ::Protocol::TLS_PORT : AMQ::Protocol::DEFAULT_PORT
     end
 
     def sanitized_uri
