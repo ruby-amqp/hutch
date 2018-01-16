@@ -92,6 +92,36 @@ describe Hutch::Broker do
 
       connection.close
     end
+
+    context 'when configured with a URI' do
+      context 'which specifies the port' do
+        before { config[:uri] = 'amqp://guest:guest@127.0.0.1:5672/' }
+
+        it 'successfully connects' do
+          expect { broker.open_connection }.not_to raise_error
+        end
+      end
+
+      context 'which does not specify port and uses the amqp scheme' do
+        before { config[:uri] = 'amqp://guest:guest@127.0.0.1/' }
+
+        it 'successfully connects' do
+          expect { broker.open_connection }.not_to raise_error
+        end
+      end
+
+      context 'which specifies the amqps scheme' do
+        before { config[:uri] = 'amqps://guest:guest@127.0.0.1/' }
+
+        it 'utilises TLS' do
+          expect(Hutch::Adapter).to receive(:new).with(
+            hash_including(tls: true, port: 5671)
+          ).and_return(instance_double('Hutch::Adapter', start: nil))
+
+          broker.open_connection
+        end
+      end
+    end
   end
 
   describe '#open_connection!' do
