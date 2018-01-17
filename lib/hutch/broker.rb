@@ -11,6 +11,24 @@ module Hutch
 
     attr_accessor :connection, :channel, :exchange, :api_client
 
+
+    DEFAULT_AMQP_PORT =
+      case RUBY_ENGINE
+      when "jruby" then
+        com.rabbitmq.client.ConnectionFactory::DEFAULT_AMQP_PORT
+      when "ruby" then
+        AMQ::Protocol::DEFAULT_PORT
+      end
+
+    DEFAULT_AMQPS_PORT =
+      case RUBY_ENGINE
+      when "jruby" then
+        com.rabbitmq.client.ConnectionFactory::DEFAULT_AMQP_OVER_SSL_PORT
+      when "ruby" then
+        AMQ::Protocol::TLS_PORT
+      end
+
+
     # @param config [nil,Hash] Configuration override
     def initialize(config = nil)
       @config = config || Hutch::Config
@@ -301,7 +319,7 @@ module Hutch
     end
 
     def default_mq_port
-      @config[:mq_tls] ? AMQ::Protocol::TLS_PORT : AMQ::Protocol::DEFAULT_PORT
+      @config[:mq_tls] ? DEFAULT_AMQPS_PORT : DEFAULT_AMQP_PORT
     end
 
     def sanitized_uri

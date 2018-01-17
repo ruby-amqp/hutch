@@ -98,7 +98,9 @@ describe Hutch::Broker do
         before { config[:uri] = 'amqp://guest:guest@127.0.0.1:5672/' }
 
         it 'successfully connects' do
-          expect { broker.open_connection }.not_to raise_error
+          c = broker.open_connection
+          expect(c).to be_open
+          c.close
         end
       end
 
@@ -106,7 +108,9 @@ describe Hutch::Broker do
         before { config[:uri] = 'amqp://guest:guest@127.0.0.1/' }
 
         it 'successfully connects' do
-          expect { broker.open_connection }.not_to raise_error
+          c = broker.open_connection
+          expect(c).to be_open
+          c.close
         end
       end
 
