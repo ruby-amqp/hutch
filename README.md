@@ -59,8 +59,9 @@ Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.i
 
 ### Project Maturity
 
-Hutch is a moderately mature project (started in early 2013)
-that was extracted from production systems.
+Hutch is a mature project that was originally extracted from production systems
+at [GoCardless](https://gocardless.com) in 2013 and is now maintained by a large
+group of contributors.
 
 ## Consumers
 
@@ -122,7 +123,7 @@ end
 
 This sets the `x-max-length` header. For more details, see the [RabbitMQ
 documentation on Queue Length Limit](https://www.rabbitmq.com/maxlength.html). To find out more
-about custom queue arguments, consult the [RabbitMQ documentation on AMQP Protocol Extensions](https://www.rabbitmq.com/extensions.html). 
+about custom queue arguments, consult the [RabbitMQ documentation on AMQP Protocol Extensions](https://www.rabbitmq.com/extensions.html).
 
 Consumers can write to Hutch's log by calling the logger method. The logger method returns
 a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.html).
@@ -166,7 +167,7 @@ This will enable NewRelic custom instrumentation:
 Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
 ```
 
-Batteries included! 
+Batteries included!
 
 ## Running Hutch
 
@@ -570,8 +571,3 @@ Generate with
     </tr>
   </tbody>
 </table>
-
-
----
-
-GoCardless ♥ open source. If you do too, come [join us](https://gocardless.com/jobs/backend_developer).
