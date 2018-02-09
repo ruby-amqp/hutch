@@ -14,7 +14,7 @@ require 'hutch/exceptions'
 require 'hutch/tracers'
 
 module Hutch
-  @@mutex = Mutex.new
+  @@connection_mutex = Mutex.new
 
   def self.register_consumer(consumer)
     self.consumers << consumer
@@ -42,7 +42,7 @@ module Hutch
   # @param config [Hash] Configuration
   # @option options [Boolean] :enable_http_api_use
   def self.connect(options = {}, config = Hutch::Config)
-    @@mutex.synchronize do
+    @@connection_mutex.synchronize do
       unless connected?
         @broker = Hutch::Broker.new(config)
         @broker.connect(options)
