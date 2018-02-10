@@ -1,3 +1,17 @@
+## 0.26.0 (unreleased)
+
+### Synchronized Connection Code
+
+The methods that connect to RabbitMQ are now synchronized which makes
+them safer to use in concurrent settings. Note that Hutch still
+uses a single Bunny channel which is not meant to be shared
+between threads without application-level synchronization for publishing.
+
+Contributed by Chris Barton.
+
+GitHub pull request: [#308](https://github.com/gocardless/hutch/pull/308).
+
+
 ## 0.25.0 - January 17th, 2018
 
 ### Consumer groups
