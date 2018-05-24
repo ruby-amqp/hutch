@@ -8,7 +8,7 @@ matrix:
     - rvm: "2.4.2"
     - rvm: "2.3.5"
     - rvm: "2.2.8"
-    - rvm: jruby-9.1.17.0
+    - rvm: jruby-9.2.0.0
       jdk: oraclejdk8
       env:
         - JRUBY_OPTS='--debug'
