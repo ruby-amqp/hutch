@@ -2,7 +2,6 @@
 
 [![Gem Version](https://badge.fury.io/rb/hutch.svg)](http://badge.fury.io/rb/hutch)
 [![Build Status](https://travis-ci.org/gocardless/hutch.svg?branch=master)](https://travis-ci.org/gocardless/hutch)
-[![Dependency Status](https://gemnasium.com/gocardless/hutch.svg)](https://gemnasium.com/gocardless/hutch)
 [![Code Climate](https://codeclimate.com/github/gocardless/hutch.svg)](https://codeclimate.com/github/gocardless/hutch)
 
 Hutch is a Ruby library for enabling asynchronous inter-service communication
