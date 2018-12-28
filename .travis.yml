@@ -4,11 +4,12 @@ before_install:
   - gem install bundler
 matrix:
   include:
+    - rvm: "2.6.0"
     - rvm: "2.5.1"
     - rvm: "2.4.2"
     - rvm: "2.3.5"
     - rvm: "2.2.8"
-    - rvm: jruby-9.2.0.0
+    - rvm: jruby-9.2.5.0
       jdk: oraclejdk8
       env:
         - JRUBY_OPTS='--debug'
