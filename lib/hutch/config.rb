@@ -89,6 +89,12 @@ module Hutch
     # Bunny's socket write timeout
     number_setting :write_timeout, 11
 
+    # Bunny's enable/disable network recovery
+    boolean_setting :automatically_recover, true
+
+    # Bunny's reconnect interval
+    number_setting :network_recovery_interval, 1
+
     # FIXME: DOCUMENT THIS
     number_setting :graceful_exit_timeout, 11
 
