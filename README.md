@@ -341,6 +341,8 @@ Known configuration parameters are:
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timeout`: Bunny's socket write timeout (default: `11`)
+ * `automatically_recover`: Bunny's enable/disable network recovery (default: `true`)
+ * `network_recovery_interval`: Bunny's reconnect interval (default: `1`)
  * `tracer`: tracer to use to track message processing
 
 ### Environment variables
@@ -483,6 +485,20 @@ Generate with
       <td>Number</td>
       <td><tt>HUTCH_WRITE_TIMEOUT</tt></td>
       <td><p>Bunny's socket write timeout</p></td>
+    </tr>
+    <tr>
+      <td><tt>automatically_recover</tt></td>
+      <td>true</td>
+      <td>Boolean</td>
+      <td><tt>HUTCH_AUTOMATICALLY_RECOVER</tt></td>
+      <td><p>Bunny's enable/disable network recovery</p></td>
+    </tr>
+    <tr>
+      <td><tt>network_recovery_interval</tt></td>
+      <td>1</td>
+      <td>Number</td>
+      <td><tt>HUTCH_NETWORK_RECOVERY_INTERVAL</tt></td>
+      <td><p>Bunny's reconnect interval</p></td>
     </tr>
     <tr>
       <td><tt>graceful_exit_timeout</tt></td>
