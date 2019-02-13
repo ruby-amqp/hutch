@@ -1,4 +1,14 @@
-## 0.26.0 (unreleased)
+## 0.27.0
+
+No changes yet.
+
+
+## 0.26.0 (February 13th, 2019)
+
+### Dependency Bumps
+
+Bunny and other dependencies were updated to their latest release
+series.
 
 ### Synchronized Connection Code
 
@@ -9,7 +19,21 @@ between threads without application-level synchronization for publishing.
 
 Contributed by Chris Barton.
 
-GitHub pull request: [#308](https://github.com/gocardless/hutch/pull/308).
+GitHub issue: [#308](https://github.com/gocardless/hutch/pull/308).
+
+### More Bunny Options Propagated
+
+Contributed by Damian Le Nouaille.
+
+GitHub issue: [#322](https://github.com/gocardless/hutch/pull/322).
+
+### Removed Opbeat Integration
+
+The service is no longer generally available.
+
+Contributed by Olle Jonsson.
+
+GitHub issue: [#313](https://github.com/gocardless/hutch/pull/313)
 
 
 ## 0.25.0 - January 17th, 2018
@@ -703,4 +727,3 @@ Hutch.global_properties = proc {
 ## 0.1.0 - September 9, 2013
 
 - Initial release
-
