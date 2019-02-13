@@ -1,4 +1,3 @@
 module Hutch
-  VERSION = '0.26.0.pre'.freeze
+  VERSION = '0.26.0'.freeze
 end
-
