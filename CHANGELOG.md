@@ -1,6 +1,9 @@
 ## 0.27.0
 
-No changes yet.
+### Dependency Bumps
+
+Bunny and other dependencies were updated to their latest release
+series.
 
 
 ## 0.26.0 (February 13th, 2019)
