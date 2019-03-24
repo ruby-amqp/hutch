@@ -22,7 +22,7 @@ RSpec.describe Hutch::Waiter do
       end
     end
 
-    context 'a TERM signal is received' do
+    context 'a TERM signal is received', if: !defined?(JRUBY_VERSION) do
       it 'logs that hutch is stopping' do
         expect(Hutch::Logging.logger).to receive(:info)
           .with('caught SIGTERM, stopping hutch...')
@@ -32,7 +32,7 @@ RSpec.describe Hutch::Waiter do
       end
     end
 
-    context 'a INT signal is received' do
+    context 'a INT signal is received', if: !defined?(JRUBY_VERSION) do
       it 'logs that hutch is stopping' do
         expect(Hutch::Logging.logger).to receive(:info)
           .with('caught SIGINT, stopping hutch...')
