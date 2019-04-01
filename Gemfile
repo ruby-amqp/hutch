@@ -23,7 +23,7 @@ group :development, :test do
   gem "honeybadger"
   gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
-  gem "airbrake", "~> 8.0"
+  gem "airbrake", "~> 9.0"
 end
 
 group :development, :darwin do
