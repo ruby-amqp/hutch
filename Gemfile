@@ -24,6 +24,7 @@ group :development, :test do
   gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
   gem "airbrake", "~> 9.0"
+  gem "rollbar"
 end
 
 group :development, :darwin do
