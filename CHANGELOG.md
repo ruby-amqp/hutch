@@ -1,4 +1,29 @@
-## 0.27.0
+## 0.28.0 (under development)
+
+No chages yet.
+
+
+## 0.27.0 (September 9th, 2019)
+
+### Enhancements
+
+ * Error handler for Rollback.
+
+   GitHub issue: [gocardless/hutch#332](https://github.com/gocardless/hutch/pull/332)
+
+   Contributed by Johan Kok.
+
+### Bug Fixes
+
+ * Allow for the latest ActiveSupport version.
+
+   GitHub issue: [gocardless/hutch#334](https://github.com/gocardless/hutch/pull/334)
+
+ * Signal tests are now skipped on JRuby.
+
+   Contributed by Olle Jonsson.
+
+   GitHub issue: [gocardless/hutch#326](https://github.com/gocardless/hutch/pull/326)
 
 ### Dependency Bumps
 
