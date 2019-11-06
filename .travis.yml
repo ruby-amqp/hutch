@@ -11,12 +11,17 @@ matrix:
     - rvm: "2.5.6"
     - rvm: "2.4.7"
     - rvm: "2.3.8"
-    - rvm: "jruby-9.2.8.0"
+    - rvm: "jruby-9.2.9.0"
     - rvm: "ruby-head"
   allow_failures:
     rvm:
-      - "jruby-9.2.8.0"
+      - "jruby-9.2.9.0"
       - ruby-head
+
+addons:
+  apt:
+    packages:
+    - rabbitmq-server 
 
 services:
   - rabbitmq
