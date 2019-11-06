@@ -18,5 +18,10 @@ matrix:
       - "jruby-9.2.9.0"
       - ruby-head
 
+addons:
+  apt:
+    packages:
+    - rabbitmq-server 
+
 services:
   - rabbitmq
