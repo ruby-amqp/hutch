@@ -1,3 +1,6 @@
+dist: bionic
+sudo: required
+
 language: ruby
 cache: bundler
 before_install:
@@ -17,11 +20,3 @@ matrix:
     rvm:
       - "jruby-9.2.9.0"
       - ruby-head
-
-addons:
-  apt:
-    packages:
-    - rabbitmq-server 
-
-services:
-  - rabbitmq
