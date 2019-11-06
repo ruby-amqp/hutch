@@ -8,6 +8,7 @@ before_install:
 before_script:
   - "./bin/ci/install_on_debian.sh"
   - until sudo lsof -i:5672; do echo "Waiting for RabbitMQ to start..."; sleep 1; done
+  - "./bin/ci/before_build.sh"
 matrix:
   include:
     - rvm: "2.6.4"
