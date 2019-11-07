@@ -181,12 +181,15 @@ module Hutch
     # Return a mapping of queue names to the routing keys they're bound to.
     def bindings
       results = Hash.new { |hash, key| hash[key] = [] }
-      api_client.bindings.each do |binding|
-        next if binding['destination'] == binding['routing_key']
-        next unless binding['source'] == @config[:mq_exchange]
-        next unless binding['vhost'] == @config[:mq_vhost]
+
+      filtered = api_client.bindings.
+        reject { |b| b['destination'] == b['routing_key'] }.
+        filter { |b| b['source'] == @config[:mq_exchange] && b['vhost'] == @config[:mq_vhost] }
+
+      filtered.each do |binding|
         results[binding['destination']] << binding['routing_key']
       end
+
       results
     end
 
@@ -194,8 +197,8 @@ module Hutch
     def unbind_redundant_bindings(queue, routing_keys)
       return unless http_api_use_enabled?
 
-      bindings.each do |dest, keys|
-        next unless dest == queue.name
+      filtered = bindings.filter { |dest, keys| dest == queue.name }
+      filtered.each do |dest, keys|
         keys.reject { |key| routing_keys.include?(key) }.each do |key|
           logger.debug "removing redundant binding #{queue.name} <--> #{key}"
           queue.unbind(exchange, routing_key: key)

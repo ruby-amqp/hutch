@@ -33,6 +33,20 @@ module Hutch
     def load_app
       # Try to load a Rails app in the current directory
       load_rails_app('.') if Hutch::Config.autoload_rails
+      set_up_code_paths!
+
+      # Because of the order things are required when we run the Hutch binary
+      # in hutch/bin, the Sentry Raven gem gets required **after** the error
+      # handlers are set up. Due to this, we never got any Sentry notifications
+      # when an error occurred in any of the consumers.
+      if defined?(Raven)
+        Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
+      end
+
+      true
+    end
+
+    def set_up_code_paths!
       Hutch::Config.require_paths.each do |path|
         # See if each path is a Rails app. If so, try to load it.
         next if load_rails_app(path)
@@ -51,16 +65,6 @@ module Hutch
           $LOAD_PATH.pop
         end
       end
-
-      # Because of the order things are required when we run the Hutch binary
-      # in hutch/bin, the Sentry Raven gem gets required **after** the error
-      # handlers are set up. Due to this, we never got any Sentry notifications
-      # when an error occurred in any of the consumers.
-      if defined?(Raven)
-        Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
-      end
-
-      true
     end
 
     def load_rails_app(path)
