@@ -109,10 +109,6 @@ module Hutch
       logger.info "opening rabbitmq channel with pool size #{consumer_pool_size}, abort on exception #{consumer_pool_abort_on_exception}"
       connection.create_channel(nil, consumer_pool_size, consumer_pool_abort_on_exception).tap do |ch|
         connection.prefetch_channel(ch, @config[:channel_prefetch])
-        if @config[:publisher_confirms] || @config[:force_publisher_confirms]
-          logger.info 'enabling publisher confirms'
-          ch.confirm_select
-        end
       end
     end
 

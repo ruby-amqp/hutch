@@ -170,21 +170,6 @@ describe Hutch::Broker do
         broker.open_channel
       end
     end
-
-    context 'with force_publisher_confirms set' do
-      let(:force_publisher_confirms_value) { true }
-      before { config[:force_publisher_confirms] = force_publisher_confirms_value }
-
-      it 'waits for confirmation', adapter: :bunny do
-        expect_any_instance_of(Bunny::Channel).to receive(:confirm_select)
-        broker.open_channel
-      end
-
-      it 'waits for confirmation', adapter: :march_hare do
-        expect_any_instance_of(MarchHare::Channel).to receive(:confirm_select)
-        broker.open_channel
-      end
-    end
   end
 
   describe '#open_channel!' do
@@ -433,13 +418,21 @@ describe Hutch::Broker do
 
         it 'waits for confirms on the channel', adapter: :bunny do
           expect_any_instance_of(Bunny::Channel).
+            to receive(:confirm_select)
+
+          expect_any_instance_of(Bunny::Channel).
             to receive(:wait_for_confirms)
+
           broker.publish('test.key', {key: "value"})
         end
 
         it 'waits for confirms on the channel', adapter: :march_hare do
           expect_any_instance_of(MarchHare::Channel).
+            to receive(:confirm_select)
+
+          expect_any_instance_of(MarchHare::Channel).
             to receive(:wait_for_confirms)
+
           broker.publish('test.key', {key: "value"})
         end
       end

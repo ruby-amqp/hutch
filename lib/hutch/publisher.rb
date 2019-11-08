@@ -19,6 +19,11 @@ module Hutch
 
       serializer = options[:serializer] || config[:serializer]
 
+      if @config[:publisher_confirms] || @config[:force_publisher_confirms]
+        logger.info 'enabling publisher confirms'
+        channel.confirm_select
+      end
+
       non_overridable_properties = {
         routing_key:  routing_key,
         timestamp:    connection.current_timestamp,
