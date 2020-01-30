@@ -109,6 +109,28 @@ class FailedPaymentConsumer
 end
 ```
 
+It is possible to set some custom options to consumer's queue explicitly.
+This example sets the consumer's queue as a
+[quorum queue](https://www.rabbitmq.com/quorum-queues.html)
+and to operate in the [lazy mode](https://www.rabbitmq.com/lazy-queues.html).
+The `initial_group_size`
+[argument](https://www.rabbitmq.com/quorum-queues.html#replication-factor) is
+optional.
+
+```ruby
+class FailedPaymentConsumer
+  include Hutch::Consumer
+  consume 'gc.ps.payment.failed'
+  queue_name 'failed_payments'
+  lazy_queue
+  quorum_queue initial_group_size: 3
+
+  def process(message)
+    mark_payment_as_failed(message[:id])
+  end
+end
+```
+
 You can also set custom arguments per consumer. This example declares a consumer with
 a maximum length of 10 messages:
 
