@@ -29,11 +29,28 @@ module Hutch
       # wants to subscribe to.
       def consume(*routing_keys)
         @routing_keys = self.routing_keys.union(routing_keys)
+        @queue_mode = 'default'
+        @queue_type = 'classic'
       end
+
+      attr_reader :queue_mode, :queue_type, :initial_group_size
 
       # Explicitly set the queue name
       def queue_name(name)
         @queue_name = name
+      end
+
+      # Explicitly set the queue mode to 'lazy'
+      def lazy_queue
+        @queue_mode = 'lazy'
+      end
+
+      # Explicitly set the queue type to 'quorum'
+      # @param [Hash] options the options params related to quorum queue
+      # @option options [Integer] :initial_group_size Initial Replication Factor
+      def quorum_queue(options = {})
+        @queue_type = 'quorum'
+        @initial_group_size = options[:initial_group_size]
       end
 
       # Allow to specify custom arguments that will be passed when creating the queue.
@@ -58,7 +75,13 @@ module Hutch
 
       # Returns consumer custom arguments.
       def get_arguments
-        @arguments || {}
+        all_arguments = @arguments || {}
+        all_arguments['x-queue-mode'] = @queue_mode
+        all_arguments['x-queue-type'] = @queue_type
+        if @initial_group_size
+          all_arguments['x-quorum-initial-group-size'] = @initial_group_size
+        end
+        all_arguments
       end
 
       # Accessor for the consumer's routing key.
