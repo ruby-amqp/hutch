@@ -241,6 +241,24 @@ directory of a Rails app, or pass the path to a Rails app in with the
 the `app/consumers/` directory, to allow them to be auto-loaded when Rails
 boots.
 
+If you're using the new Zeitwerk autoloader (enabled by default in Rails 6)
+and the consumers are not loaded in development environment you will need to
+trigger the autoloading in an initializer with
+
+```ruby
+::Zeitwerk::Loader.eager_load_all 
+```
+
+or with something more specific like
+
+```ruby
+autoloader = Rails.autoloaders.main
+
+Dir.glob(File.join("**", "*_consumer.rb")).each do |consumer|
+  autoloader.preload(consumer)
+end
+```
+
 To require files that define consumers manually, simply pass each file as an
 option to `--require`. Hutch will automatically detect whether you've provided
 a Rails app or a standard file, and take the appropriate behaviour:
