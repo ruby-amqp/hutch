@@ -184,7 +184,7 @@ module Hutch
 
       filtered = api_client.bindings.
         reject { |b| b['destination'] == b['routing_key'] }.
-        filter { |b| b['source'] == @config[:mq_exchange] && b['vhost'] == @config[:mq_vhost] }
+        select { |b| b['source'] == @config[:mq_exchange] && b['vhost'] == @config[:mq_vhost] }
 
       filtered.each do |binding|
         results[binding['destination']] << binding['routing_key']
@@ -197,7 +197,7 @@ module Hutch
     def unbind_redundant_bindings(queue, routing_keys)
       return unless http_api_use_enabled?
 
-      filtered = bindings.filter { |dest, keys| dest == queue.name }
+      filtered = bindings.select { |dest, keys| dest == queue.name }
       filtered.each do |dest, keys|
         keys.reject { |key| routing_keys.include?(key) }.each do |key|
           logger.debug "removing redundant binding #{queue.name} <--> #{key}"
