@@ -42,7 +42,7 @@ module Hutch
     private
 
     def log_publication(serializer, payload, routing_key)
-      logger.info {
+      logger.debug {
         spec =
           if serializer.binary?
             "#{payload.bytesize} bytes message"
