@@ -1,7 +1,34 @@
 ## 0.28.0 (under development)
 
-No chages yet.
+### Enhancements
 
+  * Add lazy and quorum options for queues.
+
+    GitHub issue: [gocardless/hutch#341](https://github.com/gocardless/hutch/pull/341)
+
+    Contributed by: Arthur Del Esposte
+
+  * Log level in the message publisher switched to DEBUG.
+
+    GitHub issue: [gocardless/hutch#343](https://github.com/gocardless/hutch/pull/343)
+
+    Contributed by: Codruț Constantin Gușoi
+
+### Documentation
+
+  * Add zeitwerk note to README.
+
+    GitHub issue: [gocardless/hutch#342](https://github.com/gocardless/hutch/pull/342)
+
+    Contributed by: Paolo Zaccagnini
+
+### CI
+
+  * Use jruby-9.2.9.0
+
+    GitHub issue: [gocardless/hutch#336](https://github.com/gocardless/hutch/pull/336)
+
+    Contributed by: Olle Jonsson
 
 ## 0.27.0 (September 9th, 2019)
 
