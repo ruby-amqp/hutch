@@ -254,7 +254,7 @@ or with something more specific like
 ```ruby
 autoloader = Rails.autoloaders.main
 
-Dir.glob(File.join("**", "*_consumer.rb")).each do |consumer|
+Dir.glob(File.join('app/consumers', '*_consumer.rb')).each do |consumer|
   autoloader.preload(consumer)
 end
 ```
