@@ -14,4 +14,11 @@ describe Hutch::Serializers::JSON do
     expect(decoded[:b]).to eq 2
   end
 
+  context 'when payload is nil' do
+    it "returns empty hash" do
+      decoded = subject.decode(nil)
+
+      expect(decoded).to eq({})
+    end
+  end
 end
