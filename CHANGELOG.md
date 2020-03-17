@@ -1,4 +1,9 @@
-## 0.28.0 (under development)
+## 1.0.0 (under development)
+
+How about we finally ship a 1.0?
+
+
+## 0.28.0 (March 17, 2020)
 
 ### Enhancements
 
