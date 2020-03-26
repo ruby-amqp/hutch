@@ -29,8 +29,9 @@ module Hutch
       # wants to subscribe to.
       def consume(*routing_keys)
         @routing_keys = self.routing_keys.union(routing_keys)
-        @queue_mode = 'default'
-        @queue_type = 'classic'
+        # these are opt-in
+        @queue_mode = nil
+        @queue_type = nil
       end
 
       attr_reader :queue_mode, :queue_type, :initial_group_size
@@ -43,6 +44,11 @@ module Hutch
       # Explicitly set the queue mode to 'lazy'
       def lazy_queue
         @queue_mode = 'lazy'
+      end
+
+      # Explicitly set the queue type to 'classic'
+      def classic_queue
+        @queue_type = 'classic'
       end
 
       # Explicitly set the queue type to 'quorum'
@@ -76,11 +82,11 @@ module Hutch
       # Returns consumer custom arguments.
       def get_arguments
         all_arguments = @arguments || {}
-        all_arguments['x-queue-mode'] = @queue_mode
-        all_arguments['x-queue-type'] = @queue_type
-        if @initial_group_size
-          all_arguments['x-quorum-initial-group-size'] = @initial_group_size
-        end
+
+        all_arguments['x-queue-mode'] = @queue_mode if @queue_mode
+        all_arguments['x-queue-type'] = @queue_type if @queue_type
+        all_arguments['x-quorum-initial-group-size'] = @initial_group_size if @initial_group_size
+
         all_arguments
       end
 
