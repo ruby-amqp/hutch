@@ -1,6 +1,56 @@
 ## 1.0.0 (under development)
 
-How about we finally ship a 1.0?
+Hutch has been around for several years. It is time to ship a 1.0. With it we try to correct
+a few of overly opinionated decisions from recent releases. This means this release
+contains potentially breaking changes.
+
+### Breaking Changes
+
+ * Hutch will no longer configure any queue type (such as [quorum queues](https://www.rabbitmq.com/quorum-queues.html))
+   or queue mode (used by classic [lazy queues](https://www.rabbitmq.com/lazy-queues.html))
+   by default as that can be breaking change for existing Hutch and RabbitMQ installations due to the
+   [property equivalence requirement](https://www.rabbitmq.com/queues.html#property-equivalence) in AMQP 0-9-1.
+
+   This means **some defaults introduced in `0.28.0` ([gocardless/hutch#341](https://github.com/gocardless/hutch/pull/341)) were reverted**.
+   The user has to opt in to configure the queue type and mode and other [optional arguments](https://www.rabbitmq.com/queues.html#optional-arguments) they need to use.
+   Most optional arguments can be set via [policies](https://www.rabbitmq.com/parameters.html#policies) which is always the recommended approach. 
+   Queue type, unfortunately, is not one of them as different queue types have completely different
+   implementation details, on disk data formats and so on.
+
+   To use a quorum queue, use the `quorum_queue` consumer DSL method:
+
+   ``` ruby
+   class ConsumerUsingQuorumQueue
+      include Hutch::Consumer
+      consume 'hutch.test1'
+      # when in doubt, prefer using a policy to this DSL
+      # https://www.rabbitmq.com/parameters.html#policies
+      arguments 'x-key': :value
+        
+      quorum_queue
+   end
+   ```
+
+   To use a classic lazy queue, use the `lazy_queue` consumer DSL method:
+
+   ``` ruby
+   class ConsumerUsingLazyQueue
+     include Hutch::Consumer
+     consume 'hutch.test1'
+     # when in doubt, prefer using a policy to this DSL
+      # https://www.rabbitmq.com/parameters.html#policies
+      arguments 'x-key': :value
+     
+     lazy_queue
+     classic_queue
+   end
+   ```
+
+   By default Hutch will not configure any `x-queue-type` or `x-queue-mode` optional arguments
+   which is identical to RabbitMQ defaults (a regular classic queue).
+
+   Note that as of RabbitMQ 3.8.2, an omitted `x-queue-type` is [considered to be identical](https://github.com/rabbitmq/rabbitmq-common/issues/341)
+   to `x-queue-type` set to `classic` by RabbitMQ server.
 
 
 ## 0.28.0 (March 17, 2020)
