@@ -59,7 +59,8 @@ module Hutch
         @initial_group_size = options[:initial_group_size]
       end
 
-      # Allow to specify custom arguments that will be passed when creating the queue.
+      # Configures an optional argument that will be passed when declaring the queue.
+      # Prefer using a policy to this DSL: https://www.rabbitmq.com/parameters.html#policies
       def arguments(arguments = {})
         @arguments = arguments
       end
