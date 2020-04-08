@@ -1,4 +1,8 @@
-## 1.0.0 (under development)
+## 1.0.1 (in development)
+
+No changes yet.
+
+## 1.0.0 (April 8th, 2020)
 
 Hutch has been around for several years. It is time to ship a 1.0. With it we try to correct
 a few of overly opinionated decisions from recent releases. This means this release
