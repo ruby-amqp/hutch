@@ -49,6 +49,9 @@ module Hutch
     # RabbitMQ Exchange to use for publishing
     string_setting :mq_exchange, 'hutch'
 
+    # RabbitMQ Exchange type to use for publishing
+    string_setting :mq_exchange_type, 'topic'
+
     # RabbitMQ vhost to use
     string_setting :mq_vhost, '/'
 
