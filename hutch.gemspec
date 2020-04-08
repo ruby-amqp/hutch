@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
     gem.add_runtime_dependency 'march_hare', '>= 3.0.0'
   else
     gem.platform = Gem::Platform::RUBY
-    gem.add_runtime_dependency 'bunny', '>= 2.14', '< 2.16'
+    gem.add_runtime_dependency 'bunny', '>= 2.15', '< 2.16'
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.14'
