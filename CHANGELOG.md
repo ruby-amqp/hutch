@@ -53,6 +53,19 @@ contains potentially breaking changes.
    to `x-queue-type` set to `classic` by RabbitMQ server.
 
 
+   #### Enhancements
+
+    * Exchange type is now configurable via the `` config setting. Supported exchanges must be
+      compatible with topic exchanges (e.g. wrap it). Default value is `"topic"`.
+
+      This feature is limited to topic and delayed message exchange plugins and is mostly
+      useful for forward compatibility.
+
+      Contributed by Michael Bumann.
+
+      GitHub issue: [gocardless/hutch#349](https://github.com/gocardless/hutch/pull/349)
+
+
 ## 0.28.0 (March 17, 2020)
 
 ### Enhancements
