@@ -59,8 +59,8 @@ contains potentially breaking changes.
 
    #### Enhancements
 
-    * Exchange type is now configurable via the `` config setting. Supported exchanges must be
-      compatible with topic exchanges (e.g. wrap it). Default value is `"topic"`.
+    * Exchange type is now configurable via the `mq_exchange_type` config setting. Supported exchanges must be
+      compatible with topic exchanges (e.g. wrap it). Default value is `topic`.
 
       This feature is limited to topic and delayed message exchange plugins and is mostly
       useful for forward compatibility.
