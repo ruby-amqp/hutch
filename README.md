@@ -384,6 +384,7 @@ Known configuration parameters are:
  * `automatically_recover`: Bunny's enable/disable network recovery (default: `true`)
  * `network_recovery_interval`: Bunny's reconnect interval (default: `1`)
  * `tracer`: tracer to use to track message processing
+ * `namespace`: A namespace string to help group your queues (default: `nil`)
 
 ### Environment variables
 
@@ -441,6 +442,13 @@ Generate with
       <td>String</td>
       <td><tt>HUTCH_MQ_EXCHANGE</tt></td>
       <td><p>RabbitMQ Exchange to use for publishing</p></td>
+    </tr>
+    <tr>
+      <td><tt>mq_exchange_type</tt></td>
+      <td>topic</td>
+      <td>String</td>
+      <td><tt>HUTCH_MQ_EXCHANGE_TYPE</tt></td>
+      <td><p>RabbitMQ Exchange type to use for publishing</p></td>
     </tr>
     <tr>
       <td><tt>mq_vhost</tt></td>
@@ -623,6 +631,20 @@ Generate with
       <td>String</td>
       <td><tt>HUTCH_CONSUMER_TAG_PREFIX</tt></td>
       <td><p>Prefix displayed on the consumers tags.</p></td>
+    </tr>
+    <tr>
+      <td><tt>namespace</tt></td>
+      <td>nil</td>
+      <td>String</td>
+      <td><tt>HUTCH_NAMESPACE</tt></td>
+      <td><p>A namespace to help group your queues</p></td>
+    </tr>
+    <tr>
+      <td><tt>group</tt></td>
+      <td>''</td>
+      <td>String</td>
+      <td><tt>HUTCH_GROUP</tt></td>
+      <td></td>
     </tr>
   </tbody>
 </table>

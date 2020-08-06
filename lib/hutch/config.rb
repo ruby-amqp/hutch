@@ -145,6 +145,9 @@ module Hutch
     # Prefix displayed on the consumers tags.
     string_setting :consumer_tag_prefix, 'hutch'
 
+    # A namespace to help group your queues
+    string_setting :namespace, nil
+
     string_setting :group, ''
 
     # Set of all setting keys
