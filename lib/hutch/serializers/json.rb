@@ -6,7 +6,7 @@ module Hutch
     class JSON
 
       def self.encode(payload)
-        ::JSON.dump(payload)
+        ::MultiJson.dump(payload)
       end
 
       def self.decode(payload)
