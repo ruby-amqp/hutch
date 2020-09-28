@@ -59,8 +59,8 @@ Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.i
 ### Project Maturity
 
 Hutch is a mature project that was originally extracted from production systems
-at [GoCardless](https://gocardless.com) in 2013 and is now maintained by a large
-group of contributors.
+at [GoCardless](https://gocardless.com) in 2013 and is now maintained its contributors
+and users.
 
 ## Consumers
 
@@ -259,13 +259,37 @@ Dir.glob(File.join('app/consumers', '*_consumer.rb')).each do |consumer|
 end
 ```
 
+### Consumer Groups
+
+It is possible to load only a subset of consumers. This is done by defining a consumer
+group under the `consumers_groups` configuration key:
+
+``` yaml
+consumers_groups:
+  payments:
+    - DepositConsumer
+    - CashoutConsumer
+  notification:
+    - EmailNotificationConsumer
+```
+
+To only load a group of consumers, use the `--only-group` option:
+
+``` shell
+hutch --only-group=payments --config=/path/to/hutch.yaml
+```
+
+### Loading Consumers Manually (One-by-One)
+
 To require files that define consumers manually, simply pass each file as an
 option to `--require`. Hutch will automatically detect whether you've provided
 a Rails app or a standard file, and take the appropriate behaviour:
 
 ```bash
-$ hutch --require path/to/rails-app  # loads a rails app
-$ hutch --require path/to/file.rb    # loads a ruby file
+# loads a rails app
+hutch --require path/to/rails-app
+# loads a ruby file
+hutch --require path/to/file.rb
 ```
 
 ### Stopping Hutch
