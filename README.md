@@ -59,7 +59,7 @@ Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.i
 ### Project Maturity
 
 Hutch is a mature project that was originally extracted from production systems
-at [GoCardless](https://gocardless.com) in 2013 and is now maintained its contributors
+at [GoCardless](https://gocardless.com) in 2013 and is now maintained by its contributors
 and users.
 
 ## Consumers
