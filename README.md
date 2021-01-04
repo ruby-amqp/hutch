@@ -262,10 +262,10 @@ end
 ### Consumer Groups
 
 It is possible to load only a subset of consumers. This is done by defining a consumer
-group under the `consumers_groups` configuration key:
+group under the `consumer_groups` configuration key:
 
 ``` yaml
-consumers_groups:
+consumer_groups:
   payments:
     - DepositConsumer
     - CashoutConsumer
