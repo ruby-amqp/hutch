@@ -83,7 +83,7 @@ describe Hutch::Config do
         let(:new_value) { 1 }
 
 
-        specify 'does not perform any type' do
+        specify 'does not perform any typecasting' do
           expect(value).to eq new_value
         end
       end
