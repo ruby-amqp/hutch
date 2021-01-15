@@ -49,6 +49,44 @@ describe Hutch::Config do
       context 'sets value in user config hash' do
         it { is_expected.to eq(new_value) }
       end
+
+      context 'type casting' do
+        context 'number attributes' do
+          before  { Hutch::Config.set(:heartbeat, new_value) }
+          subject(:value) { Hutch::Config.user_config[:heartbeat] }
+
+          let(:new_value) { "0" }
+
+
+          specify 'casts values to integers' do
+            expect(value).to eq 0
+          end
+        end
+      end
+
+      context 'boolean attributes' do
+        before  { Hutch::Config.set(:autoload_rails, new_value) }
+        subject(:value) { Hutch::Config.user_config[:autoload_rails] }
+
+        let(:new_value) { "t" }
+
+
+        specify 'casts values to booleans' do
+          expect(value).to eq true
+        end
+      end
+
+      context 'string attributes' do
+        before  { Hutch::Config.set(:mq_exchange_type, new_value) }
+        subject(:value) { Hutch::Config.user_config[:mq_exchange_type] }
+
+        let(:new_value) { 1 }
+
+
+        specify 'does not perform any type' do
+          expect(value).to eq new_value
+        end
+      end
     end
 
     context 'for invalid attributes' do
