@@ -16,9 +16,9 @@ matrix:
     - rvm: "2.5.8"
     - rvm: "2.4.10"
     - rvm: "2.3.8"
-    - rvm: "jruby-9.2.9.0"
+    - rvm: "jruby-9.2.15.0"
     - rvm: "ruby-head"
   allow_failures:
     rvm:
-      - "jruby-9.2.9.0"
+      - "jruby-9.2.15.0"
       - ruby-head
