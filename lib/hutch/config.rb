@@ -196,14 +196,7 @@ module Hutch
       env_keys_configured.each_with_object({}) {|attr, result|
         value = ENV[key_for(attr)]
 
-        case
-        when is_bool(attr) || value == 'false'
-          result[attr] = to_bool(value)
-        when is_num(attr)
-          result[attr] = value.to_i
-        else
-          result[attr] = value
-        end
+        result[attr] = type_cast(attr, value)
       }
     end
 
@@ -238,7 +231,7 @@ module Hutch
 
     def self.set(attr, value)
       check_attr(attr.to_sym)
-      user_config[attr.to_sym] = value
+      user_config[attr.to_sym] = type_cast(attr, value)
     end
 
     class << self
@@ -274,6 +267,18 @@ module Hutch
         value
       end
     end
+
+    def self.type_cast(attr, value)
+      case
+      when is_bool(attr) || value == 'false'
+        to_bool(value)
+      when is_num(attr)
+        value.to_i
+      else
+        value
+      end
+    end
+    private_class_method :type_cast
 
     def self.define_methods
       @config.keys.each do |key|
