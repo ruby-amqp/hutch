@@ -188,6 +188,12 @@ This will enable NewRelic custom instrumentation:
 Hutch::Config.set(:tracer, Hutch::Tracers::NewRelic)
 ```
 
+And this will enable Datadog custom instrumentation:
+
+```ruby
+Hutch::Config.set(:tracer, Hutch::Tracers::Datadog)
+```
+
 Batteries included!
 
 ## Running Hutch
@@ -246,7 +252,7 @@ and the consumers are not loaded in development environment you will need to
 trigger the autoloading in an initializer with
 
 ```ruby
-::Zeitwerk::Loader.eager_load_all 
+::Zeitwerk::Loader.eager_load_all
 ```
 
 or with something more specific like
