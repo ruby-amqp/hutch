@@ -5,5 +5,6 @@ module Hutch
     autoload :Honeybadger, 'hutch/error_handlers/honeybadger'
     autoload :Airbrake,    'hutch/error_handlers/airbrake'
     autoload :Rollbar,     'hutch/error_handlers/rollbar'
+    autoload :Bugsnag,     'hutch/error_handlers/bugsnag'
   end
 end

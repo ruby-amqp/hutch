@@ -25,6 +25,7 @@ group :development, :test do
   gem "newrelic_rpm"
   gem "airbrake", "~> 10.0"
   gem "rollbar"
+  gem "bugsnag"
 end
 
 group :development, :darwin do
