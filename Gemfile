@@ -20,6 +20,7 @@ group :development, :test do
   gem "simplecov", "~> 0.12"
 
   gem "sentry-raven"
+  gem "sentry-ruby"
   gem "honeybadger"
   gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
