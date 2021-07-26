@@ -1,6 +1,10 @@
-## 1.0.1 (in development)
+## 1.1.0 (in development)
 
-No changes yet.
+### Updated Sentry Error Handler
+
+Contributed by Karol @Azdaroth Galanciak.
+
+GitHub issue: [#363](https://github.com/ruby-amqp/hutch/pull/363)
 
 ## 1.0.0 (April 8th, 2020)
 
