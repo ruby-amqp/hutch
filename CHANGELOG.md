@@ -27,6 +27,12 @@ Contributed by Karol @Azdaroth Galanciak.
 
 GitHub issue: [#358](https://github.com/ruby-amqp/hutch/pull/358)
 
+### Wider MultiJson Adoption
+
+Contributed by Ulysse @BuonOmo Buonomo.
+
+GitHub issue: [#356](https://github.com/ruby-amqp/hutch/pull/356)
+
 ### README Corrections
 
 Contributed by Johan @johankok Kok.
