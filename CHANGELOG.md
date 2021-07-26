@@ -6,12 +6,17 @@ Contributed by @ivanhuang1.
 
 GitHub issue: [#362](https://github.com/ruby-amqp/hutch/pull/362)
 
+### Datadog Tracer
+
+Contributed by Karol @Azdaroth Galanciak.
+
+GitHub issue: [#360](https://github.com/ruby-amqp/hutch/pull/360)
+
 ### Updated Sentry Error Handler
 
 Contributed by Karol @Azdaroth Galanciak.
 
 GitHub issue: [#363](https://github.com/ruby-amqp/hutch/pull/363)
-
 
 ### Type Casting for Values Set Using Hutch::Config.set
 
@@ -22,6 +27,11 @@ Contributed by Karol @Azdaroth Galanciak.
 
 GitHub issue: [#358](https://github.com/ruby-amqp/hutch/pull/358)
 
+### README Corrections
+
+Contributed by Johan @johankok Kok.
+
+GitHub issue: [#353](https://github.com/ruby-amqp/hutch/pull/353)
 
 ## 1.0.0 (April 8th, 2020)
 
