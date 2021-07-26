@@ -1,10 +1,27 @@
-## 1.1.0 (in development)
+## 1.1.0 (July 26th, 2021)
+
+### Bugsnag Error Handler
+
+Contributed by @ivanhuang1.
+
+GitHub issue: [#362](https://github.com/ruby-amqp/hutch/pull/362)
 
 ### Updated Sentry Error Handler
 
 Contributed by Karol @Azdaroth Galanciak.
 
 GitHub issue: [#363](https://github.com/ruby-amqp/hutch/pull/363)
+
+
+### Type Casting for Values Set Using Hutch::Config.set
+
+Values set with `Hutch::Config.set` now have expected setting type casting
+applied to them.
+
+Contributed by Karol @Azdaroth Galanciak.
+
+GitHub issue: [#358](https://github.com/ruby-amqp/hutch/pull/358)
+
 
 ## 1.0.0 (April 8th, 2020)
 
