@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: --name rabbitmq
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['jruby-9.2.19.0', 'jruby-9.3.0.0', 'jruby-head']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+    # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
+    # change this to (see https://github.com/ruby/setup-ruby#versioning):
+      uses: ruby/setup-ruby@v1
+    # uses: ruby/setup-ruby@473e4d8fe5dd94ee328fdfca9f8c9c7afc9dae5e
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Set up RabbitMQ
+      run: |
+        until sudo lsof -i:5672; do echo "Waiting for RabbitMQ to start..."; sleep 1; done
+        ./bin/ci/before_build_docker.sh
+    - name: Run tests
+      run: bundle exec rspec spec
