@@ -65,6 +65,11 @@ module Hutch
         @arguments = arguments
       end
 
+      # Congfiures queue options that will be passed when declaring the queue.
+      def queue_options(options = {})
+        @queue_options = options
+      end
+
       # Set custom serializer class, override global value
       def serializer(name)
         @serializer = name
@@ -89,6 +94,15 @@ module Hutch
         all_arguments['x-quorum-initial-group-size'] = @initial_group_size if @initial_group_size
 
         all_arguments
+      end
+
+      def get_options
+        default_options = { durable: true }
+
+        all_options = default_options.merge(@queue_options || {})
+        all_options[:arguments] = get_arguments
+
+        all_options
       end
 
       # Accessor for the consumer's routing key.

@@ -4,7 +4,7 @@ require 'hutch/worker'
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
                           get_queue_name: 'consumer', get_arguments: {},
-                          get_serializer: nil) }
+                          get_options: {}, get_serializer: nil) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   let(:setup_procs) { Array.new(2) { Proc.new {} } }
@@ -35,7 +35,7 @@ describe Hutch::Worker do
     before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
 
     it 'creates a queue' do
-      expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_arguments).and_return(queue)
+      expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_options).and_return(queue)
       worker.setup_queue(consumer)
     end
 
