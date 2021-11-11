@@ -37,8 +37,9 @@ module Hutch
       attr_reader :queue_mode, :queue_type, :initial_group_size
 
       # Explicitly set the queue name
-      def queue_name(name)
+      def queue_name(name, options = {})
         @queue_name = name
+        @options = options
       end
 
       # Explicitly set the queue mode to 'lazy'
@@ -89,6 +90,15 @@ module Hutch
         all_arguments['x-quorum-initial-group-size'] = @initial_group_size if @initial_group_size
 
         all_arguments
+      end
+
+      def get_options
+        default_options = { durable: true }
+
+        all_options = default_options.merge(@options || {})
+        all_options[:arguments] = get_arguments
+
+        all_options
       end
 
       # Accessor for the consumer's routing key.

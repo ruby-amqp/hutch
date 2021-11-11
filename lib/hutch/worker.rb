@@ -47,7 +47,7 @@ module Hutch
     def setup_queue(consumer)
       logger.info "setting up queue: #{consumer.get_queue_name}"
 
-      queue = @broker.queue(consumer.get_queue_name, consumer.get_arguments)
+      queue = @broker.queue(consumer.get_queue_name, consumer.get_options)
       @broker.bind_queue(queue, consumer.routing_keys)
 
       queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true) do |*args|
