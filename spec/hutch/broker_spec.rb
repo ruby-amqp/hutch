@@ -262,7 +262,7 @@ describe Hutch::Broker do
         args.first == ''
         args.last == arguments
       end
-      broker.queue('test', arguments)
+      broker.queue('test', arguments: arguments)
     end
   end
 
