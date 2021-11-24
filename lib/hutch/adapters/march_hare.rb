@@ -32,6 +32,10 @@ module Hutch
       def current_timestamp
         Time.now
       end
+
+      def self.new_exchange(ch, exchange_type, exchange_name, exchange_options)
+        MarchHare::Exchange.new(ch, exchange_name, exchange_options.merge(type: exchange_type))
+      end
     end
   end
 end

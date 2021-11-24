@@ -127,7 +127,7 @@ module Hutch
       logger.info "using topic exchange '#{exchange_name}'"
 
       with_bunny_precondition_handler('exchange') do
-        Bunny::Exchange.new(ch, exchange_type, exchange_name, exchange_options)
+        Adapter.new_exchange(ch, exchange_type, exchange_name, exchange_options)
       end
     end
 

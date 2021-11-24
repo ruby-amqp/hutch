@@ -28,6 +28,10 @@ module Hutch
       def current_timestamp
         Time.now.to_i
       end
+
+      def self.new_exchange(ch, exchange_type, exchange_name, exchange_options)
+        Bunny::Exchange.new(ch, exchange_type, exchange_name, exchange_options)
+      end
     end
   end
 end
