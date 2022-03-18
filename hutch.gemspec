@@ -13,14 +13,12 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'activesupport', '>= 4.2', '< 8'
 
   gem.name = 'hutch'
-  gem.summary = 'Easy inter-service communication using RabbitMQ.'
-  gem.description = 'Hutch is a Ruby library for enabling asynchronous ' \
-                    'inter-service communication using RabbitMQ.'
+  gem.summary = 'Opinionated asynchronous inter-service communication using RabbitMQ'
+  gem.description = 'Hutch is a Ruby library for enabling asynchronous inter-service communication using RabbitMQ'
   gem.version = Hutch::VERSION.dup
   gem.required_ruby_version = '>= 2.2'
-  gem.authors = ['Harry Marr']
-  gem.email = ['developers@gocardless.com']
-  gem.homepage = 'https://github.com/gocardless/hutch'
+  gem.authors = ['Harry Marr', 'Michael Klishin']
+  gem.homepage = 'https://github.com/ruby-amqp/hutch'
   gem.require_paths = ['lib']
   gem.license = 'MIT'
   gem.executables = ['hutch']
