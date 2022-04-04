@@ -222,7 +222,12 @@ module Hutch
     end
 
     def self.to_bool(value)
-      !(value.nil? || value == '' || value =~ /^(false|f|no|n|0)$/i || value == false)
+      case value
+      when nil, false, '', /^(false|f|no|n|0)$/i
+        false
+      else
+        true
+      end
     end
 
     def self.is_num(attr)
