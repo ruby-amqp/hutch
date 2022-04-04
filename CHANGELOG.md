@@ -1,3 +1,9 @@
+## 1.1.1 (March 18th, 2022)
+### Dependency Bump
+
+Hutch now allows ActiveSupport 7.x.
+
+
 ## 1.1.0 (July 26th, 2021)
 
 ### Bugsnag Error Handler
