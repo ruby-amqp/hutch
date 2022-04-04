@@ -65,14 +65,52 @@ describe Hutch::Config do
       end
 
       context 'boolean attributes' do
-        before  { Hutch::Config.set(:autoload_rails, new_value) }
-        subject(:value) { Hutch::Config.user_config[:autoload_rails] }
+        context 'from non-empty string' do
+          before  { Hutch::Config.set(:autoload_rails, new_value) }
+          subject(:value) { Hutch::Config.user_config[:autoload_rails] }
 
-        let(:new_value) { "t" }
+          let(:new_value) { "t" }
 
 
-        specify 'casts values to booleans' do
-          expect(value).to eq true
+          specify 'casts values to booleans' do
+            expect(value).to eq true
+          end
+        end
+
+        context 'from empty string' do
+          before  { Hutch::Config.set(:autoload_rails, new_value) }
+          subject(:value) { Hutch::Config.user_config[:autoload_rails] }
+
+          let(:new_value) { "" }
+
+
+          specify 'casts values to booleans' do
+            expect(value).to eq false
+          end
+        end
+
+        context 'from boolean' do
+          before  { Hutch::Config.set(:autoload_rails, new_value) }
+          subject(:value) { Hutch::Config.user_config[:autoload_rails] }
+
+          let(:new_value) { true }
+
+
+          specify 'casts values to booleans' do
+            expect(value).to eq true
+          end
+        end
+
+        context 'from nil' do
+          before  { Hutch::Config.set(:autoload_rails, new_value) }
+          subject(:value) { Hutch::Config.user_config[:autoload_rails] }
+
+          let(:new_value) { nil }
+
+
+          specify 'casts values to booleans' do
+            expect(value).to eq false
+          end
         end
       end
 
