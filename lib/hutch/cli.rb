@@ -65,7 +65,7 @@ module Hutch
           return false
         ensure
           # Clean up load path
-          $LOAD_PATH.pop
+          $LOAD_PATH.delete('.')
         end
       end
     end
