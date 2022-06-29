@@ -21,7 +21,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ['jruby-9.2.19.0', 'jruby-9.3.0.0', 'jruby-head']
+        ruby-version: 
+          - jruby-9.2.19.0
+          - jruby-9.3.0.0
+          - jruby-head
+          - 2.7
+          - 3.0
+          - 3.1
 
     steps:
     - uses: actions/checkout@v2
