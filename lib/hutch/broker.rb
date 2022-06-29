@@ -174,8 +174,8 @@ module Hutch
     def queue(name, options = {})
       with_bunny_precondition_handler('queue') do
         namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        name = name.prepend(namespace + ":") if namespace.present?
-        channel.queue(name, **options)
+        queue_name = namespace.present? ? "#{namespace}:#{name}" : name
+        channel.queue(queue_name, **options)
       end
     end
 
