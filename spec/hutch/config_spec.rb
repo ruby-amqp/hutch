@@ -31,12 +31,10 @@ describe Hutch::Config do
     end
 
     context 'for invalid attributes' do
-      let(:invalid_get) do
-        -> { Hutch::Config.get(:invalid_attr) }
-      end
+      let(:invalid_get) { Hutch::Config.get(:invalid_attr) }
 
       specify do
-        expect(invalid_get).to raise_error Hutch::UnknownAttributeError
+        expect { invalid_get }.to raise_error Hutch::UnknownAttributeError
       end
     end
   end
@@ -128,12 +126,10 @@ describe Hutch::Config do
     end
 
     context 'for invalid attributes' do
-      let(:invalid_set) do
-        -> { Hutch::Config.set(:invalid_attr, new_value) }
-      end
+      let(:invalid_set) { Hutch::Config.set(:invalid_attr, new_value) }
 
       specify do
-        expect(invalid_set).to raise_error Hutch::UnknownAttributeError
+        expect { invalid_set }.to raise_error Hutch::UnknownAttributeError
       end
     end
   end
@@ -147,8 +143,8 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_getter) { -> { Hutch::Config.invalid_attr } }
-      specify { expect(invalid_getter).to raise_error NoMethodError }
+      let(:invalid_getter) { Hutch::Config.invalid_attr }
+      specify { expect { invalid_getter }.to raise_error NoMethodError }
     end
 
     context 'for an ENV-overriden value attribute' do
@@ -185,8 +181,8 @@ describe Hutch::Config do
     end
 
     context 'for an invalid attribute' do
-      let(:invalid_setter) { -> { Hutch::Config.invalid_attr = new_value } }
-      specify { expect(invalid_setter).to raise_error NoMethodError }
+      let(:invalid_setter) { Hutch::Config.invalid_attr = new_value }
+      specify { expect { invalid_setter }.to raise_error NoMethodError }
     end
   end
 

@@ -245,9 +245,9 @@ describe Hutch::Broker do
     context 'when given invalid details' do
       before { config[:mq_api_host] = 'notarealhost' }
       after  { broker.disconnect }
-      let(:set_up_api_connection) { ->{ broker.set_up_api_connection } }
+      let(:set_up_api_connection) { broker.set_up_api_connection }
 
-      specify { expect(set_up_api_connection).to raise_error(StandardError) }
+      specify { expect { broker.set_up_api_connection }.to raise_error(StandardError) }
     end
   end
 
