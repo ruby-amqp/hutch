@@ -1,5 +1,9 @@
 name: Test
 
+concurrency: 
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ master ]
@@ -45,3 +49,12 @@ jobs:
         ./bin/ci/before_build_docker.sh
     - name: Run tests
       run: bundle exec rspec spec
+  test_all:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: Test (matrix)
+    needs: test
+    steps:
+      - name: Check test matrix status
+        if: ${{ needs.test.result != 'success' }}
+        run: exit 1
