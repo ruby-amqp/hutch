@@ -24,7 +24,7 @@ group :development, :test do
   gem "honeybadger"
   gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
-  gem "ddtrace"
+  gem "ddtrace", "~> 0.54.2"
   gem "airbrake", "~> 10.0"
   gem "rollbar"
   gem "bugsnag"
