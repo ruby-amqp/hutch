@@ -11,7 +11,7 @@ module Hutch
         logger.error "#{prefix} Logging event to Sentry"
         logger.error "#{prefix} #{ex.class} - #{ex.message}"
         ::Sentry.configure_scope do |scope|
-          scope.set_context("payload", payload)
+          scope.set_context("payload", JSON.parse(payload))
         end
         ::Sentry.capture_exception(ex)
       end
