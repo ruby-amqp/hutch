@@ -3,6 +3,14 @@ require 'spec_helper'
 describe Hutch::ErrorHandlers::Sentry do
   let(:error_handler) { Hutch::ErrorHandlers::Sentry.new }
 
+  before do
+    Sentry.init do
+      # initialize Sentry so that the integration acutally works
+      # otherwise, all its methods are going to return early
+      # so it will be impossible to check if it actually works
+    end
+  end
+
   describe '#handle' do
     let(:properties) { OpenStruct.new(message_id: "1") }
     let(:payload) { "{}" }
