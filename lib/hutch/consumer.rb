@@ -22,6 +22,10 @@ module Hutch
       broker.requeue(delivery_info.delivery_tag)
     end
 
+    def message_rejected?
+      !!@message_rejected
+    end
+
     def logger
       Hutch::Logging.logger
     end
