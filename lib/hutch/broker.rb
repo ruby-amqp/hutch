@@ -287,6 +287,7 @@ module Hutch
         params[:host]               = @config[:mq_host]
         params[:port]               = @config[:mq_port]
         params[:vhost]              = @config[:mq_vhost].presence || Hutch::Adapter::DEFAULT_VHOST
+        params[:auth_mechanism]     = @config[:mq_auth_mechanism]
         params[:username]           = @config[:mq_username]
         params[:password]           = @config[:mq_password]
         params[:tls]                = @config[:mq_tls]

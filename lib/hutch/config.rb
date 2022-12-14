@@ -63,6 +63,9 @@ module Hutch
     # RabbitMQ password
     string_setting :mq_password, 'guest'
 
+    # RabbitMQ Auth Mechanism
+    string_setting :mq_auth_mechanism, 'PLAIN'
+
     # RabbitMQ URI (takes precedence over MQ username, password, host, port and vhost settings)
     string_setting :uri, nil
 
