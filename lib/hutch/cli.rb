@@ -234,7 +234,7 @@ module Hutch
     end
 
     def abort_without_file(file, file_description, &block)
-      abort_with_message("#{file_description} '#{file}' not found") unless File.exists?(file)
+      abort_with_message("#{file_description} '#{file}' not found") unless File.exist?(file)
 
       yield
     end
