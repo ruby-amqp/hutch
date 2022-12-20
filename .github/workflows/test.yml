@@ -26,9 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby-version: 
-          - jruby
-          - "truffleruby"
-          - "truffleruby+graalvm"
           - 2.7
           - 3.0
           - 3.1
