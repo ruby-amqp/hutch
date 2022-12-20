@@ -32,7 +32,7 @@ RSpec.describe Hutch::Tracers::Datadog do
       handle
 
       expect(::Datadog::Tracing).to have_received(:trace).with('ClassName',
-        hash_including(service: 'hutch', span_type: 'rabbitmq'))
+        hash_including(service: 'hutch', type: 'rabbitmq'))
     end
 
     it 'processes the message' do
