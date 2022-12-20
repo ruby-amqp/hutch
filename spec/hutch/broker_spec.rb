@@ -119,7 +119,7 @@ describe Hutch::Broker do
 
         it 'utilises TLS' do
           expect(Hutch::Adapter).to receive(:new).with(
-            hash_including(tls: true, port: 5671)
+            hash_including(tls: true)
           ).and_return(instance_double('Hutch::Adapter', start: nil))
 
           broker.open_connection
