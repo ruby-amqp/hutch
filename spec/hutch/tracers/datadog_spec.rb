@@ -25,14 +25,14 @@ RSpec.describe Hutch::Tracers::Datadog do
     let(:message) { double(:message) }
 
     before do
-      allow(Datadog.tracer).to receive(:trace).and_call_original
+      allow(::Datadog::Tracing).to receive(:trace).and_call_original
     end
 
     it 'uses Datadog tracer' do
       handle
 
-      expect(Datadog.tracer).to have_received(:trace).with('ClassName',
-        hash_including(service: 'hutch', span_type: 'rabbitmq'))
+      expect(::Datadog::Tracing).to have_received(:trace).with('ClassName',
+        hash_including(service: 'hutch', type: 'rabbitmq'))
     end
 
     it 'processes the message' do

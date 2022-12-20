@@ -1,4 +1,5 @@
 require 'ddtrace'
+require 'ddtrace/auto_instrument'
 
 module Hutch
   module Tracers
@@ -8,7 +9,7 @@ module Hutch
       end
 
       def handle(message)
-        ::Datadog.tracer.trace(@klass.class.name, service: 'hutch', span_type: 'rabbitmq') do
+        ::Datadog::Tracing.trace(@klass.class.name, continue_from: nil, service: 'hutch', type: 'rabbitmq') do
           @klass.process(message)
         end
       end

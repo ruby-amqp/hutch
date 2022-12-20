@@ -1,12 +1,12 @@
 source 'https://rubygems.org'
 
-ruby '>= 2.3.0'
+ruby '>= 2.6.0'
 
 gemspec
 
 group :development do
   gem "rake"
-  gem "guard", "~> 2.14", platform: :mri_23
+  gem "guard", "~> 2.18"
   gem "guard-rspec", "~> 4.7", platform: :mri_23
 
   gem "yard", "~> 0.9"
@@ -16,21 +16,20 @@ group :development do
 end
 
 group :development, :test do
-  gem "rspec", "~> 3.5"
-  gem "simplecov", "~> 0.12"
+  gem "rspec", "~> 3.12"
+  gem "simplecov", "~> 0.21"
 
   gem "sentry-raven"
   gem "sentry-ruby"
   gem "honeybadger"
-  gem "coveralls", "~> 0.8.15", require: false
   gem "newrelic_rpm"
-  gem "ddtrace", "~> 0.54.2"
-  gem "airbrake", "~> 10.0"
+  gem "ddtrace", "~> 1.8"
+  gem "airbrake", "~> 13.0"
   gem "rollbar"
   gem "bugsnag"
 end
 
 group :development, :darwin do
-  gem "rb-fsevent", "~> 0.9"
+  gem "rb-fsevent", "~> 0.11.2"
   gem "growl", "~> 1.0.3"
 end
