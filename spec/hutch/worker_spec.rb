@@ -83,12 +83,14 @@ describe Hutch::Worker do
     it 'passes the message to the consumer' do
       expect(consumer_instance).to receive(:process).
                         with(an_instance_of(Hutch::Message))
+      expect(consumer_instance).to receive(:message_rejected?).and_return(false)
       worker.handle_message(consumer, delivery_info, properties, payload)
     end
 
     it 'acknowledges the message' do
       allow(consumer_instance).to receive(:process)
       expect(broker).to receive(:ack).with(delivery_info.delivery_tag)
+      expect(consumer_instance).to receive(:message_rejected?).and_return(false)
       worker.handle_message(consumer, delivery_info, properties, payload)
     end
 

@@ -13,11 +13,17 @@ module Hutch
     end
 
     def reject!
+      @message_rejected = true
       broker.reject(delivery_info.delivery_tag)
     end
 
     def requeue!
+      @message_rejected = true
       broker.requeue(delivery_info.delivery_tag)
+    end
+
+    def message_rejected?
+      !!@message_rejected
     end
 
     def logger
