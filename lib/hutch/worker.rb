@@ -45,9 +45,11 @@ module Hutch
     # Bind a consumer's routing keys to its queue, and set up a subscription to
     # receive messages sent to the queue.
     def setup_queue(consumer)
-      logger.info "setting up queue: #{consumer.get_queue_name}"
+      queue_name = consumer.get_queue_name
+      queue_name = @broker.namespaced_queue_name(queue_name) unless consumer.get_queue_name_exact?
+      logger.info "setting up queue: #{queue_name}"
 
-      queue = @broker.queue(consumer.get_queue_name, consumer.get_options)
+      queue = @broker.queue(queue_name, consumer.get_options)
       @broker.bind_queue(queue, consumer.routing_keys)
 
       queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true) do |*args|
