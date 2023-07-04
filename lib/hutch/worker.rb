@@ -75,7 +75,7 @@ module Hutch
     rescue => ex
       acknowledge_error(delivery_info, properties, @broker, ex)
       properties = Bunny::MessageProperties.new(properties.to_hash.merge(delivery_info: delivery_info))
-      handle_error(properties, payload, consumer, ex)
+      handle_error(properties, payload, consumer, ex, delivery_info)
     end
 
     def with_tracing(klass)
@@ -84,7 +84,7 @@ module Hutch
 
     def handle_error(*args)
       Hutch::Config[:error_handlers].each do |backend|
-        backend.handle(*args)
+        backend.handle *args.first(backend.method(:handle).arity)
       end
     end
 
