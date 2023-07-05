@@ -74,7 +74,6 @@ module Hutch
       @broker.ack(delivery_info.delivery_tag) unless consumer_instance.message_rejected?
     rescue => ex
       acknowledge_error(delivery_info, properties, @broker, ex)
-      properties = Bunny::MessageProperties.new(properties.to_hash.merge(delivery_info: delivery_info))
       handle_error(properties, payload, consumer, ex, delivery_info)
     end
 
