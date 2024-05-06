@@ -298,6 +298,7 @@ module Hutch
           params[:tls_ca_certificates] = @config[:mq_tls_ca_certificates]
         end
         params[:heartbeat]          = @config[:heartbeat]
+        params[:connection_name]    = @config[:connection_name]
         params[:connection_timeout] = @config[:connection_timeout]
         params[:read_timeout]       = @config[:read_timeout]
         params[:write_timeout]      = @config[:write_timeout]

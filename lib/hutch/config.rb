@@ -86,6 +86,9 @@ module Hutch
     # Default: `0`, no limit. See Bunny and RabbitMQ documentation.
     number_setting :channel_prefetch, 0
 
+    # [Client-Provided Connection Name](https://www.rabbitmq.com/docs/connections#client-provided-names)
+    string_setting :connection_name, nil
+
     # Bunny's socket open timeout
     number_setting :connection_timeout, 11
 

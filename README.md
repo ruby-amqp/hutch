@@ -543,6 +543,13 @@ Generate with
       <td><p>The <tt>basic.qos</tt> prefetch value to use.</p></td>
     </tr>
     <tr>
+      <td><tt>connection_name</tt></td>
+      <td>nil</td>
+      <td>String</td>
+      <td><tt>HUTCH_CONNECTION_NAME</tt></td>
+      <td><p><a href="https://www.rabbitmq.com/docs/connections#client-provided-names">Client-Provided Connection Name</a></p></td>
+    </tr>
+    <tr>
       <td><tt>connection_timeout</tt></td>
       <td>11</td>
       <td>Number</td>
