@@ -406,6 +406,7 @@ Known configuration parameters are:
  * `error_acknowledgements`: a chain of responsibility of objects that acknowledge/reject/requeue messages when an
     exception happens, see classes in `Hutch::Acknowledgements`.
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
+ * `mq_client_properties`: Bunny's [client properties](https://www.rabbitmq.com/docs/connections#capabilities) (default: `{}`)
  * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)

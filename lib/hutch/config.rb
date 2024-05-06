@@ -174,6 +174,7 @@ module Hutch
     # @return [Hash]
     def self.default_config
       @settings_defaults.merge({
+        mq_client_properties: {},
         mq_exchange_options: {},
         mq_tls_cert: nil,
         mq_tls_key: nil,
