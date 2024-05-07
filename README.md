@@ -406,6 +406,7 @@ Known configuration parameters are:
  * `error_acknowledgements`: a chain of responsibility of objects that acknowledge/reject/requeue messages when an
     exception happens, see classes in `Hutch::Acknowledgements`.
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
+ * `mq_client_properties`: Bunny's [client properties](https://www.rabbitmq.com/docs/connections#capabilities) (default: `{}`)
  * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
@@ -541,6 +542,13 @@ Generate with
       <td>Number</td>
       <td><tt>HUTCH_CHANNEL_PREFETCH</tt></td>
       <td><p>The <tt>basic.qos</tt> prefetch value to use.</p></td>
+    </tr>
+    <tr>
+      <td><tt>connection_name</tt></td>
+      <td>nil</td>
+      <td>String</td>
+      <td><tt>HUTCH_CONNECTION_NAME</tt></td>
+      <td><p><a href="https://www.rabbitmq.com/docs/connections#client-provided-names">Client-Provided Connection Name</a></p></td>
     </tr>
     <tr>
       <td><tt>connection_timeout</tt></td>
