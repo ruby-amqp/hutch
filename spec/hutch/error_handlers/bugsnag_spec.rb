@@ -8,6 +8,7 @@ describe Hutch::ErrorHandlers::Bugsnag do
   before do
     Bugsnag.configure do |bugsnag|
       bugsnag.api_key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      bugsnag.logger = Logger.new(File::NULL) # suppress logging
     end
   end
 
