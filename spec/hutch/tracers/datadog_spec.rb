@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Hutch::Tracers::Datadog do
+  ::Datadog.logger.level = Logger::FATAL # suppress logging
+  
   describe "#handle" do
     subject(:handle) { tracer.handle(message) }
 
