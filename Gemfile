@@ -1,13 +1,14 @@
 source 'https://rubygems.org'
 
-ruby '>= 2.6.0'
+# because we use an anscient version of ddtrace
+ruby '>= 2.7.0', '< 3.2'
 
 gemspec
 
 group :development do
   gem "rake"
-  gem "guard", "~> 2.18"
-  gem "guard-rspec", "~> 4.7", platform: :mri_23
+  gem "guard", "~> 2.14", platform: :mri
+  gem "guard-rspec", "~> 4.7", platform: :mri
 
   gem "yard", "~> 0.9"
   gem 'kramdown', "> 0", platform: :jruby
