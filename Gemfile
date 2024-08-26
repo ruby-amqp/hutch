@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
-# because we use an anscient version of ddtrace
-ruby '>= 2.7.0', '< 3.2'
+ruby '>= 2.7.0'
 
 gemspec
 
