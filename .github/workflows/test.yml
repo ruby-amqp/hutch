@@ -4,10 +4,7 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
+on: [push,pull_request,workflow_dispatch]
 
 jobs:
   test:
@@ -29,6 +26,8 @@ jobs:
           - 2.7
           - 3.0
           - 3.1
+          - 3.2
+          - 3.3
 
     steps:
     - uses: actions/checkout@v3
