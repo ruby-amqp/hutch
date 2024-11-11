@@ -1,3 +1,8 @@
+## 1.4.0 (in development)
+
+No changes yet.
+
+
 ## 1.3.0 (Nov 11, 2024)
 
 ### Ruby 3.2 Compatibility
