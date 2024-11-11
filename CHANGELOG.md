@@ -1,4 +1,24 @@
+## 1.3.0 (Nov 11, 2024)
+
+### Ruby 3.2 Compatibility
+
+GitHub issue: [#392](https://github.com/ruby-amqp/hutch/pull/392)
+
+### Relaxed ActiveSupport Dependency Constraints
+
+Contributed by drobny.
+
+GitHub issue: [#402](https://github.com/ruby-amqp/hutch/pull/402)
+
+### Client-Provided Connection Name
+
+Contributed by @sharshenov.
+
+GitHub issue: [#399](https://github.com/ruby-amqp/hutch/pull/399)
+
+
 ## 1.1.1 (March 18th, 2022)
+
 ### Dependency Bump
 
 Hutch now allows ActiveSupport 7.x.
