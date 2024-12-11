@@ -1,6 +1,15 @@
-## 1.3.1 (in development)
+## 1.3.2 (in development)
 
 No changes yet.
+
+## 1.3.1 (Dec 11, 2024)
+
+### Rails 8.x Compatibility
+
+Contributed by @drobny.
+
+GitHub issue: [#404](https://github.com/ruby-amqp/hutch/pull/404)
+
 
 ## 1.3.0 (Nov 11, 2024)
 
@@ -10,7 +19,7 @@ GitHub issue: [#392](https://github.com/ruby-amqp/hutch/pull/392)
 
 ### Relaxed ActiveSupport Dependency Constraints
 
-Contributed by drobny.
+Contributed by @drobny.
 
 GitHub issue: [#402](https://github.com/ruby-amqp/hutch/pull/402)
 
