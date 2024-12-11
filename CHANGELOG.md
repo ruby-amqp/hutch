@@ -1,6 +1,10 @@
 ## 1.4.0 (in development)
 
-No changes yet.
+### Rails 8.x Compatibility
+
+Contributed by @drobny.
+
+GitHub issue: [#404](https://github.com/ruby-amqp/hutch/pull/404)
 
 
 ## 1.3.0 (Nov 11, 2024)
