@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'multi_json', '~> 1.15'
   gem.add_runtime_dependency 'activesupport', '>= 4.2'
+  gem.add_runtime_dependency 'ostruct', '~> 0.6'
 
   gem.name = 'hutch'
   gem.summary = 'Opinionated asynchronous inter-service communication using RabbitMQ'
