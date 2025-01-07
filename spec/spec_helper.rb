@@ -12,6 +12,7 @@ end
 require 'raven'
 require 'hutch'
 require 'logger'
+require 'ostruct'
 
 # set logger to be a null logger
 Hutch::Logging.logger = Logger.new(File::NULL)
