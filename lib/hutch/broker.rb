@@ -225,6 +225,8 @@ module Hutch
       if defined?(JRUBY_VERSION)
         channel.close
       else
+        # Stop submitting messages to channel_work_pool to allow it to drain
+        cancel_all_channel_consumers 
         # Enqueue a failing job that kills the consumer loop
         channel_work_pool.shutdown
         # Give `timeout` seconds to jobs that are still being processed
@@ -382,5 +384,32 @@ module Hutch
     def consumer_pool_abort_on_exception
       @config[:consumer_pool_abort_on_exception]
     end
+
+    def cancel_all_channel_consumers
+      return unless channel&.consumers
+
+      logger.debug("Broker: Cancel channel.consumers: #{channel.consumers.inspect}")
+
+      channel.consumers.each_value { |consumer| cancel(consumer) }
+    end
+
+    #
+    # Cancel a consumer with retry.
+    #
+    # @param [Bunny::Consumer] consumer
+    #
+    def cancel(consumer)
+      return unless consumer
+
+      logger.info("Broker: Will try to cancel consumer #{consumer.inspect}")
+      cancel_ok = consumer.cancel
+      if cancel_ok
+        logger.info "Broker: Consumer #{cancel_ok.consumer_tag} cancelled"
+      else
+        logger.warn "Broker: Could not cancel consumer #{consumer.inspect}"
+        sleep(1)
+        cancel(consumer)
+      end
+    end 
   end
 end

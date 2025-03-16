@@ -324,13 +324,33 @@ describe Hutch::Broker do
   end
 
   describe '#stop', adapter: :bunny do
-    let(:thread_1) { double('Thread') }
-    let(:thread_2) { double('Thread') }
     let(:work_pool) { double('Bunny::ConsumerWorkPool') }
+    let(:channel) { double('Bunny::Channel')  }
+    let(:consumer_1) { double('Bunny::Consumer', cancel: OpenStruct.new(consumer_tag: 'hutch_1')) }
+    let(:consumer_2) { double('Bunny::Consumer', cancel: OpenStruct.new(consumer_tag: 'hutch_2')) }
+    let(:consumers) do 
+      { consumer_1: consumer_1, consumer_2: consumer_2 }
+    end
     let(:config) { { graceful_exit_timeout: 2 } }
 
     before do
       allow(broker).to receive(:channel_work_pool).and_return(work_pool)
+      allow(broker).to receive(:channel).and_return(channel)
+      allow(channel).to receive(:consumers).and_return(consumers)
+      allow(work_pool).to receive(:shutdown)
+      allow(work_pool).to receive(:join)
+      allow(work_pool).to receive(:kill)
+    end
+        
+    it 'cancels all channel consumers before work pool shutdown' do
+      (
+        expect(consumer_1).to receive(:cancel)
+        expect(consumer_2).to receive(:cancel)
+      ).ordered
+
+      expect(work_pool).to receive(:shutdown).ordered
+
+      broker.stop
     end
 
     it 'gracefully stops the work pool' do
@@ -340,6 +360,7 @@ describe Hutch::Broker do
 
       broker.stop
     end
+
   end
 
   describe '#stop', adapter: :march_hare do
