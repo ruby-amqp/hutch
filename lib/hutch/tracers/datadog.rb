@@ -1,5 +1,10 @@
-require 'ddtrace'
-require 'ddtrace/auto_instrument'
+begin
+  require 'ddtrace'
+  require 'ddtrace/auto_instrument'
+rescue LoadError
+  require 'datadog'
+  require 'datadog/auto_instrument'
+end
 
 module Hutch
   module Tracers
