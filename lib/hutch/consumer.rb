@@ -43,7 +43,8 @@ module Hutch
       attr_reader :queue_mode, :queue_type, :initial_group_size
 
       # Explicitly set the queue name
-      def queue_name(name)
+      def queue_name(name, exact: false)
+        @queue_name_exact = exact
         @queue_name = name
       end
 
@@ -89,6 +90,11 @@ module Hutch
         queue_name = self.name.gsub(/::/, ':')
         queue_name.gsub!(/([^A-Z:])([A-Z])/) { "#{$1}_#{$2}" }
         queue_name.downcase
+      end
+
+      # Ask for the queue name to be used verbatim (ignore namespace)
+      def get_queue_name_exact?
+        @queue_name_exact
       end
 
       # Returns consumer custom arguments.

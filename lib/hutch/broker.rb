@@ -173,10 +173,14 @@ module Hutch
     # Create / get a durable queue and apply namespace if it exists.
     def queue(name, options = {})
       with_bunny_precondition_handler('queue') do
-        namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
-        queue_name = namespace.present? ? "#{namespace}:#{name}" : name
-        channel.queue(queue_name, **options)
+        channel.queue(name, **options)
       end
+    end
+
+    def namespaced_queue_name(name)
+      namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")
+      name = name.prepend(namespace + ":") if namespace.present?
+      name
     end
 
     # Return a mapping of queue names to the routing keys they're bound to.
