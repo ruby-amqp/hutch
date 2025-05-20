@@ -4,7 +4,7 @@ describe Hutch::ErrorHandlers::Logger do
   let(:error_handler) { Hutch::ErrorHandlers::Logger.new }
 
   describe '#handle' do
-    let(:properties) { OpenStruct.new(message_id: "1") }
+    let(:properties) { Struct.new(:message_id).new("1") }
     let(:payload) { "{}" }
     let(:error) { double(message: "Stuff went wrong", class: "RuntimeError",
                        backtrace: ["line 1", "line 2"]) }

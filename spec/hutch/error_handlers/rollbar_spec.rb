@@ -14,7 +14,7 @@ describe Hutch::ErrorHandlers::Rollbar do
 
     it "logs the error to Rollbar" do
       message_id = "1"
-      properties = OpenStruct.new(message_id: message_id)
+      properties = Struct.new(:message_id).new(message_id)
       payload = "{}"
       consumer = double
       ex = error

@@ -12,7 +12,7 @@ describe Hutch::ErrorHandlers::Sentry do
   end
 
   describe '#handle' do
-    let(:properties) { OpenStruct.new(message_id: "1") }
+    let(:properties) { Struct.new(:message_id).new("1") }
     let(:payload) { "{}" }
     let(:error) do
       begin
