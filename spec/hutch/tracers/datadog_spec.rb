@@ -16,7 +16,7 @@ RSpec.describe Hutch::Tracers::Datadog do
         end
 
         def class
-          OpenStruct.new(name: 'ClassName')
+          Struct.new(:name).new('ClassName')
         end
 
         def process(message)

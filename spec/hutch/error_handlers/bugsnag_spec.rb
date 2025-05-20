@@ -23,7 +23,7 @@ describe Hutch::ErrorHandlers::Bugsnag do
 
     it "logs the error to Bugsnag" do
       message_id = "1"
-      properties = OpenStruct.new(message_id: message_id)
+      properties = Struct.new(:message_id).new(message_id)
       payload = "{}"
       consumer = double
       ex = error

@@ -1,7 +1,6 @@
 require 'active_support/core_ext/object/blank'
 
 require 'carrot-top'
-require 'ostruct'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/publisher'
@@ -269,8 +268,11 @@ module Hutch
 
     private
 
+    Config = Struct.new(:host, :port, :username, :password, :ssl, :protocol, :sanitized_uri)
+    private_constant :Config
+
     def api_config
-      @api_config ||= OpenStruct.new.tap do |config|
+      @api_config ||= Config.new.tap do |config|
         config.host = @config[:mq_api_host]
         config.port = @config[:mq_api_port]
         config.username = @config[:mq_username]

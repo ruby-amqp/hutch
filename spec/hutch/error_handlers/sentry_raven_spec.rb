@@ -4,7 +4,7 @@ describe Hutch::ErrorHandlers::SentryRaven do
   let(:error_handler) { Hutch::ErrorHandlers::SentryRaven.new }
 
   describe '#handle' do
-    let(:properties) { OpenStruct.new(message_id: "1") }
+    let(:properties) { Struct.new(:message_id).new("1") }
     let(:payload) { "{}" }
     let(:error) do
       begin
