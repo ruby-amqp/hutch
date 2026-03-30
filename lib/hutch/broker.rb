@@ -4,6 +4,7 @@ require 'carrot-top'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/publisher'
+require 'thread'
 
 module Hutch
   class Broker
@@ -113,11 +114,31 @@ module Hutch
           logger.info 'enabling publisher confirms'
           ch.confirm_select
         end
+
+        install_channel_recovery!(ch)
       end
     end
 
     def open_channel!
       @channel = open_channel
+    end
+
+    def install_channel_recovery!(ch)
+      ch.on_error do |channel, close|
+        next unless close.delivery_ack_timeout?
+
+        # Reopen performs blocking protocol operations, so run it outside Bunny's
+        # channel error callback thread to avoid timing out waiting for OpenOk.
+        Thread.new do
+          begin
+            channel.reopen
+            connection.recover_channel_topology(channel)
+            logger.info 'channel recovery succeeded'
+          rescue => ex
+            logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
+          end
+        end
+      end
     end
 
     def declare_exchange(ch = channel)
