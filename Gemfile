@@ -23,7 +23,7 @@ group :development, :test do
   gem "sentry-ruby"
   gem "honeybadger"
   gem "newrelic_rpm"
-  gem "ddtrace", "~> 1.8"
+  gem "datadog"
   gem "airbrake", "~> 13.0"
   gem "rollbar"
   gem "bugsnag"

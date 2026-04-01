@@ -95,7 +95,7 @@ describe Hutch::Broker do
 
     context 'when configured with a URI' do
       context 'which specifies the port' do
-        before { config[:uri] = 'amqp://guest:guest@127.0.0.1:5672/' }
+        before { config[:uri] = "amqp://#{config[:mq_username]}:#{config[:mq_password]}@#{config[:mq_host]}:#{config[:mq_port]}/" }
 
         it 'successfully connects' do
           c = broker.open_connection
@@ -105,7 +105,7 @@ describe Hutch::Broker do
       end
 
       context 'which does not specify port and uses the amqp scheme' do
-        before { config[:uri] = 'amqp://guest:guest@127.0.0.1/' }
+        before { config[:uri] = "amqp://#{config[:mq_username]}:#{config[:mq_password]}@#{config[:mq_host]}/" }
 
         it 'successfully connects' do
           c = broker.open_connection
@@ -115,7 +115,7 @@ describe Hutch::Broker do
       end
 
       context 'which specifies the amqps scheme' do
-        before { config[:uri] = 'amqps://guest:guest@127.0.0.1/' }
+        before { config[:uri] = "amqps://#{config[:mq_username]}:#{config[:mq_password]}@#{config[:mq_host]}/" }
 
         it 'utilises TLS' do
           expect(Hutch::Adapter).to receive(:new).with(
