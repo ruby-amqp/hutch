@@ -4,7 +4,6 @@ require 'carrot-top'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/publisher'
-require 'thread'
 
 module Hutch
   class Broker
@@ -127,16 +126,12 @@ module Hutch
       ch.on_error do |channel, close|
         next unless close.delivery_ack_timeout?
 
-        # Reopen performs blocking protocol operations, so run it outside Bunny's
-        # channel error callback thread to avoid timing out waiting for OpenOk.
-        Thread.new do
-          begin
-            channel.reopen
-            connection.recover_channel_topology(channel)
-            logger.info 'channel recovery succeeded'
-          rescue => ex
-            logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
-          end
+        begin
+          channel.reopen
+          connection.recover_channel_topology(channel)
+          logger.warn 'recovered consumer channel after a delivery acknowledgement timeout'
+        rescue => ex
+          logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
         end
       end
     end
