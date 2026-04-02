@@ -5,6 +5,24 @@
 This version adopts [Bunny `3.x`](https://github.com/ruby-amqp/bunny/releases/tag/3.0.0)
 and as a result, requires Ruby 3.0.
 
+### `without_namespace` Consumer DSL Option
+
+Consumers can now opt out of the automatic namespace prefix
+for their queue name using the `without_namespace` DSL method:
+
+``` ruby
+class DeadLetterConsumer
+  include Hutch::Consumer
+  consume 'dead.letters'
+  queue_name 'deadletter'
+  without_namespace
+end
+```
+
+Originally contributed by @tlloydthwaites.
+
+GitHub issue: [#393](https://github.com/ruby-amqp/hutch/pull/393)
+
 ### Consumer Channel Recovery After Delivery Acknowledgement Timeout
 
 Hutch now automatically "recovers" (reopens) consumer channels closed by RabbitMQ
