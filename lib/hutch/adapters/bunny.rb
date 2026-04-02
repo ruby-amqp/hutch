@@ -11,7 +11,7 @@ module Hutch
       ConnectionRefused = Bunny::TCPConnectionFailed
       PreconditionFailed = Bunny::PreconditionFailed
 
-      def_delegators :@connection, :start, :disconnect, :close, :create_channel, :open?
+      def_delegators :@connection, :start, :disconnect, :close, :create_channel, :open?, :recover_channel_topology
 
       def initialize(opts={})
         @connection = Bunny.new(opts)

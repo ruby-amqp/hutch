@@ -113,11 +113,27 @@ module Hutch
           logger.info 'enabling publisher confirms'
           ch.confirm_select
         end
+
+        install_channel_recovery!(ch)
       end
     end
 
     def open_channel!
       @channel = open_channel
+    end
+
+    def install_channel_recovery!(ch)
+      ch.on_error do |channel, close|
+        next unless close.delivery_ack_timeout?
+
+        begin
+          channel.reopen
+          connection.recover_channel_topology(channel)
+          logger.warn 'recovered consumer channel after a delivery acknowledgement timeout'
+        rescue => ex
+          logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
+        end
+      end
     end
 
     def declare_exchange(ch = channel)

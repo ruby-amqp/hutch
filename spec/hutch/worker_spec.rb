@@ -61,6 +61,7 @@ describe Hutch::Worker do
     context 'with a configured consumer tag prefix that is too long' do
       let(:maximum_size) { 255 - SecureRandom.uuid.size - 1 }
       before { Hutch::Config.set(:consumer_tag_prefix, 'a'.*(maximum_size + 1)) }
+      after { Hutch::Config.set(:consumer_tag_prefix, 'hutch') }
 
       it 'raises an error' do
         expect { worker.setup_queue(consumer) }.to raise_error(/Tag must be 255 bytes long at most/)
