@@ -133,7 +133,7 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
     end
 
     expect(log_output).to match(/delivery acknowledgement on channel \d+ timed out/i)
-    expect(log_output).to match(/channel recovery succeeded/i)
+    expect(log_output).to match(/recovered consumer channel after a delivery acknowledgement timeout/i)
     expect(processed_messages).to include('after-recovery')
   end
 end
