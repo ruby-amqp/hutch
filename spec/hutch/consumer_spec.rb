@@ -97,6 +97,17 @@ describe Hutch::Consumer do
     end
   end
 
+  describe '.without_namespace' do
+    it 'is false by default' do
+      expect(simple_consumer.without_namespace?).to eq(false)
+    end
+
+    it 'returns true after calling without_namespace' do
+      simple_consumer.without_namespace
+      expect(simple_consumer.without_namespace?).to eq(true)
+    end
+  end
+
   describe 'default queue mode' do
     it 'does not specify any mode by default' do
       expect(simple_consumer.queue_mode).to eq(nil)

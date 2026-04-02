@@ -256,13 +256,27 @@ describe Hutch::Broker do
     let(:arguments) { { foo: :bar } }
     before { allow(broker).to receive(:channel) { channel } }
 
-    it 'applies a global namespace' do
-      config[:namespace] = 'mirror-all.service'
-      expect(broker.channel).to receive(:queue) do |*args|
-        args.first == ''
-        args.last == arguments
-      end
+    it 'creates a queue with the given name' do
+      expect(broker.channel).to receive(:queue).with('test', arguments: arguments)
       broker.queue('test'.freeze, arguments: arguments)
+    end
+  end
+
+  describe '#namespaced_queue_name' do
+    context 'with a namespace configured' do
+      before { config[:namespace] = 'mirror-all.service' }
+
+      it 'prepends the namespace' do
+        expect(broker.namespaced_queue_name('test')).to eq('mirror-all.service:test')
+      end
+    end
+
+    context 'without a namespace configured' do
+      before { config[:namespace] = nil }
+
+      it 'returns the name unchanged' do
+        expect(broker.namespaced_queue_name('test')).to eq('test')
+      end
     end
   end
 

@@ -47,6 +47,15 @@ module Hutch
         @queue_name = name
       end
 
+      # Opt out of the namespace prefix for this consumer's queue
+      def without_namespace
+        @without_namespace = true
+      end
+
+      def without_namespace?
+        !!@without_namespace
+      end
+
       # Explicitly set the queue mode to 'lazy'
       def lazy_queue
         @queue_mode = 'lazy'

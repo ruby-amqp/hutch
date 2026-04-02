@@ -4,7 +4,8 @@ require 'hutch/worker'
 describe Hutch::Worker do
   let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
                           get_queue_name: 'consumer', get_arguments: {},
-                          get_options: {}, get_serializer: nil) }
+                          get_options: {}, get_serializer: nil,
+                          without_namespace?: false) }
   let(:consumers) { [consumer, double('Consumer')] }
   let(:broker) { Hutch::Broker.new }
   let(:setup_procs) { Array.new(2) { Proc.new {} } }
@@ -32,11 +33,25 @@ describe Hutch::Worker do
 
   describe '#setup_queue' do
     let(:queue) { double('Queue', bind: nil, subscribe: nil) }
-    before { allow(broker).to receive_messages(queue: queue, bind_queue: nil) }
+    before { allow(broker).to receive_messages(queue: queue, bind_queue: nil, namespaced_queue_name: 'consumer') }
 
-    it 'creates a queue' do
-      expect(broker).to receive(:queue).with(consumer.get_queue_name, consumer.get_options).and_return(queue)
+    it 'creates a queue with a namespaced name' do
+      expect(broker).to receive(:namespaced_queue_name).with('consumer').and_return('ns:consumer')
+      expect(broker).to receive(:queue).with('ns:consumer', consumer.get_options).and_return(queue)
       worker.setup_queue(consumer)
+    end
+
+    context 'when the consumer uses without_namespace' do
+      let(:consumer) { double('Consumer', routing_keys: %w( a b c ),
+                              get_queue_name: 'consumer', get_arguments: {},
+                              get_options: {}, get_serializer: nil,
+                              without_namespace?: true) }
+
+      it 'creates a queue without applying the namespace' do
+        expect(broker).not_to receive(:namespaced_queue_name)
+        expect(broker).to receive(:queue).with('consumer', consumer.get_options).and_return(queue)
+        worker.setup_queue(consumer)
+      end
     end
 
     it 'binds the queue to each of the routing keys' do
