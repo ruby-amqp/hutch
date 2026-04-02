@@ -52,7 +52,7 @@ To run tests use `rspec` directly (not Rake).
 
 ### Serializers
 
- * `lib/hutch/serializers/json.rb`: JSON serialization via `multi_json`
+ * `lib/hutch/serializers/json.rb`: JSON serialization via Ruby's stdlib `json`
  * `lib/hutch/serializers/identity.rb`: pass-through (no-op) serializer
 
 ### Error Handlers
@@ -60,7 +60,6 @@ To run tests use `rspec` directly (not Rake).
  * `lib/hutch/error_handlers/base.rb`: base class
  * `lib/hutch/error_handlers/logger.rb`: logs errors (default)
  * `lib/hutch/error_handlers/sentry.rb`: sentry-ruby integration
- * `lib/hutch/error_handlers/sentry_raven.rb`: legacy sentry-raven integration
  * `lib/hutch/error_handlers/honeybadger.rb`: Honeybadger
  * `lib/hutch/error_handlers/airbrake.rb`: Airbrake
  * `lib/hutch/error_handlers/rollbar.rb`: Rollbar

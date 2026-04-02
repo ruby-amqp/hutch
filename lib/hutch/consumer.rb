@@ -80,7 +80,7 @@ module Hutch
         @arguments = arguments
       end
 
-      # Congfiures queue options that will be passed when declaring the queue.
+      # Configures queue options that will be passed when declaring the queue.
       def queue_options(options = {})
         @queue_options = options
       end

@@ -57,7 +57,7 @@ module Hutch
 
     # RabbitMQ username to use.
     #
-    # As of RabbitMQ 3.3.0, <tt>guest</tt> can only can connect from localhost.
+    # The <tt>guest</tt> user can only connect from localhost.
     string_setting :mq_username, 'guest'
 
     # RabbitMQ password
@@ -78,7 +78,7 @@ module Hutch
     # RabbitMQ HTTP API port
     number_setting :mq_api_port, 15672
 
-    # [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html)
+    # [RabbitMQ heartbeat timeout](https://www.rabbitmq.com/docs/heartbeats)
     number_setting :heartbeat, 30
 
     # The <tt>basic.qos</tt> prefetch value to use.
@@ -104,7 +104,7 @@ module Hutch
     # Bunny's reconnect interval
     number_setting :network_recovery_interval, 1
 
-    # FIXME: DOCUMENT THIS
+    # Timeout (in seconds) for consumer threads to finish before being killed during graceful shutdown
     number_setting :graceful_exit_timeout, 11
 
     # Bunny consumer work pool size
