@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.summary = 'Opinionated asynchronous inter-service communication using RabbitMQ'
   gem.description = 'Hutch is a Ruby library for enabling asynchronous inter-service communication using RabbitMQ'
   gem.version = Hutch::VERSION.dup
-  gem.required_ruby_version = '>= 2.6'
+  gem.required_ruby_version = '>= 3.0'
   gem.authors = ['Harry Marr', 'Michael Klishin']
   gem.homepage = 'https://github.com/ruby-amqp/hutch'
   gem.require_paths = ['lib']

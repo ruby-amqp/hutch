@@ -14,7 +14,7 @@ and [ActiveSupport](https://github.com/rails/rails/tree/main/activesupport) from
 
 ## Target Ruby Version
 
-This library targets Ruby 3.1 and later versions
+This library targets Ruby 3.0 and later versions
 For JRuby, the supported series are 9.x and 10.x.
 
 ## Build and Test
