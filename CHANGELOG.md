@@ -1,5 +1,27 @@
 ## 1.4.0 (in development)
 
+### Ruby 3.0 is Now Required
+
+This version adopts [Bunny `3.x`](https://github.com/ruby-amqp/bunny/releases/tag/3.0.0)
+and as a result, requires Ruby 3.0.
+
+### Consumer Channel Recovery After Delivery Acknowledgement Timeout
+
+Hutch now automatically "recovers" (reopens) consumer channels closed by RabbitMQ
+due to a [delivery acknowledgement timeout](https://www.rabbitmq.com/docs/consumers#acknowledgement-timeout).
+
+Note that this exception indicates a potential issue on Hutch's end:
+a delivery was not acknowledged in time (30 minutes by default). Even then,
+recovering the channel in this specific scenario is an operational improvement.
+
+Contributed by @Garaio-REM.
+
+GitHub issue: [#414](https://github.com/ruby-amqp/hutch/pull/414)
+
+### Migrated Datadog Tracer From the `ddtrace` Gem to `datadog`
+
+The Datadog tracer now uses the `datadog` gem instead of the deprecated `ddtrace`.
+
 ### Rails 8.x Compatibility
 
 Contributed by @drobny.
@@ -89,7 +111,7 @@ contains potentially breaking changes.
 
    This means **some defaults introduced in `0.28.0` ([gocardless/hutch#341](https://github.com/gocardless/hutch/pull/341)) were reverted**.
    The user has to opt in to configure the queue type and mode and other [optional arguments](https://www.rabbitmq.com/queues.html#optional-arguments) they need to use.
-   Most optional arguments can be set via [policies](https://www.rabbitmq.com/parameters.html#policies) which is always the recommended approach. 
+   Most optional arguments can be set via [policies](https://www.rabbitmq.com/parameters.html#policies) which is always the recommended approach.
    Queue type, unfortunately, is not one of them as different queue types have completely different
    implementation details, on disk data formats and so on.
 
@@ -102,7 +124,7 @@ contains potentially breaking changes.
       # when in doubt, prefer using a policy to this DSL
       # https://www.rabbitmq.com/parameters.html#policies
       arguments 'x-key': :value
-        
+
       quorum_queue
    end
    ```
@@ -116,7 +138,7 @@ contains potentially breaking changes.
      # when in doubt, prefer using a policy to this DSL
       # https://www.rabbitmq.com/parameters.html#policies
       arguments 'x-key': :value
-     
+
      lazy_queue
      classic_queue
    end
