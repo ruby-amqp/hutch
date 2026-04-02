@@ -1,4 +1,4 @@
-require 'multi_json'
+ require 'json'
 require 'active_support/core_ext/hash/indifferent_access'
 
 module Hutch
@@ -6,11 +6,11 @@ module Hutch
     class JSON
 
       def self.encode(payload)
-        ::MultiJson.dump(payload)
+        ::JSON.generate(payload)
       end
 
       def self.decode(payload)
-        ::MultiJson.load(payload).with_indifferent_access
+        ::JSON.parse(payload).with_indifferent_access
       end
 
       def self.binary? ; false ; end
