@@ -1,4 +1,4 @@
-## 1.4.0 (Apr 6, 2026)
+## 1.4.0 (unreleased)
 
 ### Ruby 3.0 is Now Required
 
