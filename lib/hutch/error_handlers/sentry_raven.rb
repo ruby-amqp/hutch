@@ -10,6 +10,9 @@ module Hutch
         unless Raven.respond_to?(:capture_exception)
           raise "The Hutch Sentry error handler requires Raven >= 0.4.0"
         end
+
+        warn "[DEPRECATION] Hutch::ErrorHandlers::SentryRaven is deprecated and will be removed in Hutch 2.0. " \
+             "Use Hutch::ErrorHandlers::Sentry (backed by the sentry-ruby gem) instead." \
       end
 
       def handle(properties, payload, consumer, ex)

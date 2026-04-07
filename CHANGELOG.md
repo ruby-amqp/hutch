@@ -1,4 +1,4 @@
-## 1.4.0 (in development)
+## 1.4.0 (Apr 6, 2026)
 
 ### Ruby 3.0 is Now Required
 
@@ -39,6 +39,13 @@ GitHub issue: [#414](https://github.com/ruby-amqp/hutch/pull/414)
 ### Migrated Datadog Tracer From the `ddtrace` Gem to `datadog`
 
 The Datadog tracer now uses the `datadog` gem instead of the deprecated `ddtrace`.
+The `ddtrace` gem is still supported but emits a deprecation warning at load time.
+Support for `ddtrace` will be removed in Hutch 2.0.
+
+### Deprecated `SentryRaven` Error Handler
+
+`Hutch::ErrorHandlers::SentryRaven` now emits a deprecation warning and will be
+removed in Hutch 2.0. Use `Hutch::ErrorHandlers::Sentry` (backed by `sentry-ruby`) instead.
 
 ### Rails 8.x Compatibility
 
