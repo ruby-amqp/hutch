@@ -36,12 +36,9 @@ module Hutch
       set_up_code_paths!
 
       # Because of the order things are required when we run the Hutch binary
-      # in hutch/bin, the Sentry Raven gem gets required **after** the error
+      # in hutch/bin, the sentry-ruby gem gets required **after** the error
       # handlers are set up. Due to this, we never got any Sentry notifications
       # when an error occurred in any of the consumers.
-      if defined?(Raven)
-        Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::SentryRaven.new
-      end
       if defined?(Sentry)
         Hutch::Config[:error_handlers] << Hutch::ErrorHandlers::Sentry.new
       end

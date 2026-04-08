@@ -19,7 +19,6 @@ group :development, :test do
   gem "rspec", "~> 3.12"
   gem "simplecov", "~> 0.21"
 
-  gem "sentry-raven"
   gem "sentry-ruby"
   gem "honeybadger"
   gem "newrelic_rpm"

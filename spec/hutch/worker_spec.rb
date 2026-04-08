@@ -191,7 +191,7 @@ describe Hutch::Worker do
 
     context "when the payload is not valid json" do
       let(:payload) { "Not Valid JSON" }
-      let(:expected_log) { /ERROR .+ error in consumer .+ MultiJson::ParseError .+ backtrace:/m }
+      let(:expected_log) { /ERROR .+ error in consumer .+ JSON::ParserError .+ backtrace:/m }
 
       it 'logs the error' do
         expect { subject }.to change { log.tap(&:rewind).read }.from("").to(expected_log)

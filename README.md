@@ -1,7 +1,5 @@
-![](http://cl.ly/image/3h0q3F3G142K/hutch.png)
-
-[![Gem Version](https://badge.fury.io/rb/hutch.svg)](http://badge.fury.io/rb/hutch)
-[![Code Climate](https://codeclimate.com/github/gocardless/hutch.svg)](https://codeclimate.com/github/gocardless/hutch)
+[![Gem Version](https://badge.fury.io/rb/hutch.svg)](https://badge.fury.io/rb/hutch)
+[![CI](https://github.com/ruby-amqp/hutch/actions/workflows/test.yml/badge.svg)](https://github.com/ruby-amqp/hutch/actions/workflows/test.yml)
 
 Hutch is a Ruby library for enabling asynchronous inter-service communication
 in a service-oriented architecture, using RabbitMQ.
@@ -23,6 +21,8 @@ gem install hutch
     - [Message Processing Tracers](#message-processing-tracers)
   - [Running Hutch](#running-hutch)
     - [Loading Consumers](#loading-consumers)
+    - [Consumer Groups](#consumer-groups)
+    - [Loading Consumers Manually (One-by-One)](#loading-consumers-manually-one-by-one)
     - [Stopping Hutch](#stopping-hutch)
   - [Producers](#producers)
     - [Producer Configuration](#producer-configuration)
@@ -38,8 +38,8 @@ gem install hutch
 
 ## Requirements
 
-- Hutch requires Ruby 2.4+ or JRuby 9K.
-- Hutch requires RabbitMQ 3.3 or later.
+- Hutch requires Ruby 3.0+ or JRuby 9.4+
+- Hutch requires RabbitMQ 3.13 or later
 
 ## Overview
 
@@ -52,7 +52,7 @@ With Hutch, consumers are stored in separate files and include the `Hutch::Consu
 They are then loaded by a command line runner which connects to RabbitMQ, sets up queues and bindings,
 and so on. Publishers connect to RabbitMQ via `Hutch.connect` and publish using `Hutch.publish`.
 
-Hutch uses [Bunny](http://rubybunny.info) or [March Hare](http://rubymarchhare.info)
+Hutch uses [Bunny](https://github.com/ruby-amqp/bunny) or [March Hare](https://github.com/ruby-amqp/march_hare)
 (on JRuby) under the hood.
 
 ### Project Maturity
@@ -79,7 +79,7 @@ message[:id]  # => "02ABCXYZ"
 To subscribe to a topic, pass a routing key to `consume` in the class
 definition. To bind to multiple routing keys, simply pass extra routing keys
 in as additional arguments. Refer to the [RabbitMQ docs on topic exchanges
-](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html) for more information
+](https://www.rabbitmq.com/tutorials/tutorial-five-ruby) for more information
 about how to use routing keys. Here's an example consumer:
 
 ```ruby
@@ -110,10 +110,10 @@ end
 
 It is possible to set some custom options to consumer's queue explicitly.
 This example sets the consumer's queue as a
-[quorum queue](https://www.rabbitmq.com/quorum-queues.html)
-and to operate in the [lazy mode](https://www.rabbitmq.com/lazy-queues.html).
+[quorum queue](https://www.rabbitmq.com/docs/quorum-queues)
+and to operate in the [lazy mode](https://www.rabbitmq.com/docs/lazy-queues).
 The `initial_group_size`
-[argument](https://www.rabbitmq.com/quorum-queues.html#replication-factor) is
+[argument](https://www.rabbitmq.com/docs/quorum-queues#replication-factor) is
 optional.
 
 ```ruby
@@ -142,11 +142,11 @@ end
 ```
 
 This sets the `x-max-length` header. For more details, see the [RabbitMQ
-documentation on Queue Length Limit](https://www.rabbitmq.com/maxlength.html). To find out more
-about custom queue arguments, consult the [RabbitMQ documentation on AMQP Protocol Extensions](https://www.rabbitmq.com/extensions.html).
+documentation on Queue Length Limit](https://www.rabbitmq.com/docs/maxlength). To find out more
+about custom queue arguments, consult the [RabbitMQ documentation on AMQP Protocol Extensions](https://www.rabbitmq.com/docs/extensions).
 
 Consumers can write to Hutch's log by calling the logger method. The logger method returns
-a [Logger object](http://ruby-doc.org/stdlib-2.1.2/libdoc/logger/rdoc/Logger.html).
+a [Logger object](https://docs.ruby-lang.org/en/3.0/Logger.html).
 
 ```ruby
 class FailedPaymentConsumer
@@ -174,7 +174,7 @@ client_logger = Logger.new("/path/to/bunny.log")
 Hutch::Config.set(:client_logger, client_logger)
 ```
 
-See this [RabbitMQ tutorial on topic exchanges](http://www.rabbitmq.com/tutorials/tutorial-five-ruby.html)
+See this [RabbitMQ tutorial on topic exchanges](https://www.rabbitmq.com/tutorials/tutorial-five-ruby)
 to learn more.
 
 ### Message Processing Tracers
@@ -206,7 +206,7 @@ usage: hutch [options]
         --mq-host HOST               Set the RabbitMQ host
         --mq-port PORT               Set the RabbitMQ port
     -t, --[no-]mq-tls                Use TLS for the AMQP connection
-        --mq-tls-cert FILE           Certificate  for TLS client verification
+        --mq-tls-cert FILE           Certificate for TLS client verification
         --mq-tls-key FILE            Private key for TLS client verification
         --mq-exchange EXCHANGE       Set the RabbitMQ exchange
         --mq-vhost VHOST             Set the RabbitMQ vhost
@@ -242,13 +242,13 @@ in the config file, allowing for easy customization.
 
 Using Hutch with a Rails app is simple. Either start Hutch in the working
 directory of a Rails app, or pass the path to a Rails app in with the
-`--require` option. Consumers defined in Rails apps should be placed with in
+`--require` option. Consumers defined in Rails apps should be placed within
 the `app/consumers/` directory, to allow them to be auto-loaded when Rails
 boots.
 
-If you're using the new Zeitwerk autoloader (enabled by default in Rails 6)
-and the consumers are not loaded in development environment you will need to
-trigger the autoloading in an initializer with
+If you're using the Zeitwerk autoloader (the default since Rails 6)
+and the consumers are not loaded in the development environment, you will need to
+trigger eager loading in an initializer with
 
 ```ruby
 ::Zeitwerk::Loader.eager_load_all
@@ -309,8 +309,6 @@ kill -SIGTERM 456 # or kill -15 456
 kill -SIGQUIT 789 # or kill -3 789
 ```
 
-![](http://g.recordit.co/wyCdzG9Kh3.gif)
-
 ## Producers
 
 Hutch includes a `publish` method for sending messages to Hutch consumers. When
@@ -334,7 +332,7 @@ Hutch::Config.set(:mq_exchange, 'name')
 ### Publisher Confirms
 
 For maximum message reliability when producing messages, you can force Hutch to use
-[Publisher Confirms](https://www.rabbitmq.com/confirms.html) and wait for a confirmation
+[Publisher Confirms](https://www.rabbitmq.com/docs/confirms) and wait for a confirmation
 after every message published. This is the safest possible option for publishers
 but also results in a **significant throughput drop**.
 
@@ -354,25 +352,27 @@ send messages to Hutch.
 - Hutch works with topic exchanges, check the producer is also using topic
   exchanges.
 - Use message routing keys that match those used in your Hutch consumers.
-- Be sure your exchanges are marked as durable. In the Ruby AMQP gem, this is
-  done by passing `durable: true` to the exchange creation method.
-- Publish messages as persistent.
-- Using publisher confirms is highly recommended.
+- Be sure your exchanges are marked as durable, by passing `durable: true`
+  to the exchange creation method
+- Publish messages as persistent
+- Using publisher confirms is highly recommended
 
 Here's an example of a well-behaved publisher, minus publisher confirms:
 
 ```ruby
-AMQP.connect(host: config[:host]) do |connection|
-  channel  = AMQP::Channel.new(connection)
-  exchange = channel.topic(config[:exchange], durable: true)
+require 'bunny'
 
-  message = JSON.dump({ subject: 'Test', id: 'abc' })
-  exchange.publish(message, routing_key: 'test', persistent: true)
-end
+conn = Bunny.new(host: config[:host])
+conn.start
+
+ch       = conn.create_channel
+exchange = ch.topic(config[:exchange], durable: true)
+
+message = JSON.dump({ subject: 'Test', id: 'abc' })
+exchange.publish(message, routing_key: 'test', persistent: true)
+
+conn.close
 ```
-
-If using publisher confirms with amqp gem, see [this issue](https://github.com/ruby-amqp/amqp/issues/92)
-and [this gist](https://gist.github.com/3042381) for more info.
 
 ## Configuration
 
@@ -385,7 +385,7 @@ Known configuration parameters are:
  * `mq_host`: RabbitMQ hostname (default: `localhost`)
  * `mq_port`: RabbitMQ port (default: `5672`)
  * `mq_vhost`: vhost to use (default: `/`)
- * `mq_username`: username to use (default: `guest`, only can connect from localhost as of RabbitMQ 3.3.0)
+ * `mq_username`: username to use (default: `guest`, can only connect from localhost)
  * `mq_password`: password to use (default: `guest`)
  * `mq_tls`: should TLS be used? (default: `false`)
  * `mq_tls_cert`: path to client TLS certificate (public key)
@@ -407,7 +407,7 @@ Known configuration parameters are:
     exception happens, see classes in `Hutch::Acknowledgements`.
  * `mq_exchange`: exchange to use for publishing (default: `hutch`)
  * `mq_client_properties`: Bunny's [client properties](https://www.rabbitmq.com/docs/connections#capabilities) (default: `{}`)
- * `heartbeat`: [RabbitMQ heartbeat timeout](http://rabbitmq.com/heartbeats.html) (default: `30`)
+ * `heartbeat`: [RabbitMQ heartbeat timeout](https://www.rabbitmq.com/docs/heartbeats) (default: `30`)
  * `connection_timeout`: Bunny's socket open timeout (default: `11`)
  * `read_timeout`: Bunny's socket read timeout (default: `11`)
  * `write_timeout`: Bunny's socket write timeout (default: `11`)
@@ -534,7 +534,7 @@ Generate with
       <td>30</td>
       <td>Number</td>
       <td><tt>HUTCH_HEARTBEAT</tt></td>
-      <td><p><a href="http://rabbitmq.com/heartbeats.html">RabbitMQ heartbeat timeout</a></p></td>
+      <td><p><a href="https://www.rabbitmq.com/docs/heartbeats">RabbitMQ heartbeat timeout</a></p></td>
     </tr>
     <tr>
       <td><tt>channel_prefetch</tt></td>
@@ -590,7 +590,7 @@ Generate with
       <td>11</td>
       <td>Number</td>
       <td><tt>HUTCH_GRACEFUL_EXIT_TIMEOUT</tt></td>
-      <td><p>FIXME: DOCUMENT THIS</p></td>
+      <td><p>Timeout (in seconds) for consumer threads to finish before being killed during graceful shutdown</p></td>
     </tr>
     <tr>
       <td><tt>consumer_pool_size</tt></td>
@@ -646,7 +646,7 @@ Generate with
       <td>false</td>
       <td>Boolean</td>
       <td><tt>HUTCH_FORCE_PUBLISHER_CONFIRMS</tt></td>
-      <td><p>Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for</p></td>
+      <td><p>Enables publisher confirms, forces Hutch::Broker#wait_for_confirms for every publish</p></td>
     </tr>
     <tr>
       <td><tt>enable_http_api_use</tt></td>
@@ -681,7 +681,7 @@ Generate with
       <td>''</td>
       <td>String</td>
       <td><tt>HUTCH_GROUP</tt></td>
-      <td></td>
+      <td><p>Consumer group to load (see Consumer Groups)</p></td>
     </tr>
   </tbody>
 </table>

@@ -1,11 +1,28 @@
+# Hutch Change Log
+
 ## 2.0.0 (in development)
 
-No changes yet.
+### Datadog Tracer Now Requires the `datadog` Gem
+
+The Datadog tracer now requires the [`datadog`](https://github.com/DataDog/dd-trace-rb) gem.
+Support for the deprecated `ddtrace` gem has been removed. ([migration guide](https://github.com/DataDog/dd-trace-rb/blob/master/docs/UpgradeGuide2.md))
+
+### Removed the `SentryRaven` Error Handler
+
+The `Hutch::ErrorHandlers::SentryRaven` error handler based on the EOL
+[`sentry-raven`](https://github.com/getsentry/raven-ruby) gem
+has been removed. Use `Hutch::ErrorHandlers::Sentry` (backed by `sentry-ruby`) instead. ([migration guide](https://docs.sentry.io/platforms/ruby/migration/))
+
+### Replaced `multi_json` With Ruby's stdlib `json`
+
+The `multi_json` runtime dependency has been removed. Hutch now uses
+Ruby's built-in `json` library directly.
 
 
 ## 1.4.0 (Apr 7, 2026)
 
 ### Ruby 3.1 is Now Required
+>>>>>>> Garaio-REM-update_docs_and_remove_legacy_things
 
 This version adopts [Bunny `3.x`](https://github.com/ruby-amqp/bunny/releases/tag/3.0.0)
 and as a result, requires Ruby 3.1.
