@@ -22,7 +22,6 @@ Ruby's built-in `json` library directly.
 ## 1.4.0 (Apr 7, 2026)
 
 ### Ruby 3.1 is Now Required
->>>>>>> Garaio-REM-update_docs_and_remove_legacy_things
 
 This version adopts [Bunny `3.x`](https://github.com/ruby-amqp/bunny/releases/tag/3.0.0)
 and as a result, requires Ruby 3.1.
