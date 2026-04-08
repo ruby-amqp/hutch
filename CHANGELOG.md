@@ -5,10 +5,10 @@ No changes yet.
 
 ## 1.4.0 (Apr 7, 2026)
 
-### Ruby 3.0 is Now Required
+### Ruby 3.1 is Now Required
 
 This version adopts [Bunny `3.x`](https://github.com/ruby-amqp/bunny/releases/tag/3.0.0)
-and as a result, requires Ruby 3.0.
+and as a result, requires Ruby 3.1.
 
 ### `without_namespace` Consumer DSL Option
 
