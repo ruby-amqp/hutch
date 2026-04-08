@@ -19,7 +19,7 @@ The `multi_json` runtime dependency has been removed. Hutch now uses
 Ruby's built-in `json` library directly.
 
 
-## 1.4.0 (Apr 7, 2206)
+## 1.4.0 (Apr 7, 2026)
 
 ### Ruby 3.0 is Now Required
 
