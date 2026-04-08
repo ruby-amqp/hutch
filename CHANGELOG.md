@@ -1,3 +1,5 @@
+# Hutch Change Log
+
 ## 2.0.0 (in development)
 
 ### Datadog Tracer Now Requires the `datadog` Gem
@@ -16,7 +18,8 @@ has been removed. Use `Hutch::ErrorHandlers::Sentry` (backed by `sentry-ruby`) i
 The `multi_json` runtime dependency has been removed. Hutch now uses
 Ruby's built-in `json` library directly.
 
-## 1.4.0 (Apr 6, 2026)
+
+## 1.4.0 (Apr 7, 2206)
 
 ### Ruby 3.0 is Now Required
 
