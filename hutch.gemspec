@@ -1,4 +1,4 @@
-require File.expand_path('../lib/hutch/version', __FILE__)
+require_relative 'lib/hutch/version'
 
 Gem::Specification.new do |gem|
   if defined?(JRUBY_VERSION)
@@ -21,6 +21,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.license = 'MIT'
   gem.executables = ['hutch']
-  gem.files = `git ls-files`.split("\n")
-  gem.test_files = `git ls-files -- spec/*`.split("\n")
+  gem.files = Dir.glob('{lib,bin,templates}/**/*') + %w[README.md LICENSE CHANGELOG.md]
+  gem.test_files = Dir.glob('spec/**/*_spec.rb')
 end
