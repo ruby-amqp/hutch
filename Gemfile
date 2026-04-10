@@ -6,8 +6,6 @@ gemspec
 
 group :development do
   gem "rake"
-  gem "guard", "~> 2.14", platform: :mri
-  gem "guard-rspec", "~> 4.7", platform: :mri
 
   gem "yard", "~> 0.9"
   gem 'kramdown', "> 0", platform: :jruby
@@ -26,9 +24,4 @@ group :development, :test do
   gem "airbrake", "~> 13.0"
   gem "rollbar"
   gem "bugsnag"
-end
-
-group :development, :darwin do
-  gem "rb-fsevent", "~> 0.11.2"
-  gem "growl", "~> 1.0.3"
 end

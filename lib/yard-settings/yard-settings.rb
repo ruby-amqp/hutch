@@ -1,2 +1,2 @@
-YARD::Templates::Engine.register_template_path(File.dirname(__FILE__) + '/../../templates')
-require File.join(File.dirname(__FILE__), 'handler') if RUBY19
+YARD::Templates::Engine.register_template_path(File.join(__dir__, '../../templates'))
+require_relative 'handler'
