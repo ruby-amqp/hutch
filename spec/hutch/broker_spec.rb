@@ -94,6 +94,22 @@ describe Hutch::Broker do
     end
 
     context 'when configured with a URI' do
+      context 'which does not specify a vhost' do
+        before { config[:uri] = "amqp://#{config[:mq_username]}:#{config[:mq_password]}@#{config[:mq_host]}:#{config[:mq_port]}/" }
+
+        it 'successfully connects' do
+          c = broker.open_connection
+          expect(c).to be_open
+          c.close
+        end
+
+        it 'defaults mq_vhost to "/" rather than an empty string' do
+          c = broker.open_connection
+          expect(config[:mq_vhost]).to eq('/')
+          c.close
+        end
+      end
+
       context 'which specifies the port' do
         before { config[:uri] = "amqp://#{config[:mq_username]}:#{config[:mq_password]}@#{config[:mq_host]}:#{config[:mq_port]}/" }
 

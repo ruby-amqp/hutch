@@ -343,7 +343,7 @@ module Hutch
       @config[:mq_tls]      = u.scheme == 'amqps'
       @config[:mq_host]     = u.host
       @config[:mq_port]     = u.port || default_mq_port
-      @config[:mq_vhost]    = u.path.sub(/^\//, "")
+      @config[:mq_vhost]    = u.path.sub(/^\//, "").presence || Hutch::Adapter::DEFAULT_VHOST
       @config[:mq_username] = u.user
       @config[:mq_password] = u.password
     end
