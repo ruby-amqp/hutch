@@ -38,7 +38,7 @@ gem install hutch
 
 ## Requirements
 
-- Hutch requires Ruby 3.0+ or JRuby 9.4+
+- Hutch requires Ruby 3.2+ or JRuby 10+
 - Hutch requires RabbitMQ 3.13 or later
 
 ## Overview

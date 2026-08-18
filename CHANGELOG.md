@@ -2,6 +2,12 @@
 
 ## 2.0.0 (in development)
 
+### Hutch Now Requires Ruby 3.2 or JRuby 10
+
+Ruby 3.0 and 3.1 are end of life. Ruby 3.2 provides `URI.decode_uri_component`
+and `URI.encode_uri_component`, which the URI handling now relies on. JRuby 9.4
+reports `RUBY_VERSION` 3.1.7 and is therefore ruled out; JRuby 10 is unaffected.
+
 ### Datadog Tracer Now Requires the `datadog` Gem
 
 The Datadog tracer now requires the [`datadog`](https://github.com/DataDog/dd-trace-rb) gem.
