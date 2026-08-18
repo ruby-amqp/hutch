@@ -129,6 +129,27 @@ describe Hutch::Broker do
   end
 
   describe '#parse_uri' do
+    {
+      "amqp://host/vhost"    => "vhost",
+      "amqp://host/v%2fhost" => "v/host",
+      "amqp://host/%2f"      => "/",
+      "amqp://host/"         => Hutch::Adapter::DEFAULT_VHOST,
+      "amqp://host"          => Hutch::Adapter::DEFAULT_VHOST,
+    }.each do |uri, vhost|
+      it "parses the vhost of #{uri} as #{vhost.inspect}" do
+        config[:uri] = uri
+        broker.send(:parse_uri)
+
+        expect(config[:mq_vhost]).to eq(vhost)
+      end
+    end
+
+    it 'passes the vhost to the connection unchanged' do
+      config[:uri] = "amqp://host/%2f"
+
+      expect(broker.send(:connection_params)[:vhost]).to eq("/")
+    end
+
     it 'percent-decodes the username and password' do
       config[:uri] = "amqp://al%23pha:be%20ta@host:10000/vhost"
       broker.send(:parse_uri)
@@ -143,6 +164,37 @@ describe Hutch::Broker do
 
       expect(config[:mq_username]).to be_nil
       expect(config[:mq_password]).to be_nil
+    end
+  end
+
+  describe '#bindings', 'vhost filtering' do
+    let(:api_bindings) do
+      [{ 'source' => 'hutch', 'vhost' => '/', 'destination' => 'q', 'routing_key' => 'key' }]
+    end
+
+    before do
+      config[:mq_exchange] = 'hutch'
+      broker.api_client = double('api_client', bindings: api_bindings)
+    end
+
+    it 'filters on the default vhost when the configured vhost is blank' do
+      config[:mq_vhost] = ''
+
+      expect(broker.bindings).to eq('q' => ['key'])
+    end
+  end
+
+  describe '#sanitized_uri' do
+    it 'percent-encodes the decoded username and vhost again' do
+      config[:uri] = 'amqp://al%23pha:be%20ta@host:10000/v%2Fhost'
+
+      expect(broker.send(:sanitized_uri)).to eq('amqp://al%23pha@host:10000/v%2Fhost')
+    end
+
+    it 'renders the default vhost as a bare trailing slash' do
+      config[:uri] = 'amqp://alpha:beta@host:10000/'
+
+      expect(broker.send(:sanitized_uri)).to eq('amqp://alpha@host:10000/')
     end
   end
 

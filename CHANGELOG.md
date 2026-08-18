@@ -8,6 +8,22 @@ Ruby 3.0 and 3.1 are end of life. Ruby 3.2 provides `URI.decode_uri_component`
 and `URI.encode_uri_component`, which the URI handling now relies on. JRuby 9.4
 reports `RUBY_VERSION` 3.1.7 and is therefore ruled out; JRuby 10 is unaffected.
 
+### Bindings for Retired Routing Keys No Longer Accumulate
+
+For a broker configured through a URI, `Hutch::Config[:mq_vhost]` held the raw
+path segment (`""`) while the connection used the resolved vhost (`/`), so the
+vhost filter in `Broker#bindings` matched nothing and
+`Broker#unbind_redundant_bindings` never unbound anything.
+
+The vhost is now percent-decoded and resolved once, in `Broker#parse_uri`. As a
+side effect `amqp://host/%2F` connects to the default vhost instead of one
+literally named `%2F`, and a vhost configured directly as `""` is matched as
+well. Hutch still resolves both `amqp://host` and `amqp://host/` to the default
+vhost `/`.
+
+GitHub issue: [#422](https://github.com/ruby-amqp/hutch/issues/422)
+
+
 ### Credentials in Connection URIs Are Now Percent-Decoded
 
 A username or password containing a character that has to be percent-encoded in

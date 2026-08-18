@@ -206,7 +206,7 @@ module Hutch
 
       filtered = api_client.bindings.
         reject { |b| b['destination'] == b['routing_key'] }.
-        select { |b| b['source'] == @config[:mq_exchange] && b['vhost'] == @config[:mq_vhost] }
+        select { |b| b['source'] == @config[:mq_exchange] && b['vhost'] == vhost }
 
       filtered.each do |binding|
         results[binding['destination']] << binding['routing_key']
@@ -300,7 +300,7 @@ module Hutch
         config.password = @config[:mq_password]
         config.ssl = @config[:mq_api_ssl]
         config.protocol = config.ssl ? "https://" : "http://"
-        config.sanitized_uri = "#{config.protocol}#{config.username}@#{config.host}:#{config.port}/"
+        config.sanitized_uri = "#{config.protocol}#{URI.encode_uri_component(config.username.to_s)}@#{config.host}:#{config.port}/"
       end
     end
 
@@ -310,7 +310,7 @@ module Hutch
       {}.tap do |params|
         params[:host]               = @config[:mq_host]
         params[:port]               = @config[:mq_port]
-        params[:vhost]              = @config[:mq_vhost].presence || Hutch::Adapter::DEFAULT_VHOST
+        params[:vhost]              = vhost
         params[:auth_mechanism]     = @config[:mq_auth_mechanism]
         params[:username]           = @config[:mq_username]
         params[:password]           = @config[:mq_password]
@@ -344,9 +344,23 @@ module Hutch
       @config[:mq_tls]      = u.scheme == 'amqps'
       @config[:mq_host]     = u.host
       @config[:mq_port]     = u.port || default_mq_port
-      @config[:mq_vhost]    = u.path.sub(/^\//, "")
-      @config[:mq_username] = u.user && URI::DEFAULT_PARSER.unescape(u.user)
-      @config[:mq_password] = u.password && URI::DEFAULT_PARSER.unescape(u.password)
+      @config[:mq_vhost]    = parse_vhost(u)
+      @config[:mq_username] = u.user && URI.decode_uri_component(u.user)
+      @config[:mq_password] = u.password && URI.decode_uri_component(u.password)
+    end
+
+    # Resolved here rather than in #connection_params, so that
+    # Config[:mq_vhost] holds the name the HTTP API reports too.
+    def parse_vhost(uri)
+      URI.decode_uri_component(uri.path.sub(%r{\A/}, "")).presence ||
+        Hutch::Adapter::DEFAULT_VHOST
+    end
+
+    # The vhost Hutch connects to. Config[:mq_vhost] can still be blank when it
+    # was set directly rather than through a URI, while the broker and its HTTP
+    # API call the default vhost `/`.
+    def vhost
+      @config[:mq_vhost].presence || Hutch::Adapter::DEFAULT_VHOST
     end
 
     def default_mq_port
@@ -357,7 +371,8 @@ module Hutch
       p = connection_params
       scheme = p[:tls] ? "amqps" : "amqp"
 
-      "#{scheme}://#{p[:username]}@#{p[:host]}:#{p[:port]}/#{p[:vhost].sub(/^\//, '')}"
+      "#{scheme}://#{URI.encode_uri_component(p[:username].to_s)}" \
+        "@#{p[:host]}:#{p[:port]}/#{URI.encode_uri_component(p[:vhost].sub(%r{\A/}, ''))}"
     end
 
     def with_authentication_error_handler
