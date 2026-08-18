@@ -31,9 +31,10 @@ describe Hutch::CLI do
       end
 
       context "when the config file exists" do
-        let(:file) do
-          Tempfile.new("hutch-test-config.yaml").to_path
-        end
+        # Kept in a let, so the Tempfile is not garbage collected - and with it
+        # unlinked - before the CLI checks that the path exists.
+        let(:config_file) { Tempfile.new("hutch-test-config.yaml") }
+        let(:file) { config_file.to_path }
 
         it "parses the config" do
           expect(Hutch::Config).to receive(:load_from_file)
@@ -55,9 +56,10 @@ describe Hutch::CLI do
       end
 
       context "when the keyfile file exists" do
-        let(:file) do
-          Tempfile.new("hutch-test-key.pem").to_path
-        end
+        # Kept in a let, so the Tempfile is not garbage collected - and with it
+        # unlinked - before the CLI checks that the path exists.
+        let(:key_file) { Tempfile.new("hutch-test-key.pem") }
+        let(:file) { key_file.to_path }
 
         it "sets mq_tls_key to the file" do
           expect(Hutch::Config).to receive(:mq_tls_key=)
@@ -79,9 +81,10 @@ describe Hutch::CLI do
       end
 
       context "when the certfile file exists" do
-        let(:file) do
-          Tempfile.new("hutch-test-cert.pem").to_path
-        end
+        # Kept in a let, so the Tempfile is not garbage collected - and with it
+        # unlinked - before the CLI checks that the path exists.
+        let(:cert_file) { Tempfile.new("hutch-test-cert.pem") }
+        let(:file) { cert_file.to_path }
 
         it "sets mq_tls_cert to the file" do
           expect(Hutch::Config).to receive(:mq_tls_cert=)
