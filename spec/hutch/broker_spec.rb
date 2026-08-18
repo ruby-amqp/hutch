@@ -128,6 +128,24 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#parse_uri' do
+    it 'percent-decodes the username and password' do
+      config[:uri] = "amqp://al%23pha:be%20ta@host:10000/vhost"
+      broker.send(:parse_uri)
+
+      expect(config[:mq_username]).to eq("al#pha")
+      expect(config[:mq_password]).to eq("be ta")
+    end
+
+    it 'leaves absent credentials nil' do
+      config[:uri] = "amqp://host:10000/vhost"
+      broker.send(:parse_uri)
+
+      expect(config[:mq_username]).to be_nil
+      expect(config[:mq_password]).to be_nil
+    end
+  end
+
   describe '#open_connection!' do
     it 'sets the #connection to #open_connection' do
       connection = double('connection').as_null_object

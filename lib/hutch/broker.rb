@@ -1,3 +1,4 @@
+require 'uri'
 require 'active_support/core_ext/object/blank'
 
 require 'carrot-top'
@@ -344,8 +345,8 @@ module Hutch
       @config[:mq_host]     = u.host
       @config[:mq_port]     = u.port || default_mq_port
       @config[:mq_vhost]    = u.path.sub(/^\//, "")
-      @config[:mq_username] = u.user
-      @config[:mq_password] = u.password
+      @config[:mq_username] = u.user && URI::DEFAULT_PARSER.unescape(u.user)
+      @config[:mq_password] = u.password && URI::DEFAULT_PARSER.unescape(u.password)
     end
 
     def default_mq_port
