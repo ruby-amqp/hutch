@@ -25,6 +25,11 @@ module Hutch
         ch.prefetch = prefetch if prefetch
       end
 
+      # MarchHare::Channel has no on_error callback, and neither Channel#reopen
+      # nor Session#recover_channel_topology have a march_hare counterpart.
+      def install_channel_recovery(ch)
+      end
+
       def create_channel(n = nil, consumer_pool_size = 1, consumer_pool_abort_on_exception = false)
         @connection.create_channel(n)
       end

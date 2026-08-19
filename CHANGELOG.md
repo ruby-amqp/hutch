@@ -31,6 +31,12 @@ URIs Hutch logs (`Broker#sanitized_uri` and its HTTP API counterpart) encode tho
 values again, so they stay well-formed.
 
 
+### Channel Recovery No Longer Breaks Hutch on JRuby
+
+`MarchHare::Channel` has no `on_error` callback, so opening a channel raised on
+JRuby. The recovery hook is now installed by the adapter.
+
+
 ### Datadog Tracer Now Requires the `datadog` Gem
 
 The Datadog tracer now requires the [`datadog`](https://github.com/DataDog/dd-trace-rb) gem.
