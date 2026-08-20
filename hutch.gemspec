@@ -1,7 +1,8 @@
 require_relative 'lib/hutch/version'
 
 Gem::Specification.new do |gem|
-  if defined?(JRUBY_VERSION)
+  # GEM_PLATFORM=java gem build hutch.gemspec produces the JRuby variant on MRI
+  if ENV["GEM_PLATFORM"] == "java" || defined?(JRUBY_VERSION)
     gem.platform = 'java'
     gem.add_runtime_dependency 'march_hare', '>= 4.7.0'
   else
