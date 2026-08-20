@@ -25,6 +25,19 @@ module Hutch
         ch.prefetch = prefetch if prefetch
       end
 
+      # MarchHare::Session has no queue_exists? counterpart.
+      def queue_exists?(name)
+        ch = @connection.create_channel
+        begin
+          ch.queue(name, passive: true)
+          true
+        rescue MarchHare::NotFound
+          false
+        ensure
+          ch.close rescue nil
+        end
+      end
+
       # MarchHare::Channel has no on_error callback, and neither Channel#reopen
       # nor Session#recover_channel_topology has a `march_hare` counterpart.
       def install_channel_recovery(ch)

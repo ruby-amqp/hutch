@@ -2,11 +2,18 @@
 
 ## 2.0.0 (in development)
 
+### Consumer Recovery After a RabbitMQ 4.3 Quorum Queue Consumer Timeout
+
+RabbitMQ 4.3 quorum queues cancel a timed out consumer with `basic.cancel`
+instead of closing the channel.
+
+Workers now re-subscribe consumers cancelled by the server, but only if
+the queue still exists: a `basic.cancel` carries no reason, so a consumer
+timeout is indistinguishable from a queue deletion.
+
 ### Hutch Now Requires Ruby 3.2 or JRuby 10
 
-Ruby 3.0 and 3.1 are end of life. Ruby 3.2 provides `URI.decode_uri_component`
-and `URI.encode_uri_component`, which the URI handling now relies on. JRuby 9.4
-reports `RUBY_VERSION` 3.1.7 and is therefore ruled out; JRuby 10 is unaffected.
+Ruby 3.0 and 3.1 have reached EOL.
 
 ### Bindings for Retired Routing Keys No Longer Accumulate
 

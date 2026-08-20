@@ -180,6 +180,10 @@ module Hutch
       end
     end
 
+    def queue_exists?(name)
+      connection.queue_exists?(name)
+    end
+
     # Apply the configured namespace prefix to a queue name.
     def namespaced_queue_name(name)
       namespace = @config[:namespace].to_s.downcase.gsub(/[^-_:\.\w]/, "")

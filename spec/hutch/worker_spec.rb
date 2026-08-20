@@ -60,7 +60,7 @@ describe Hutch::Worker do
     end
 
     it 'sets up a subscription' do
-      expect(queue).to receive(:subscribe).with(consumer_tag: %r(^hutch\-.{36}$), manual_ack: true)
+      expect(queue).to receive(:subscribe).with(consumer_tag: %r(^hutch\-.{36}$), manual_ack: true, on_cancellation: kind_of(Proc))
       worker.setup_queue(consumer)
     end
 
@@ -68,7 +68,7 @@ describe Hutch::Worker do
       before { Hutch::Config.set(:consumer_tag_prefix, 'appname') }
 
       it 'sets up a subscription with the configured tag prefix' do
-        expect(queue).to receive(:subscribe).with(consumer_tag: %r(^appname\-.{36}$), manual_ack: true)
+        expect(queue).to receive(:subscribe).with(consumer_tag: %r(^appname\-.{36}$), manual_ack: true, on_cancellation: kind_of(Proc))
         worker.setup_queue(consumer)
       end
     end

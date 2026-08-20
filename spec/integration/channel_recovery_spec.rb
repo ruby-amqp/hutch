@@ -117,16 +117,22 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
     )
   end
 
+  # RabbitMQ up to 4.2 closes the channel on a delivery acknowledgement
+  # timeout; 4.3+ quorum queues instead cancel only the timed out consumer.
+  let(:recovery_log_pattern) do
+    /delivery acknowledgement on channel \d+ timed out|cancelled by the server, re-subscribing/i
+  end
+
   # This spec is intentionally slow because RabbitMQ enforces delivery
-  # acknowledgement timeouts on a periodic sweep, not immediately at the deadline.
-  it 're-subscribes and consumes later messages after RabbitMQ closes the channel for ack timeout' do
+  # acknowledgement timeouts periodically on a timer, not immediately at the deadline.
+  it 're-subscribes and consumes later messages after RabbitMQ times out an unacknowledged delivery' do
     broker.connect
     worker.setup_queues
 
     publish_message('trigger-timeout')
 
-    wait_for(240, 'delivery acknowledgement timeout') do
-      log_output.match?(/delivery acknowledgement on channel \d+ timed out/i)
+    wait_for(240, 'a delivery acknowledgement timeout to close the channel or cancel the consumer') do
+      log_output.match?(recovery_log_pattern)
     end
 
     publish_message('after-recovery')
@@ -135,8 +141,7 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
       processed_messages.include?('after-recovery')
     end
 
-    expect(log_output).to match(/delivery acknowledgement on channel \d+ timed out/i)
-    expect(log_output).to match(/recovered consumer channel after a delivery acknowledgement timeout/i)
+    expect(log_output).to match(recovery_log_pattern)
     expect(processed_messages).to include('after-recovery')
   end
 end
