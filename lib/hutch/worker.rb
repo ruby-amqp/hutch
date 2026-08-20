@@ -52,10 +52,25 @@ module Hutch
       queue = @broker.queue(queue_name, consumer.get_options)
       @broker.bind_queue(queue, consumer.routing_keys)
 
-      queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true) do |*args|
+      on_cancellation = proc { handle_cancellation(consumer, queue_name) }
+      queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true,
+                      on_cancellation: on_cancellation) do |*args|
         delivery_info, properties, payload = Hutch::Adapter.decode_message(*args)
         handle_message(consumer, delivery_info, properties, payload)
       end
+    end
+
+    # A server-sent `basic.cancel` carries no reason, so a consumer timeout
+    # is indistinguishable from a queue deletion. Only the former is recoverable.
+    def handle_cancellation(consumer, queue_name)
+      if @broker.queue_exists?(queue_name)
+        logger.warn "consumer on queue #{queue_name} was cancelled by the server, re-subscribing"
+        setup_queue(consumer)
+      else
+        logger.error "consumer on queue #{queue_name} was cancelled by the server: the queue no longer exists"
+      end
+    rescue => ex
+      logger.error "consumer re-subscription failed: #{ex.class}: #{ex.message}"
     end
 
     # Called internally when a new messages comes in from RabbitMQ. Responsible

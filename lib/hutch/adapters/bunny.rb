@@ -28,14 +28,20 @@ module Hutch
         ch.prefetch(prefetch) if prefetch
       end
 
+      def queue_exists?(name)
+        @connection.queue_exists?(name)
+      end
+
       def install_channel_recovery(ch)
+        # A consumer timeout invalidates the delivery tag, so a handler that
+        # was still running acknowledges an unknown tag and closes the channel.
         ch.on_error do |channel, close|
-          next unless close.delivery_ack_timeout?
+          next unless close.delivery_ack_timeout? || close.unknown_delivery_tag?
 
           begin
             channel.reopen
             recover_channel_topology(channel)
-            logger.warn 'recovered consumer channel after a delivery acknowledgement timeout'
+            logger.warn "recovered consumer channel closed with '#{close.reply_text}'"
           rescue => ex
             logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
           end

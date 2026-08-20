@@ -1,4 +1,7 @@
 require 'spec_helper'
+
+# Channel recovery is bunny-only, see MarchHareAdapter#install_channel_recovery
+return if defined?(JRUBY_VERSION)
 require 'hutch/broker'
 require 'hutch/worker'
 require 'hutch/consumer'
@@ -8,6 +11,13 @@ require 'securerandom'
 require 'timeout'
 
 describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: true, adapter: :bunny do
+  CONSUMER_TIMEOUT_MS = 5_000
+  # A 4.3 quorum queue times the consumer out on its own timer, which fires at
+  # the deadline. Earlier series detect it from the channel tick instead, and
+  # `channel_tick_interval` defaults to 60s, so detection lags by up to that much.
+  BLOCKED_HANDLER_SECONDS = 20
+  BLOCKED_HANDLER_SECONDS_BEFORE_4_3 = 100
+
   let(:log) { StringIO.new }
   let(:logger) { Logger.new(log) }
   let(:exchange_name) { "hutch.integration.exchange.#{SecureRandom.hex(4)}" }
@@ -18,12 +28,25 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
   let(:processed_lock) { Mutex.new }
   let(:timed_out_once) { [false] }
 
+  let(:server_version) do
+    Gem::Version.new(publisher.server_properties['version'].to_s[/\A\d+(\.\d+)*/])
+  end
+
+  let(:blocked_handler_seconds) do
+    if server_version >= Gem::Version.new('4.3')
+      BLOCKED_HANDLER_SECONDS
+    else
+      BLOCKED_HANDLER_SECONDS_BEFORE_4_3
+    end
+  end
+
   let(:consumer_class) do
     msgs = processed
     lock = processed_lock
     rk = routing_key
     qn = queue_name
     timed_out = timed_out_once
+    blocked = blocked_handler_seconds
 
     Class.new do
       include Hutch::Consumer
@@ -32,13 +55,15 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
       queue_name qn
       arguments(
         'x-queue-type' => 'quorum',
-        'x-consumer-timeout' => 60_000
+        'x-consumer-timeout' => CONSUMER_TIMEOUT_MS
       )
 
+      # Both `CONSUMER_TIMEOUT_MS` and this sleep run from the same delivery,
+      # so the margin between them does not shrink on a loaded machine.
       define_method(:process) do |message|
         if message['id'] == 'trigger-timeout' && !timed_out[0]
           timed_out[0] = true
-          sleep 210
+          sleep blocked
         end
 
         lock.synchronize { msgs << message['id'] }
@@ -114,16 +139,22 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
     )
   end
 
+  # RabbitMQ up to 4.2 closes the channel on a delivery acknowledgement
+  # timeout; 4.3+ quorum queues instead cancel only the timed out consumer.
+  let(:recovery_log_pattern) do
+    /delivery acknowledgement on channel \d+ timed out|cancelled by the server, re-subscribing/i
+  end
+
   # This spec is intentionally slow because RabbitMQ enforces delivery
-  # acknowledgement timeouts on a periodic sweep, not immediately at the deadline.
-  it 're-subscribes and consumes later messages after RabbitMQ closes the channel for ack timeout' do
+  # acknowledgement timeouts periodically on a timer, not immediately at the deadline.
+  it 're-subscribes and consumes later messages after RabbitMQ times out an unacknowledged delivery' do
     broker.connect
     worker.setup_queues
 
     publish_message('trigger-timeout')
 
-    wait_for(240, 'delivery acknowledgement timeout') do
-      log_output.match?(/delivery acknowledgement on channel \d+ timed out/i)
+    wait_for(240, 'a delivery acknowledgement timeout to close the channel or cancel the consumer') do
+      log_output.match?(recovery_log_pattern)
     end
 
     publish_message('after-recovery')
@@ -132,8 +163,7 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
       processed_messages.include?('after-recovery')
     end
 
-    expect(log_output).to match(/delivery acknowledgement on channel \d+ timed out/i)
-    expect(log_output).to match(/recovered consumer channel after a delivery acknowledgement timeout/i)
+    expect(log_output).to match(recovery_log_pattern)
     expect(processed_messages).to include('after-recovery')
   end
 end

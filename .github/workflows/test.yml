@@ -27,9 +27,9 @@ jobs:
           - "3.3"
           - "3.2"
         rabbitmq:
+          - "4.3"
           - "4.2"
           - "4.1"
-          - "4.0"
           - "3.13"
 
     env:
@@ -61,12 +61,45 @@ jobs:
       - name: Run tests
         run: bundle exec rspec spec
 
+  test_jruby:
+    name: RabbitMQ 4.3, JRuby 10.1
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+
+    services:
+      rabbitmq:
+        image: rabbitmq:4.3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: --name rabbitmq
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby-10.1
+          bundler-cache: true
+
+      - name: Wait for RabbitMQ to start
+        run: sleep 10
+
+      - name: Set up RabbitMQ
+        run: ./bin/ci/before_build_docker.sh
+
+      - name: Run tests
+        run: bundle exec rspec spec
+
   test_all:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     name: Test (matrix)
-    needs: test
+    needs: [test, test_jruby]
     steps:
       - name: Check test matrix status
-        if: ${{ needs.test.result != 'success' }}
+        if: ${{ needs.test.result != 'success' || needs.test_jruby.result != 'success' }}
         run: exit 1

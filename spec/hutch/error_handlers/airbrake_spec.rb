@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+# The airbrake gem is MRI-only, see the Gemfile
+return if defined?(JRUBY_VERSION)
+
 describe Hutch::ErrorHandlers::Airbrake do
   let(:error_handler) { Hutch::ErrorHandlers::Airbrake.new }
 
