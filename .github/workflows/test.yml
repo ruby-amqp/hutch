@@ -27,9 +27,9 @@ jobs:
           - "3.3"
           - "3.2"
         rabbitmq:
+          - "4.3"
           - "4.2"
           - "4.1"
-          - "4.0"
           - "3.13"
 
     env:
@@ -62,7 +62,7 @@ jobs:
         run: bundle exec rspec spec
 
   test_jruby:
-    name: RabbitMQ 4.2, JRuby 10.1
+    name: RabbitMQ 4.3, JRuby 10.1
     runs-on: ubuntu-latest
 
     env:
@@ -70,7 +70,7 @@ jobs:
 
     services:
       rabbitmq:
-        image: rabbitmq:4.2-management
+        image: rabbitmq:4.3-management
         ports:
           - 5672:5672
           - 15672:15672
