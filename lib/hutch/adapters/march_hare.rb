@@ -25,7 +25,8 @@ module Hutch
         ch.prefetch = prefetch if prefetch
       end
 
-      # MarchHare::Session has no queue_exists? counterpart.
+      # `MarchHare::Session` has no `queue_exists?` counterpart, and a failed
+      # passive declare closes the channel, hence the throwaway one.
       def queue_exists?(name)
         ch = @connection.create_channel
         begin

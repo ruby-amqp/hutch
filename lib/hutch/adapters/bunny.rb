@@ -33,9 +33,8 @@ module Hutch
       end
 
       def install_channel_recovery(ch)
-        # An unknown delivery tag follows a consumer timeout when a delivery
-        # times out mid-processing: its tag is invalidated by the cancellation,
-        # so the eventual acknowledgement closes the channel.
+        # A consumer timeout invalidates the delivery tag, so a handler that
+        # was still running acknowledges an unknown tag and closes the channel.
         ch.on_error do |channel, close|
           next unless close.delivery_ack_timeout? || close.unknown_delivery_tag?
 

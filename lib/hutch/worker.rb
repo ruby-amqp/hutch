@@ -60,9 +60,8 @@ module Hutch
       end
     end
 
-    # A server-sent `basic.cancel` carries no reason: a RabbitMQ 4.3+ quorum
-    # queue consumer timeout looks the same as a queue deletion, so
-    # re-subscribe only when the queue still exists.
+    # A server-sent `basic.cancel` carries no reason, so a consumer timeout
+    # is indistinguishable from a queue deletion. Only the former is recoverable.
     def handle_cancellation(consumer, queue_name)
       if @broker.queue_exists?(queue_name)
         logger.warn "consumer on queue #{queue_name} was cancelled by the server, re-subscribing"
