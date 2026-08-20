@@ -36,3 +36,9 @@ jobs:
 
       - name: Push to RubyGems.org
         uses: rubygems/release-gem@v1
+
+      # release-gem leaves the RubyGems credentials configured for the job
+      - name: Push the java platform variant
+        run: |
+          GEM_PLATFORM=java gem build hutch.gemspec
+          gem push hutch-*-java.gem

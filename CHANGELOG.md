@@ -63,6 +63,11 @@ The `march_hare` adapter also now declares the exchange, not just instantiates i
 
 GitHub issue: [#427](https://github.com/ruby-amqp/hutch/issues/427)
 
+### The `java` Platform Gem Is Published Again
+
+The variant that depends on March Hare instead of Bunny was last published
+as `0.25.0` in January 2018.
+
 
 ## 1.4.0 (Apr 7, 2026)
 
