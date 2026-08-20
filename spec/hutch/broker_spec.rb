@@ -363,7 +363,7 @@ describe Hutch::Broker do
 
     context 'with a binding' do
       around do |example|
-        queue = broker.queue('test').bind(broker.exchange, routing_key: 'key')
+        queue = broker.queue('test', durable: true).bind(broker.exchange, routing_key: 'key')
         example.run
         queue.unbind(broker.exchange, routing_key: 'key').delete
       end
@@ -393,7 +393,7 @@ describe Hutch::Broker do
     end
 
     context '(rabbitmq integration test)', rabbitmq: true do
-      let(:queue) { broker.queue('consumer') }
+      let(:queue) { broker.queue('consumer', durable: true) }
       let(:routing_key) { 'key' }
 
       before { allow(broker).to receive(:bindings).and_call_original }
