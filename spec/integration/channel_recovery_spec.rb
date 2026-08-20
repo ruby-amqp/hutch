@@ -1,4 +1,7 @@
 require 'spec_helper'
+
+# Channel recovery is bunny-only, see MarchHareAdapter#install_channel_recovery
+return if defined?(JRUBY_VERSION)
 require 'hutch/broker'
 require 'hutch/worker'
 require 'hutch/consumer'

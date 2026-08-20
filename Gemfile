@@ -14,6 +14,10 @@ group :development do
 end
 
 group :development, :test do
+  # activesupport pulls in minitest, and minitest 6 needs prism, a C extension
+  # JRuby cannot build (ruby/prism#3959). Nothing here uses minitest.
+  gem "minitest", "< 6" if defined?(JRUBY_VERSION)
+
   gem "rspec", "~> 3.12"
   gem "simplecov", "~> 0.21"
 
@@ -21,7 +25,8 @@ group :development, :test do
   gem "honeybadger"
   gem "newrelic_rpm"
   gem "datadog"
-  gem "airbrake", "~> 13.0"
+  # airbrake-ruby depends on rbtree3, a C extension
+  gem "airbrake", "~> 13.0", platform: :mri
   gem "rollbar"
   gem "bugsnag"
 end
