@@ -1,10 +1,13 @@
 require 'bunny'
 require 'forwardable'
 
+require 'hutch/logging'
+
 module Hutch
   module Adapters
     class BunnyAdapter
       extend Forwardable
+      include Logging
 
       DEFAULT_VHOST = Bunny::Session::DEFAULT_VHOST
 
@@ -23,6 +26,20 @@ module Hutch
 
       def prefetch_channel(ch, prefetch)
         ch.prefetch(prefetch) if prefetch
+      end
+
+      def install_channel_recovery(ch)
+        ch.on_error do |channel, close|
+          next unless close.delivery_ack_timeout?
+
+          begin
+            channel.reopen
+            recover_channel_topology(channel)
+            logger.warn 'recovered consumer channel after a delivery acknowledgement timeout'
+          rescue => ex
+            logger.error "channel recovery failed: #{ex.class}: #{ex.message}"
+          end
+        end
       end
 
       def current_timestamp

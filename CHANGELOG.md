@@ -47,6 +47,15 @@ has been removed. Use `Hutch::ErrorHandlers::Sentry` (backed by `sentry-ruby`) i
 The `multi_json` runtime dependency has been removed. Hutch now uses
 Ruby's built-in `json` library directly.
 
+### Fixed Two JRuby Regressions
+
+`Broker#open_channel` raised, since `MarchHare::Channel` does not provide an `on_error`
+callback. The recovery hook now lives in the adapters instead.
+
+The `march_hare` adapter also now declares the exchange, not just instantiates it.
+
+GitHub issue: [#427](https://github.com/ruby-amqp/hutch/issues/427)
+
 
 ## 1.4.0 (Apr 7, 2026)
 
