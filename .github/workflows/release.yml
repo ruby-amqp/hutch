@@ -3,7 +3,7 @@ name: Push gem
 on:
   push:
     tags:
-      - "v*"
+      - "v[0-9]*"
 
 permissions:
   contents: read
@@ -15,6 +15,10 @@ jobs:
     if: github.repository == 'ruby-amqp/hutch'
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: push-gem
+      cancel-in-progress: false
+
     environment:
       name: release
       url: https://rubygems.org/gems/hutch
@@ -24,21 +28,33 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@e5517072e87f198d9533967ae13d97c11b604005 # v1.99.0
         with:
           ruby-version: ruby
           bundler-cache: true
 
-      - name: Push to RubyGems.org
-        uses: rubygems/release-gem@v1
+      - name: Verify the tag matches Hutch::VERSION
+        env:
+          TAG: ${{ github.ref_name }}
+        run: test "$TAG" = "v$(ruby -Ilib -rhutch/version -e 'print Hutch::VERSION')"
 
-      # release-gem leaves the RubyGems credentials configured for the job
+      # Built before the push so that a broken gemspec fails the job
+      # before the MRI gem is published
+      - name: Build the java platform variant
+        run: GEM_PLATFORM=java gem build -o hutch-java.gem hutch.gemspec
+
+      - name: Push to RubyGems.org
+        uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+
+      # release-gem leaves the RubyGems credentials configured for the job.
+      # It only attests the gem it pushes itself, so sign this one here to
+      # give both variants the same provenance.
       - name: Push the java platform variant
         run: |
-          GEM_PLATFORM=java gem build hutch.gemspec
-          gem push hutch-*-java.gem
+          gem exec sigstore-cli:0.2.3 sign hutch-java.gem --bundle hutch-java.gem.sigstore.json
+          gem push --attestation hutch-java.gem.sigstore.json hutch-java.gem

@@ -8,3 +8,6 @@ coverage
 .yardoc
 doc
 gemfiles/Gemfile.*.lock
+pkg/
+vendor/
+*.sigstore.json
