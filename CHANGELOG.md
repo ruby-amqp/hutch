@@ -9,7 +9,9 @@ instead of closing the channel.
 
 Workers now re-subscribe consumers cancelled by the server, but only if
 the queue still exists: a `basic.cancel` carries no reason, so a consumer
-timeout is indistinguishable from a queue deletion.
+timeout is indistinguishable from a queue deletion. The consumer channel is
+replaced in the process, so the deliveries the cancelled consumer still held
+are requeued instead of dropped.
 
 ### Hutch Now Requires Ruby 3.2 or JRuby 10
 

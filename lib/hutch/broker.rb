@@ -123,6 +123,14 @@ module Hutch
       @channel = open_channel
     end
 
+    # Replaces the consumer channel. Closing the old one makes the broker forget
+    # the consumers registered on it and requeue the deliveries they still hold.
+    def replace_channel!
+      @channel.close if @channel
+      open_channel!
+      declare_exchange!
+    end
+
     def declare_exchange(ch = channel)
       exchange_name = @config[:mq_exchange]
       exchange_type = @config[:mq_exchange_type]

@@ -11,8 +11,9 @@ module Hutch
     include Logging
 
     def initialize(broker, consumers, setup_procs)
-      @broker        = broker
-      self.consumers = consumers
+      @broker         = broker
+      @recovery_lock  = Mutex.new
+      self.consumers  = consumers
       self.setup_procs = setup_procs
     end
 
@@ -63,14 +64,33 @@ module Hutch
     # A server-sent `basic.cancel` carries no reason, so a consumer timeout
     # is indistinguishable from a queue deletion. Only the former is recoverable.
     def handle_cancellation(consumer, queue_name)
-      if @broker.queue_exists?(queue_name)
-        logger.warn "consumer on queue #{queue_name} was cancelled by the server, re-subscribing"
-        setup_queue(consumer)
-      else
+      unless @broker.queue_exists?(queue_name)
         logger.error "consumer on queue #{queue_name} was cancelled by the server: the queue no longer exists"
+        return
       end
+
+      logger.warn "consumer on queue #{queue_name} was cancelled by the server, re-subscribing"
+      resubscribe_on_a_new_channel(@broker.channel)
     rescue => ex
       logger.error "consumer re-subscription failed: #{ex.class}: #{ex.message}"
+    end
+
+    # Runs on its own thread: closing the channel shuts down the consumer work
+    # pool this callback is dispatched on.
+    def resubscribe_on_a_new_channel(cancelled_channel)
+      Thread.new do
+        begin
+          @recovery_lock.synchronize do
+            # All consumers share the channel, so only the first cancellation replaces it.
+            next unless @broker.channel.equal?(cancelled_channel)
+
+            @broker.replace_channel!
+            setup_queues
+          end
+        rescue => ex
+          logger.error "consumer re-subscription failed: #{ex.class}: #{ex.message}"
+        end
+      end
     end
 
     # Called internally when a new messages comes in from RabbitMQ. Responsible

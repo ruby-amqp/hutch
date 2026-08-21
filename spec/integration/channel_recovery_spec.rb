@@ -159,7 +159,9 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
 
     publish_message('after-recovery')
 
-    wait_for(90, 'after-recovery message consumption') do
+    # Replacing the channel requeues what the cancelled consumer still held, so
+    # consumption resumes at once rather than at the next consumer timeout tick.
+    wait_for(15, 'after-recovery message consumption') do
       processed_messages.include?('after-recovery')
     end
 
