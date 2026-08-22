@@ -1,11 +1,25 @@
 # Hutch Change Log
 
-## 2.0.0 (in development)
+## 2.0.0 (TBD)
+
+### Breaking Changes
+
+ * Ruby `3.2` or JRuby `10` is now required
+ * The Datadog tracer now depends on the [`datadog`](https://github.com/DataDog/dd-trace-rb)
+   gem, which replaces the EOL `ddtrace`
+   ([migration guide](https://github.com/DataDog/dd-trace-rb/blob/master/docs/UpgradeGuide2.md))
+ * `Hutch::ErrorHandlers::SentryRaven` has been replaced by
+   `Hutch::ErrorHandlers::Sentry`, backed by `sentry-ruby`
+   ([migration guide](https://docs.sentry.io/platforms/ruby/migration/))
+ * Messages are serialized with the stdlib `json` instead of `multi_json`, which
+   means that `MultiJson` configuration such as `MultiJson.use(:oj)` no longer
+   affects Hutch
 
 ### Consumer Recovery After a RabbitMQ 4.3 Quorum Queue Consumer Timeout
 
 RabbitMQ 4.3 quorum queues cancel a timed out consumer with `basic.cancel`
-instead of closing the channel.
+instead of closing the channel. Hutch 1.4.0 does not react to that, so on 4.3
+a consumer stops consuming its queue until the worker restarts.
 
 Workers now re-subscribe consumers cancelled by the server, but only if
 the queue still exists: a `basic.cancel` carries no reason, so a consumer
@@ -17,63 +31,33 @@ Handlers that are still running get a graceful exit to finish before
 the old channel is closed, and their acknowledgements are dropped rather than
 sent on the new channel, where their delivery tags mean nothing.
 
-### Hutch Now Requires Ruby 3.2 or JRuby 10
+### Connection URIs Are Now Percent-Decoded
 
-Ruby 3.0 and 3.1 have reached EOL.
+The virtual host, username and password of a connection URI are now decoded, as
+[the URI specification](https://www.rabbitmq.com/docs/uri-spec) requires.
+`amqp://host/%2F` connects to the default virtual host instead of one literally
+named `%2F`, and credentials containing a space, `#` or `@` authenticate again.
 
-### Bindings for Retired Routing Keys No Longer Accumulate
-
-For a broker configured through a URI, `Hutch::Config[:mq_vhost]` held the raw
-path segment while the connection used the resolved virtual host,
-breaking the unbinding of "redundant" (from Hutch's point of view) bindings.
-
-The vhost is now resolved and percent-decoded once, in `Broker#parse_uri`.
-`amqp://host/%2F` now connects to the default vhost instead of one literally
-named `%2F`.
+Reported by @deissimon.
 
 GitHub issue: [#422](https://github.com/ruby-amqp/hutch/issues/422)
 
-
-### Credentials in Connection URIs Are Now Percent-Decoded
-
-A username or password containing a character that has to be percent-encoded in
-a URI (a space, `#`, `@`) was passed to the SASL exchange in its encoded form and
-failed to authenticate. It is now decoded, as
-[the URI specification](https://www.rabbitmq.com/docs/uri-spec) requires. The
-URIs Hutch logs (`Broker#sanitized_uri` and its HTTP API counterpart) encode those
-values again, so they stay well-formed.
-
-
-### Datadog Tracer Now Requires the `datadog` Gem
-
-The Datadog tracer now requires the [`datadog`](https://github.com/DataDog/dd-trace-rb) gem.
-Support for the deprecated `ddtrace` gem has been removed. ([migration guide](https://github.com/DataDog/dd-trace-rb/blob/master/docs/UpgradeGuide2.md))
-
-### Removed the `SentryRaven` Error Handler
-
-The `Hutch::ErrorHandlers::SentryRaven` error handler based on the EOL
-[`sentry-raven`](https://github.com/getsentry/raven-ruby) gem
-has been removed. Use `Hutch::ErrorHandlers::Sentry` (backed by `sentry-ruby`) instead. ([migration guide](https://docs.sentry.io/platforms/ruby/migration/))
-
-### Replaced `multi_json` With Ruby's stdlib `json`
-
-The `multi_json` runtime dependency has been removed. Hutch now uses
-Ruby's built-in `json` library directly.
-
 ### Fixed Two JRuby Regressions
 
-`Broker#open_channel` raised, since `MarchHare::Channel` does not provide an `on_error`
-callback. The recovery hook now lives in the adapters instead.
-
-The `march_hare` adapter also now declares the exchange, not just instantiates it.
+Opening a channel raised, and the `march_hare` adapter did not declare the
+exchange it instantiated.
 
 GitHub issue: [#427](https://github.com/ruby-amqp/hutch/issues/427)
 
-### The `java` Platform Gem Is Published Again
+### The JRuby Variant Is Revived
 
-The variant that depends on March Hare instead of Bunny was last published
-as `0.25.0` in January 2018.
+The `java` platform gem, which depends on March Hare instead of Bunny, was last
+published as `0.25.0` in January 2018 and has seen little more than CI version
+bumps since. This release requires JRuby `10` and `march_hare` `4.7.0`, adds a
+JRuby CI job, and publishes the gem again.
 
+Recovering a channel the broker closed remains Bunny-only: `MarchHare::Channel`
+has no `on_error` callback and no `reopen`.
 
 ## 1.4.0 (Apr 7, 2026)
 
