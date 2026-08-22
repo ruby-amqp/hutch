@@ -12,6 +12,7 @@ module Hutch
       DEFAULT_VHOST = Bunny::Session::DEFAULT_VHOST
 
       ConnectionRefused = Bunny::TCPConnectionFailed
+      ChannelAlreadyClosed = Bunny::ChannelAlreadyClosed
       PreconditionFailed = Bunny::PreconditionFailed
 
       def_delegators :@connection, :start, :disconnect, :close, :create_channel, :open?, :recover_channel_topology

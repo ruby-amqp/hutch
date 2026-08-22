@@ -14,12 +14,12 @@ module Hutch
 
     def reject!
       @message_rejected = true
-      broker.reject(delivery_info.delivery_tag)
+      broker.reject(delivery_info.delivery_tag, channel: delivery_info.channel)
     end
 
     def requeue!
       @message_rejected = true
-      broker.requeue(delivery_info.delivery_tag)
+      broker.requeue(delivery_info.delivery_tag, channel: delivery_info.channel)
     end
 
     def message_rejected?

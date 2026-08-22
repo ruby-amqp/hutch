@@ -123,12 +123,13 @@ module Hutch
       @channel = open_channel
     end
 
-    # Replaces the consumer channel. Closing the old one makes the broker forget
-    # the consumers registered on it and requeue the deliveries they still hold.
+    # Closing the old channel makes RabbitMQ forget the consumers on it
+    # and requeue their unacknowledged deliveries.
     def replace_channel!
-      @channel.close if @channel
+      close_consumer_channel
       open_channel!
       declare_exchange!
+      declare_publisher!
     end
 
     def declare_exchange(ch = channel)
@@ -243,29 +244,26 @@ module Hutch
       if defined?(JRUBY_VERSION)
         channel.close
       else
-        # Enqueue a failing job that kills the consumer loop
-        channel_work_pool.shutdown
-        # Give `timeout` seconds to jobs that are still being processed
-        channel_work_pool.join(@config[:graceful_exit_timeout])
-        # If after `timeout` they are still running, they are killed
-        channel_work_pool.kill
+        drain_consumer_work_pool
       end
     end
 
-    def requeue(delivery_tag)
-      channel.reject(delivery_tag, true)
+    # Delivery tags are scoped to their channel: a tag from a replaced one
+    # is dropped, the server has requeued that delivery anyway.
+    def requeue(delivery_tag, channel: self.channel)
+      channel.reject(delivery_tag, true) if current_channel?(channel)
     end
 
-    def reject(delivery_tag, requeue=false)
-      channel.reject(delivery_tag, requeue)
+    def reject(delivery_tag, requeue = false, channel: self.channel)
+      channel.reject(delivery_tag, requeue) if current_channel?(channel)
     end
 
-    def ack(delivery_tag)
-      channel.ack(delivery_tag, false)
+    def ack(delivery_tag, channel: self.channel)
+      channel.ack(delivery_tag, false) if current_channel?(channel)
     end
 
-    def nack(delivery_tag)
-      channel.nack(delivery_tag, false, false)
+    def nack(delivery_tag, channel: self.channel)
+      channel.nack(delivery_tag, false, false) if current_channel?(channel)
     end
 
     def publish(*args)
@@ -286,6 +284,27 @@ module Hutch
     end
 
     private
+
+    def current_channel?(ch)
+      ch.equal?(channel)
+    end
+
+    def close_consumer_channel
+      return unless @channel && @channel.open?
+
+      drain_consumer_work_pool unless defined?(JRUBY_VERSION)
+      @channel.close
+    rescue Hutch::Adapter::ChannelAlreadyClosed
+      # The server closed the channel first: same outcome.
+    end
+
+    # Bunny kills the consumer work pool when the channel closes. Draining
+    # first gives the running handlers `graceful_exit_timeout` to finish.
+    def drain_consumer_work_pool
+      channel_work_pool.shutdown
+      channel_work_pool.join(@config[:graceful_exit_timeout])
+      channel_work_pool.kill
+    end
 
     Config = Struct.new(:host, :port, :username, :password, :ssl, :protocol, :sanitized_uri)
     private_constant :Config

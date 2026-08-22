@@ -84,11 +84,65 @@ describe Hutch::Worker do
     end
   end
 
+  describe '#handle_cancellation' do
+    let(:cancelled_channel) { double('Channel') }
+    let(:new_channel) { double('Channel') }
+    let(:log) { StringIO.new }
+
+    before do
+      allow(Hutch::Logging).to receive(:logger).and_return(Logger.new(log))
+      allow(broker).to receive(:channel).and_return(cancelled_channel)
+      allow(broker).to receive(:replace_channel!) do
+        allow(broker).to receive(:channel).and_return(new_channel)
+      end
+      allow(worker).to receive(:setup_queues)
+    end
+
+    context 'when the queue still exists' do
+      before { allow(broker).to receive(:queue_exists?).with('consumer').and_return(true) }
+
+      it 'replaces the channel and re-subscribes' do
+        expect(broker).to receive(:replace_channel!)
+        expect(worker).to receive(:setup_queues)
+
+        worker.handle_cancellation('consumer', cancelled_channel).join
+      end
+
+      it 'replaces the channel once for all the consumers that shared it' do
+        expect(broker).to receive(:replace_channel!).once
+
+        [
+          worker.handle_cancellation('consumer', cancelled_channel),
+          worker.handle_cancellation('consumer', cancelled_channel)
+        ].each(&:join)
+      end
+
+      it 'does not replace a channel that has already been replaced' do
+        expect(broker).not_to receive(:replace_channel!)
+
+        worker.handle_cancellation('consumer', double('An older channel')).join
+      end
+    end
+
+    context 'when the queue is gone' do
+      before { allow(broker).to receive(:queue_exists?).with('consumer').and_return(false) }
+
+      it 'does not re-subscribe' do
+        expect(broker).not_to receive(:replace_channel!)
+
+        worker.handle_cancellation('consumer', cancelled_channel)
+
+        log.rewind
+        expect(log.read).to match(/the queue no longer exists/)
+      end
+    end
+  end
+
   describe '#handle_message' do
     subject { worker.handle_message(consumer, delivery_info, properties, payload) }
     let(:payload) { '{}' }
     let(:consumer_instance) { double('Consumer instance') }
-    let(:delivery_info) { double('Delivery Info', routing_key: '',
+    let(:delivery_info) { double('Delivery Info', routing_key: '', channel: nil,
                                  delivery_tag: 'dt') }
     let(:properties) { double('Properties', message_id: nil, content_type: "application/json") }
     let(:log) { StringIO.new }
@@ -108,7 +162,7 @@ describe Hutch::Worker do
 
     it 'acknowledges the message' do
       allow(consumer_instance).to receive(:process)
-      expect(broker).to receive(:ack).with(delivery_info.delivery_tag)
+      expect(broker).to receive(:ack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
       expect(consumer_instance).to receive(:message_rejected?).and_return(false)
       subject
     end
@@ -141,7 +195,7 @@ describe Hutch::Worker do
       end
 
       it 'rejects the message' do
-        expect(broker).to receive(:nack).with(delivery_info.delivery_tag)
+        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
         subject
       end
 
@@ -198,7 +252,7 @@ describe Hutch::Worker do
       end
 
       it 'rejects the message' do
-        expect(broker).to receive(:nack).with(delivery_info.delivery_tag)
+        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
         subject
       end
     end
@@ -206,7 +260,7 @@ describe Hutch::Worker do
 
 
   describe '#acknowledge_error' do
-    let(:delivery_info) { double('Delivery Info', routing_key: '',
+    let(:delivery_info) { double('Delivery Info', routing_key: '', channel: nil,
                                  delivery_tag: 'dt') }
     let(:properties) { double('Properties', message_id: 'abc123') }
 
