@@ -4,15 +4,16 @@
 
 ### Breaking Changes
 
- * Ruby 3.2 or JRuby 10 is now required.
- * The Datadog tracer now requires the [`datadog`](https://github.com/DataDog/dd-trace-rb)
-   gem; support for the EOL `ddtrace` gem has been removed
-   ([migration guide](https://github.com/DataDog/dd-trace-rb/blob/master/docs/UpgradeGuide2.md)).
- * `Hutch::ErrorHandlers::SentryRaven` has been removed. Use
+ * Ruby `3.2` or JRuby `10` is now required
+ * The Datadog tracer now depends on the [`datadog`](https://github.com/DataDog/dd-trace-rb)
+   gem, which replaces the EOL `ddtrace`
+   ([migration guide](https://github.com/DataDog/dd-trace-rb/blob/master/docs/UpgradeGuide2.md))
+ * `Hutch::ErrorHandlers::SentryRaven` has been replaced by
    `Hutch::ErrorHandlers::Sentry`, backed by `sentry-ruby`
-   ([migration guide](https://docs.sentry.io/platforms/ruby/migration/)).
- * The `multi_json` dependency has been replaced with the stdlib `json`.
-   `MultiJson` configuration such as `MultiJson.use(:oj)` no longer affects Hutch.
+   ([migration guide](https://docs.sentry.io/platforms/ruby/migration/))
+ * Messages are serialized with the stdlib `json` instead of `multi_json`, which
+   means that `MultiJson` configuration such as `MultiJson.use(:oj)` no longer
+   affects Hutch
 
 ### Consumer Recovery After a RabbitMQ 4.3 Quorum Queue Consumer Timeout
 
@@ -48,13 +49,15 @@ exchange it instantiated.
 
 GitHub issue: [#427](https://github.com/ruby-amqp/hutch/issues/427)
 
-### The `java` Platform Gem Is Published Again
+### The JRuby Variant Is Revived
 
-The variant that depends on March Hare instead of Bunny was last published as
-`0.25.0` in January 2018. Note that recovering a channel the broker closed,
-which is how RabbitMQ 4.2 and earlier react to an acknowledgement timeout,
-is Bunny-only.
+The `java` platform gem, which depends on March Hare instead of Bunny, was last
+published as `0.25.0` in January 2018 and has seen little more than CI version
+bumps since. This release requires JRuby `10` and `march_hare` `4.7.0`, adds a
+JRuby CI job, and publishes the gem again.
 
+Recovering a channel the broker closed remains Bunny-only: `MarchHare::Channel`
+has no `on_error` callback and no `reopen`.
 
 ## 1.4.0 (Apr 7, 2026)
 
