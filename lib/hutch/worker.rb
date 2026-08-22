@@ -53,7 +53,7 @@ module Hutch
       queue = @broker.queue(queue_name, consumer.get_options)
       @broker.bind_queue(queue, consumer.routing_keys)
 
-      on_cancellation = proc { handle_cancellation(consumer, queue_name) }
+      on_cancellation = proc { handle_cancellation(queue_name, queue.channel) }
       queue.subscribe(consumer_tag: unique_consumer_tag, manual_ack: true,
                       on_cancellation: on_cancellation) do |*args|
         delivery_info, properties, payload = Hutch::Adapter.decode_message(*args)
@@ -63,20 +63,20 @@ module Hutch
 
     # A server-sent `basic.cancel` carries no reason, so a consumer timeout
     # is indistinguishable from a queue deletion. Only the former is recoverable.
-    def handle_cancellation(consumer, queue_name)
+    def handle_cancellation(queue_name, cancelled_channel)
       unless @broker.queue_exists?(queue_name)
         logger.error "consumer on queue #{queue_name} was cancelled by the server: the queue no longer exists"
         return
       end
 
       logger.warn "consumer on queue #{queue_name} was cancelled by the server, re-subscribing"
-      resubscribe_on_a_new_channel(@broker.channel)
+      resubscribe_on_a_new_channel(cancelled_channel)
     rescue => ex
       logger.error "consumer re-subscription failed: #{ex.class}: #{ex.message}"
     end
 
-    # Runs on its own thread: closing the channel shuts down the consumer work
-    # pool this callback is dispatched on.
+    # Runs on its own thread: closing the channel kills the consumer work
+    # pool this callback runs on. Returns the thread so that tests can join it.
     def resubscribe_on_a_new_channel(cancelled_channel)
       Thread.new do
         begin
@@ -96,6 +96,7 @@ module Hutch
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, delivery_info, properties, payload)
+      broker = ChannelBoundBroker.new(@broker, delivery_info.channel)
       serializer = consumer.get_serializer || Hutch::Config[:serializer]
       logger.debug {
         spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
@@ -106,11 +107,11 @@ module Hutch
       }
 
       message = Message.new(delivery_info, properties, payload, serializer)
-      consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
+      consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = broker, delivery_info }
       with_tracing(consumer_instance).handle(message)
-      @broker.ack(delivery_info.delivery_tag) unless consumer_instance.message_rejected?
+      broker.ack(delivery_info.delivery_tag) unless consumer_instance.message_rejected?
     rescue => ex
-      acknowledge_error(delivery_info, properties, @broker, ex)
+      acknowledge_error(delivery_info, properties, broker, ex)
       handle_error(properties, payload, consumer, ex, delivery_info)
     end
 

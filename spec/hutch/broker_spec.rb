@@ -269,6 +269,116 @@ describe Hutch::Broker do
     end
   end
 
+  describe '#replace_channel!', adapter: :bunny do
+    let(:old_channel) { double('Bunny::Channel', open?: true, close: nil) }
+    let(:new_channel) { double('Bunny::Channel').as_null_object }
+    let(:work_pool) { double('Bunny::ConsumerWorkPool', shutdown: nil, join: nil, kill: nil) }
+
+    before do
+      broker.channel = old_channel
+      allow(broker).to receive(:channel_work_pool).and_return(work_pool)
+      allow(broker).to receive(:open_channel).and_return(new_channel)
+      allow(broker).to receive(:declare_exchange!)
+      allow(broker).to receive(:declare_publisher!)
+    end
+
+    it 'drains the work pool before closing the old channel' do
+      expect(work_pool).to receive(:shutdown).ordered
+      expect(work_pool).to receive(:join).with(config[:graceful_exit_timeout]).ordered
+      expect(work_pool).to receive(:kill).ordered
+      expect(old_channel).to receive(:close).ordered
+
+      broker.replace_channel!
+    end
+
+    it 'redeclares the exchange and the publisher on the new channel' do
+      expect(broker).to receive(:declare_exchange!)
+      expect(broker).to receive(:declare_publisher!)
+
+      broker.replace_channel!
+
+      expect(broker.channel).to eq(new_channel)
+    end
+
+    context 'when the old channel is already closed' do
+      let(:old_channel) { double('Bunny::Channel', open?: false) }
+
+      it 'opens a new channel anyway' do
+        expect(old_channel).not_to receive(:close)
+        expect(work_pool).not_to receive(:shutdown)
+
+        broker.replace_channel!
+
+        expect(broker.channel).to eq(new_channel)
+      end
+    end
+
+    context 'when the server closes the old channel concurrently' do
+      it 'opens a new channel anyway' do
+        allow(old_channel).to receive(:close).
+          and_raise(Hutch::Adapter::ChannelAlreadyClosed.new('already closed', old_channel))
+
+        broker.replace_channel!
+
+        expect(broker.channel).to eq(new_channel)
+      end
+    end
+  end
+
+  describe 'acknowledgements' do
+    let(:current_channel) { double('Channel').as_null_object }
+    let(:superseded_channel) { double('Channel') }
+
+    before { broker.channel = current_channel }
+
+    it 'sends them on the channel the delivery arrived on' do
+      expect(current_channel).to receive(:ack).with('dt', false)
+      broker.ack('dt', current_channel)
+
+      expect(current_channel).to receive(:nack).with('dt', false, false)
+      broker.nack('dt', current_channel)
+
+      expect(current_channel).to receive(:reject).with('dt', false)
+      broker.reject('dt', false, current_channel)
+
+      expect(current_channel).to receive(:reject).with('dt', true)
+      broker.requeue('dt', current_channel)
+    end
+
+    it 'drops them when the channel has been replaced' do
+      expect(superseded_channel).not_to receive(:ack)
+      expect(superseded_channel).not_to receive(:nack)
+      expect(superseded_channel).not_to receive(:reject)
+
+      broker.ack('dt', superseded_channel)
+      broker.nack('dt', superseded_channel)
+      broker.reject('dt', false, superseded_channel)
+      broker.requeue('dt', superseded_channel)
+    end
+
+    it 'defaults to the current channel' do
+      expect(current_channel).to receive(:ack).with('dt', false)
+
+      broker.ack('dt')
+    end
+
+    describe Hutch::ChannelBoundBroker do
+      it 'pins acknowledgements to the channel it was built with' do
+        bound = Hutch::ChannelBoundBroker.new(broker, current_channel)
+
+        expect(current_channel).to receive(:ack).with('dt', false)
+        bound.ack('dt')
+      end
+
+      it 'drops acknowledgements once its channel is replaced' do
+        bound = Hutch::ChannelBoundBroker.new(broker, superseded_channel)
+
+        expect(superseded_channel).not_to receive(:nack)
+        bound.nack('dt')
+      end
+    end
+  end
+
   describe '#declare_exchange' do
     before do
       broker.open_connection!

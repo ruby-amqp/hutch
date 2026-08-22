@@ -13,6 +13,10 @@ timeout is indistinguishable from a queue deletion. The consumer channel is
 replaced in the process, so the deliveries the cancelled consumer still held
 are requeued instead of dropped.
 
+Handlers that are still running get `graceful_exit_timeout` to finish before
+the old channel is closed, and their acknowledgements are dropped rather than
+sent on the new channel, where their delivery tags mean nothing.
+
 ### Hutch Now Requires Ruby 3.2 or JRuby 10
 
 Ruby 3.0 and 3.1 have reached EOL.

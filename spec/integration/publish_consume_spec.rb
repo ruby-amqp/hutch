@@ -3,7 +3,6 @@ require 'hutch/broker'
 require 'hutch/worker'
 require 'hutch/consumer'
 require 'securerandom'
-require 'timeout'
 
 describe 'publishing and consuming messages', rabbitmq: true, adapter: :bunny do
   let(:exchange_name) { "hutch.test.#{SecureRandom.hex(4)}" }
@@ -41,7 +40,7 @@ describe 'publishing and consuming messages', rabbitmq: true, adapter: :bunny do
 
     broker.publish(routing_key, { test: 'data' })
 
-    Timeout.timeout(5) { sleep 0.1 until received.any? }
+    await_condition(15, 'message consumption') { received.any? }
 
     expect(received.first).to eq('test' => 'data')
   end
