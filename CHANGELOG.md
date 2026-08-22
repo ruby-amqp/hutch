@@ -13,7 +13,7 @@ timeout is indistinguishable from a queue deletion. The consumer channel is
 replaced in the process, so the deliveries the cancelled consumer still held
 are requeued instead of dropped.
 
-Handlers that are still running get `graceful_exit_timeout` to finish before
+Handlers that are still running get a graceful exit to finish before
 the old channel is closed, and their acknowledgements are dropped rather than
 sent on the new channel, where their delivery tags mean nothing.
 

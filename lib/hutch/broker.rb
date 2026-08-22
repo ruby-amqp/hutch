@@ -5,7 +5,6 @@ require 'carrot-top'
 require 'hutch/logging'
 require 'hutch/exceptions'
 require 'hutch/publisher'
-require 'delegate'
 
 module Hutch
   class Broker
@@ -251,20 +250,20 @@ module Hutch
 
     # Delivery tags are scoped to their channel: a tag from a replaced one
     # is dropped, the server has requeued that delivery anyway.
-    def requeue(delivery_tag, ch = channel)
-      ch.reject(delivery_tag, true) if current_channel?(ch)
+    def requeue(delivery_tag, channel: self.channel)
+      channel.reject(delivery_tag, true) if current_channel?(channel)
     end
 
-    def reject(delivery_tag, requeue = false, ch = channel)
-      ch.reject(delivery_tag, requeue) if current_channel?(ch)
+    def reject(delivery_tag, requeue = false, channel: self.channel)
+      channel.reject(delivery_tag, requeue) if current_channel?(channel)
     end
 
-    def ack(delivery_tag, ch = channel)
-      ch.ack(delivery_tag, false) if current_channel?(ch)
+    def ack(delivery_tag, channel: self.channel)
+      channel.ack(delivery_tag, false) if current_channel?(channel)
     end
 
-    def nack(delivery_tag, ch = channel)
-      ch.nack(delivery_tag, false, false) if current_channel?(ch)
+    def nack(delivery_tag, channel: self.channel)
+      channel.nack(delivery_tag, false, false) if current_channel?(channel)
     end
 
     def publish(*args)
@@ -437,32 +436,6 @@ module Hutch
 
     def consumer_pool_abort_on_exception
       @config[:consumer_pool_abort_on_exception]
-    end
-  end
-
-  # The Broker a consumer sees while it handles one delivery. Acknowledgements
-  # go to the channel the delivery arrived on, so acknowledgement strategies
-  # do not need to know about channel replacement.
-  class ChannelBoundBroker < SimpleDelegator
-    def initialize(broker, channel)
-      super(broker)
-      @channel = channel
-    end
-
-    def ack(delivery_tag)
-      __getobj__.ack(delivery_tag, @channel)
-    end
-
-    def nack(delivery_tag)
-      __getobj__.nack(delivery_tag, @channel)
-    end
-
-    def reject(delivery_tag, requeue = false)
-      __getobj__.reject(delivery_tag, requeue, @channel)
-    end
-
-    def requeue(delivery_tag)
-      __getobj__.requeue(delivery_tag, @channel)
     end
   end
 end

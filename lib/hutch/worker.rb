@@ -96,7 +96,6 @@ module Hutch
     # Called internally when a new messages comes in from RabbitMQ. Responsible
     # for wrapping up the message and passing it to the consumer.
     def handle_message(consumer, delivery_info, properties, payload)
-      broker = ChannelBoundBroker.new(@broker, delivery_info.channel)
       serializer = consumer.get_serializer || Hutch::Config[:serializer]
       logger.debug {
         spec   = serializer.binary? ? "#{payload.bytesize} bytes" : "#{payload}"
@@ -107,11 +106,11 @@ module Hutch
       }
 
       message = Message.new(delivery_info, properties, payload, serializer)
-      consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = broker, delivery_info }
+      consumer_instance = consumer.new.tap { |c| c.broker, c.delivery_info = @broker, delivery_info }
       with_tracing(consumer_instance).handle(message)
-      broker.ack(delivery_info.delivery_tag) unless consumer_instance.message_rejected?
+      @broker.ack(delivery_info.delivery_tag, channel: delivery_info.channel) unless consumer_instance.message_rejected?
     rescue => ex
-      acknowledge_error(delivery_info, properties, broker, ex)
+      acknowledge_error(delivery_info, properties, @broker, ex)
       handle_error(properties, payload, consumer, ex, delivery_info)
     end
 

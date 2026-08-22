@@ -162,7 +162,7 @@ describe Hutch::Worker do
 
     it 'acknowledges the message' do
       allow(consumer_instance).to receive(:process)
-      expect(broker).to receive(:ack).with(delivery_info.delivery_tag, delivery_info.channel)
+      expect(broker).to receive(:ack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
       expect(consumer_instance).to receive(:message_rejected?).and_return(false)
       subject
     end
@@ -195,7 +195,7 @@ describe Hutch::Worker do
       end
 
       it 'rejects the message' do
-        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, delivery_info.channel)
+        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
         subject
       end
 
@@ -252,7 +252,7 @@ describe Hutch::Worker do
       end
 
       it 'rejects the message' do
-        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, delivery_info.channel)
+        expect(broker).to receive(:nack).with(delivery_info.delivery_tag, channel: delivery_info.channel)
         subject
       end
     end

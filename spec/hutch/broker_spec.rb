@@ -333,16 +333,16 @@ describe Hutch::Broker do
 
     it 'sends them on the channel the delivery arrived on' do
       expect(current_channel).to receive(:ack).with('dt', false)
-      broker.ack('dt', current_channel)
+      broker.ack('dt', channel: current_channel)
 
       expect(current_channel).to receive(:nack).with('dt', false, false)
-      broker.nack('dt', current_channel)
+      broker.nack('dt', channel: current_channel)
 
       expect(current_channel).to receive(:reject).with('dt', false)
-      broker.reject('dt', false, current_channel)
+      broker.reject('dt', channel: current_channel)
 
       expect(current_channel).to receive(:reject).with('dt', true)
-      broker.requeue('dt', current_channel)
+      broker.requeue('dt', channel: current_channel)
     end
 
     it 'drops them when the channel has been replaced' do
@@ -350,32 +350,16 @@ describe Hutch::Broker do
       expect(superseded_channel).not_to receive(:nack)
       expect(superseded_channel).not_to receive(:reject)
 
-      broker.ack('dt', superseded_channel)
-      broker.nack('dt', superseded_channel)
-      broker.reject('dt', false, superseded_channel)
-      broker.requeue('dt', superseded_channel)
+      broker.ack('dt', channel: superseded_channel)
+      broker.nack('dt', channel: superseded_channel)
+      broker.reject('dt', channel: superseded_channel)
+      broker.requeue('dt', channel: superseded_channel)
     end
 
     it 'defaults to the current channel' do
       expect(current_channel).to receive(:ack).with('dt', false)
 
       broker.ack('dt')
-    end
-
-    describe Hutch::ChannelBoundBroker do
-      it 'pins acknowledgements to the channel it was built with' do
-        bound = Hutch::ChannelBoundBroker.new(broker, current_channel)
-
-        expect(current_channel).to receive(:ack).with('dt', false)
-        bound.ack('dt')
-      end
-
-      it 'drops acknowledgements once its channel is replaced' do
-        bound = Hutch::ChannelBoundBroker.new(broker, superseded_channel)
-
-        expect(superseded_channel).not_to receive(:nack)
-        bound.nack('dt')
-      end
     end
   end
 
