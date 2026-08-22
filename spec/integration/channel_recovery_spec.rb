@@ -8,7 +8,6 @@ require 'hutch/consumer'
 require 'bunny'
 require 'json'
 require 'securerandom'
-require 'timeout'
 
 describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: true, adapter: :bunny do
   CONSUMER_TIMEOUT_MS = 5_000
@@ -92,25 +91,25 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
     Hutch::Config.set(:mq_exchange, exchange_name)
     Hutch::Config.set(:force_publisher_confirms, false)
     Hutch::Config.set(:client_logger, logger)
+    # Channel replacement waits this long for the deliberately blocked
+    # handler: the default of 11s would use up most of the consumption window.
+    @graceful_exit_timeout = Hutch::Config[:graceful_exit_timeout]
+    Hutch::Config.set(:graceful_exit_timeout, 1)
   end
 
   after do
     publisher_channel.close rescue nil
     publisher.close rescue nil
     broker.disconnect rescue nil
+    Hutch::Config.set(:graceful_exit_timeout, @graceful_exit_timeout)
     Hutch::Logging.logger = Logger.new(File::NULL)
   end
 
-  def wait_for(timeout, label)
-    Timeout.timeout(timeout) do
-      loop do
-        return true if yield
-        sleep 0.25
-      end
-    end
-  rescue Timeout::Error
+  def wait_for(timeout, label, &condition)
+    await_condition(timeout, label, &condition)
+  rescue AwaitHelpers::ConditionTimeout => e
     raise <<~MSG
-      Timed out waiting for: #{label}
+      #{e.message}
 
       processed_messages=#{processed_messages.inspect}
       channel_open=#{broker.channel.open? rescue 'unknown'}
@@ -125,9 +124,10 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
     processed_lock.synchronize { processed.dup }
   end
 
+  # `StringIO#string` does not touch the stream position: a rewind here would
+  # race with the worker threads that log concurrently and corrupt the buffer.
   def log_output
-    log.rewind
-    log.read
+    log.string
   end
 
   def publish_message(id)
@@ -141,9 +141,20 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
 
   # RabbitMQ up to 4.2 closes the channel on a delivery acknowledgement
   # timeout; 4.3+ quorum queues instead cancel only the timed out consumer.
+  let(:cancels_the_consumer) { server_version >= Gem::Version.new('4.3') }
+
   let(:recovery_log_pattern) do
-    /delivery acknowledgement on channel \d+ timed out|cancelled by the server, re-subscribing/i
+    if cancels_the_consumer
+      /cancelled by the server, re-subscribing/i
+    else
+      /delivery acknowledgement on channel \d+ timed out/i
+    end
   end
+
+  # Replacing the channel requeues what the cancelled consumer still held, so
+  # consumption resumes at once. Reopening one does not, so it resumes at the
+  # next consumer timeout tick.
+  let(:recovery_seconds) { cancels_the_consumer ? 15 : 90 }
 
   # This spec is intentionally slow because RabbitMQ enforces delivery
   # acknowledgement timeouts periodically on a timer, not immediately at the deadline.
@@ -159,13 +170,18 @@ describe 'channel recovery after delivery acknowledgement timeout', rabbitmq: tr
 
     publish_message('after-recovery')
 
-    # Replacing the channel requeues what the cancelled consumer still held, so
-    # consumption resumes at once rather than at the next consumer timeout tick.
-    wait_for(15, 'after-recovery message consumption') do
+    wait_for(recovery_seconds, 'after-recovery message consumption') do
       processed_messages.include?('after-recovery')
     end
 
     expect(log_output).to match(recovery_log_pattern)
-    expect(processed_messages).to include('after-recovery')
+
+    # A consumed message proves the recovery finished, the publisher rebuild
+    # included.
+    broker.publish(routing_key, 'id' => 'published-after-recovery')
+
+    wait_for(15, 'published-after-recovery message consumption') do
+      processed_messages.include?('published-after-recovery')
+    end
   end
 end

@@ -7,12 +7,14 @@ end
 
 require 'hutch'
 require 'logger'
+require_relative 'support/await_helpers'
 
 # set logger to be a null logger
 Hutch::Logging.logger = Logger.new(File::NULL)
 
 RSpec.configure do |config|
   config.raise_errors_for_deprecations!
+  config.include AwaitHelpers
 
   if defined?(JRUBY_VERSION)
     config.filter_run_excluding adapter: :bunny
