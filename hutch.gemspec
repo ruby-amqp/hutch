@@ -7,7 +7,7 @@ Gem::Specification.new do |gem|
     gem.add_runtime_dependency 'march_hare', '>= 4.7.0'
   else
     gem.platform = Gem::Platform::RUBY
-    gem.add_runtime_dependency 'bunny', '>= 3.1', '< 4.0'
+    gem.add_runtime_dependency 'bunny', '>= 3.2', '< 4.0'
   end
   gem.add_runtime_dependency 'carrot-top', '~> 0.0.7'
   gem.add_runtime_dependency 'activesupport', '>= 4.2'
