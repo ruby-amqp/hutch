@@ -14,8 +14,8 @@ and [ActiveSupport](https://github.com/rails/rails/tree/main/activesupport) from
 
 ## Target Ruby Version
 
-This library targets Ruby 3.0 and later versions
-For JRuby, the supported series are 9.x and 10.x.
+This library targets Ruby 3.2 and later versions.
+For JRuby, the supported series is 10.x.
 
 ## Build and Test
 
@@ -100,6 +100,11 @@ existing writing style.
 
 ## Releases
 
+Releases are published by `.github/workflows/release.yml`, which reacts to a
+pushed `v*` tag. It builds both the MRI and the `java` platform gem and pushes
+them to RubyGems.org using [trusted publishing](https://guides.rubygems.org/trusted-publishing/),
+so no RubyGems credentials are needed locally.
+
 ### How to Roll (Produce) a New Release
 
 Suppose the current development version in `CHANGELOG.md` has
@@ -108,12 +113,28 @@ a `## X.Y.0 (in development)` section at the top.
 To produce a new release:
 
  1. Update `CHANGELOG.md`: replace `(in development)` with today's date, e.g. `(Mar 30, 2026)`. Make sure all notable changes since the previous release are listed
- 2. Update the version in `lib/hutch/version.rb` to match (remove the `.pre` suffix)
- 3. Commit with the message `X.Y.0` (just the version number, nothing else)
- 4. Tag the commit: `git tag vX.Y.0`
- 5. Bump the dev version: add a new `## X.(Y+1).0 (in development)` section to `CHANGELOG.md` with `No changes yet.` underneath, and update `lib/hutch/version.rb` to the next dev version with a `.pre` suffix
- 6. Commit with the message `Bump dev version`
- 7. Push: `git push && git push origin vX.(Y+1).0`
+ 2. Update the version in `lib/hutch/version.rb` to match
+ 3. Commit with the message `X.Y.0` (just the version number, nothing else) and push it
+ 4. Tag that commit and push the tag: `git tag vX.Y.0 && git push origin vX.Y.0`
+ 5. Watch the release: `gh run watch --workflow=release.yml`
+
+The workflow refuses to publish unless the tag is `v` plus `Hutch::VERSION`, so
+the two have to match exactly. The version in `lib/hutch/version.rb` stays at
+the released one until the next release is prepared.
+
+### Release Candidates
+
+A release candidate uses an `X.Y.Z.rcN` version, which RubyGems already treats
+as a prerelease: neither `gem install hutch` nor `bundle install` picks it up
+unless it is asked for explicitly. No `.pre` suffix is needed.
+
+### GitHub Releases
+
+Final releases get an entry under
+[Releases](https://github.com/ruby-amqp/hutch/releases) with the change log
+section of that version as the body. A release candidate is either left out or
+created with `gh release create --prerelease`, so that GitHub keeps presenting
+the last final release as the latest one.
 
 ## Git Instructions
 
