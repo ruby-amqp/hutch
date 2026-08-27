@@ -1,6 +1,6 @@
 # Hutch Change Log
 
-## 2.0.0 (TBD)
+## 2.0.0 (Aug 27, 2026)
 
 ### Breaking Changes
 
