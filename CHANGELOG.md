@@ -1,5 +1,10 @@
 # Hutch Change Log
 
+## 2.1.0 (in development)
+
+No changes yet.
+
+
 ## 2.0.0 (Aug 27, 2026)
 
 ### Breaking Changes

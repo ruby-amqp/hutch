@@ -117,10 +117,12 @@ To produce a new release:
  3. Commit with the message `X.Y.0` (just the version number, nothing else) and push it
  4. Tag that commit and push the tag: `git tag vX.Y.0 && git push origin vX.Y.0`
  5. Watch the release: `gh run watch --workflow=release.yml`
+ 6. Bump the dev version: add a new `## X.(Y+1).0 (in development)` section to `CHANGELOG.md` with `No changes yet.` underneath, and set `lib/hutch/version.rb` to `X.(Y+1).0.pre`
+ 7. Commit with the message `X.(Y+1).0 is the current development series` and push it
 
 The workflow refuses to publish unless the tag is `v` plus `Hutch::VERSION`, so
-the two have to match exactly. The version in `lib/hutch/version.rb` stays at
-the released one until the next release is prepared.
+the two have to match exactly. The `.pre` suffix on `main` keeps a checkout of
+an unreleased `main` from reporting a version that is already on RubyGems.org.
 
 ### Release Candidates
 
