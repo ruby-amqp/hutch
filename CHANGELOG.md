@@ -2,7 +2,10 @@
 
 ## 2.1.0 (in development)
 
-No changes yet.
+### Dependency Bump
+
+Hutch now requires [Bunny `3.3`](https://github.com/ruby-amqp/bunny/blob/main/CHANGELOG.md) or later
+to benefit from the topology recovery bug fixes.
 
 
 ## 2.0.0 (Aug 27, 2026)
